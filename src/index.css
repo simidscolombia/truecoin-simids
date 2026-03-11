@@ -1,0 +1,894 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   TRUECOIN SIMIDS — DESIGN SYSTEM v2.0
+   Light Mode + CSS Custom Properties
+   ============================================ */
+
+:root {
+  /* --- Base Colors (fixed) --- */
+  --color-bg: #F5F7FA;
+  --color-surface: #FFFFFF;
+  --color-surface-2: #EEF1F6;
+  --color-navy: #0B1F4B;
+  --color-cloud-blue: #4A7FC1;
+  --color-text: #0D0D0D;
+  --color-text-muted: #64748B;
+  --color-border: #E2E8F0;
+  --color-border-strong: #CBD5E1;
+
+  /* --- Module Accent Colors (dynamic via JS) --- */
+  --color-wallet: #D4A017;
+  --color-marketplace: #2D5A27;
+  --color-directorio: #E86430;
+  --color-pos: #0B1F4B;
+  --color-admin: #2A7F8A;
+
+  /* --- Shadows --- */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.10), 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.06);
+  --shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.15);
+}
+
+/* ============================================
+   BASE RESET
+   ============================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+}
+
+/* ============================================
+   TYPOGRAPHY
+   ============================================ */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--color-navy);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* ============================================
+   LAYOUT COMPONENTS
+   ============================================ */
+
+/* App Shell — Sidebar + Content */
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+  background: var(--color-bg);
+}
+
+/* Sidebar */
+.sidebar {
+  width: 240px;
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  positions: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  z-index: 100;
+  box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+}
+
+.sidebar-logo {
+  padding: 24px 20px;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sidebar-logo-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--color-navy);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.sidebar-logo-text {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--color-navy);
+  letter-spacing: -0.5px;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 16px 12px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+
+.sidebar-nav-item:hover {
+  background: var(--color-surface-2);
+  color: var(--color-navy);
+}
+
+.sidebar-nav-item.active {
+  background: color-mix(in srgb, var(--color-cloud-blue) 12%, transparent);
+  color: var(--color-cloud-blue);
+  font-weight: 600;
+  border-left: 3px solid var(--color-cloud-blue);
+}
+
+.sidebar-nav-item.active-wallet {
+  background: color-mix(in srgb, var(--color-wallet) 12%, transparent);
+  color: var(--color-wallet);
+  border-left-color: var(--color-wallet);
+}
+
+.sidebar-nav-item.active-market {
+  background: color-mix(in srgb, var(--color-marketplace) 12%, transparent);
+  color: var(--color-marketplace);
+  border-left-color: var(--color-marketplace);
+}
+
+.sidebar-nav-item.active-dir {
+  background: color-mix(in srgb, var(--color-directorio) 12%, transparent);
+  color: var(--color-directorio);
+  border-left-color: var(--color-directorio);
+}
+
+.sidebar-nav-item.active-pos {
+  background: color-mix(in srgb, var(--color-pos) 12%, transparent);
+  color: var(--color-pos);
+  border-left-color: var(--color-pos);
+}
+
+.sidebar-nav-item.active-admin {
+  background: color-mix(in srgb, var(--color-admin) 12%, transparent);
+  color: var(--color-admin);
+  border-left-color: var(--color-admin);
+}
+
+.sidebar-footer {
+  padding: 16px 12px;
+  border-top: 1px solid var(--color-border);
+}
+
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--color-surface-2);
+}
+
+.sidebar-user-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--color-navy);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 100vh;
+}
+
+/* ============================================
+   CARDS
+   ============================================ */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.card-lg {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+  box-shadow: var(--shadow-md);
+}
+
+/* ============================================
+   MODULE TOP HEADERS (full-width colored bars)
+   ============================================ */
+.module-header-marketplace {
+  background: linear-gradient(135deg, var(--color-marketplace), color-mix(in srgb, var(--color-marketplace) 60%, black));
+}
+
+.module-header-directorio {
+  background: linear-gradient(135deg, var(--color-directorio), color-mix(in srgb, var(--color-directorio) 60%, #7B1D00));
+}
+
+.module-header-pos {
+  background: linear-gradient(135deg, var(--color-pos), color-mix(in srgb, var(--color-pos) 60%, black));
+}
+
+.module-header-admin {
+  background: linear-gradient(135deg, var(--color-admin), color-mix(in srgb, var(--color-admin) 60%, black));
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+  text-decoration: none;
+}
+
+.btn-navy {
+  background: var(--color-navy);
+  color: white;
+}
+
+.btn-navy:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-wallet {
+  background: var(--color-wallet);
+  color: white;
+}
+
+.btn-wallet:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+
+.btn-marketplace {
+  background: var(--color-marketplace);
+  color: white;
+}
+
+.btn-marketplace:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+
+.btn-directorio {
+  background: var(--color-directorio);
+  color: white;
+}
+
+.btn-directorio:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+
+.btn-pos {
+  background: var(--color-pos);
+  color: white;
+}
+
+.btn-pos:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1.5px solid var(--color-border-strong);
+  color: var(--color-text-muted);
+}
+
+.btn-outline:hover {
+  border-color: var(--color-navy);
+  color: var(--color-navy);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-text-muted);
+}
+
+.btn-ghost:hover {
+  background: var(--color-surface-2);
+}
+
+.btn-lg {
+  padding: 14px 28px;
+  font-size: 15px;
+  border-radius: 12px;
+}
+
+.btn-sm {
+  padding: 6px 14px;
+  font-size: 13px;
+  border-radius: 8px;
+}
+
+.btn-full {
+  width: 100%;
+}
+
+/* ============================================
+   STAT CARDS
+   ============================================ */
+.stat-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 20px 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+.stat-card-value {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1;
+  margin: 8px 0 4px;
+}
+
+.stat-card-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+}
+
+/* ============================================
+   BADGES & PILLS
+   ============================================ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.badge-marketplace {
+  background: color-mix(in srgb, var(--color-marketplace) 12%, white);
+  color: var(--color-marketplace);
+}
+
+.badge-wallet {
+  background: color-mix(in srgb, var(--color-wallet) 15%, white);
+  color: var(--color-wallet);
+}
+
+.badge-directorio {
+  background: color-mix(in srgb, var(--color-directorio) 12%, white);
+  color: var(--color-directorio);
+}
+
+.badge-pos {
+  background: color-mix(in srgb, var(--color-pos) 10%, white);
+  color: var(--color-pos);
+}
+
+.badge-navy {
+  background: color-mix(in srgb, var(--color-navy) 10%, white);
+  color: var(--color-navy);
+}
+
+.badge-vip {
+  background: #FEF3C7;
+  color: #916200;
+}
+
+/* ============================================
+   FORMS & INPUTS
+   ============================================ */
+.input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 10px;
+  font-size: 14px;
+  color: var(--color-text);
+  background: var(--color-surface);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.input:focus {
+  border-color: var(--color-cloud-blue);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-cloud-blue) 15%, transparent);
+}
+
+.input-with-icon {
+  position: relative;
+}
+
+.input-with-icon .input {
+  padding-left: 42px;
+}
+
+.input-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+/* ============================================
+   MODULE PAGE WRAPPER
+   ============================================ */
+.module-page {
+  min-height: 100vh;
+  background: var(--color-bg);
+}
+
+.module-page-header {
+  padding: 32px 32px 24px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.module-page-content {
+  padding: 32px;
+}
+
+/* ============================================
+   CATEGORY PILLS (POS / Marketplace)
+   ============================================ */
+.category-pills {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 4px;
+  scrollbar-width: none;
+}
+
+.category-pills::-webkit-scrollbar {
+  display: none;
+}
+
+.pill {
+  flex-shrink: 0;
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.pill:hover {
+  border-color: var(--color-cloud-blue);
+  color: var(--color-navy);
+}
+
+.pill.active-marketplace {
+  background: var(--color-marketplace);
+  color: white;
+  border-color: var(--color-marketplace);
+}
+
+.pill.active-pos {
+  background: var(--color-pos);
+  color: white;
+  border-color: var(--color-pos);
+}
+
+.pill.active-dir {
+  background: var(--color-directorio);
+  color: white;
+  border-color: var(--color-directorio);
+}
+
+/* ============================================
+   PRODUCT CARDS
+   ============================================ */
+.product-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-border-strong);
+}
+
+/* ============================================
+   PAYMENT METHOD SELECTOR (POS)
+   ============================================ */
+.payment-method-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: 2px solid var(--color-border);
+  background: var(--color-surface);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.payment-method-btn.selected-cash {
+  border-color: #16A34A;
+  background: #F0FDF4;
+  color: #16A34A;
+}
+
+.payment-method-btn.selected-bank {
+  border-color: var(--color-cloud-blue);
+  background: color-mix(in srgb, var(--color-cloud-blue) 8%, white);
+  color: var(--color-cloud-blue);
+}
+
+.payment-method-btn.selected-tc {
+  border-color: var(--color-wallet);
+  background: color-mix(in srgb, var(--color-wallet) 10%, white);
+  color: var(--color-wallet);
+}
+
+/* ============================================
+   THEME CUSTOMIZER (Admin)
+   ============================================ */
+.color-swatch {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 3px solid var(--color-border);
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+
+.color-swatch:hover {
+  transform: scale(1.1);
+  box-shadow: var(--shadow-md);
+}
+
+.color-swatch input[type="color"] {
+  position: absolute;
+  inset: -10px;
+  width: calc(100% + 20px);
+  height: calc(100% + 20px);
+  border: none;
+  cursor: pointer;
+  opacity: 0;
+}
+
+/* ============================================
+   UTILITIES
+   ============================================ */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.animate-in {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Divider */
+.divider {
+  height: 1px;
+  background: var(--color-border);
+}
+
+/* Text helpers */
+.text-navy {
+  color: var(--color-navy);
+}
+
+.text-muted {
+  color: var(--color-text-muted);
+}
+
+.text-wallet {
+  color: var(--color-wallet);
+}
+
+.text-market {
+  color: var(--color-marketplace);
+}
+
+.text-dir {
+  color: var(--color-directorio);
+}
+
+.text-admin {
+  color: var(--color-admin);
+}
+
+.text-blue {
+  color: var(--color-cloud-blue);
+}
+
+/* Responsive mobile sidebar */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: static;
+    flex-direction: row;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .sidebar-nav {
+    flex-direction: row;
+    padding: 8px;
+    overflow-x: auto;
+  }
+
+  .sidebar-nav-item {
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 12px;
+    font-size: 11px;
+    min-width: fit-content;
+  }
+
+  .sidebar-footer {
+    display: none;
+  }
+
+  .sidebar-logo {
+    padding: 12px 16px;
+  }
+
+  .app-shell {
+    flex-direction: column;
+  }
+}
+
+/* ============================================
+   MODULE BUTTON VARIANTS
+   ============================================ */
+.btn-wallet {
+  background: var(--color-wallet);
+  color: white;
+  border: none;
+}
+
+.btn-wallet:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.btn-marketplace {
+  background: var(--color-marketplace);
+  color: white;
+  border: none;
+}
+
+.btn-marketplace:hover:not(:disabled) {
+  filter: brightness(1.15);
+}
+
+.btn-directorio {
+  background: var(--color-directorio);
+  color: white;
+  border: none;
+}
+
+.btn-pos {
+  background: var(--color-pos);
+  color: white;
+  border: none;
+}
+
+.btn-pos:hover:not(:disabled) {
+  background: #162d6a;
+}
+
+.btn-admin {
+  background: var(--color-admin);
+  color: white;
+  border: none;
+}
+
+.btn-navy {
+  background: var(--color-navy);
+  color: white;
+  border: none;
+}
+
+.btn-navy:hover:not(:disabled) {
+  background: #162d6a;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-text-muted);
+  border: none;
+}
+
+.btn-ghost:hover {
+  background: var(--color-surface-2);
+}
+
+/* ============================================
+   PAYMENT METHOD BUTTONS (SalesTerminal)
+   ============================================ */
+.payment-method-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 6px;
+  border-radius: 12px;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.payment-method-btn:hover {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface-2);
+}
+
+.payment-method-btn.selected-cash {
+  border-color: #16A34A;
+  background: #F0FDF4;
+  color: #16A34A;
+}
+
+.payment-method-btn.selected-bank {
+  border-color: var(--color-cloud-blue);
+  background: color-mix(in srgb, var(--color-cloud-blue) 8%, white);
+  color: var(--color-cloud-blue);
+}
+
+.payment-method-btn.selected-tc {
+  border-color: var(--color-wallet);
+  background: color-mix(in srgb, var(--color-wallet) 8%, white);
+  color: var(--color-wallet);
+}
+
+/* ============================================
+   BADGE VARIANTS
+   ============================================ */
+.badge-navy {
+  background: color-mix(in srgb, var(--color-navy) 10%, white);
+  color: var(--color-navy);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ============================================
+   MODULE HEADER VARIANTS
+   ============================================ */
+.module-header-pos {
+  background: var(--color-navy);
+}
+
+.module-header-directorio {
+  background: linear-gradient(135deg, var(--color-directorio) 0%, #c0522a 100%);
+}
+
+/* ============================================
+   ACTIVE PILL VARIANTS
+   ============================================ */
+.pill.active-dir {
+  background: var(--color-directorio);
+  color: white;
+  border-color: var(--color-directorio);
+}
+
+/* ============================================
+   KEYFRAMES
+   ============================================ */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

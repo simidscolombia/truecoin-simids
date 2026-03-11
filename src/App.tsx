@@ -202,7 +202,7 @@ function App() {
           </div>
           <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--color-navy)', letterSpacing: -0.5 }}>
             True<span style={{ color: 'var(--color-wallet)' }}>Coin</span>
-            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', background: 'var(--color-surface-2)', padding: '2px 6px', borderRadius: 6, marginLeft: 8, verticalAlign: 'middle' }}>v1.0.2</span>
+            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', background: 'var(--color-surface-2)', padding: '2px 6px', borderRadius: 6, marginLeft: 8, verticalAlign: 'middle' }}>v1.0.3</span>
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
@@ -248,10 +248,10 @@ function App() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            style={{ fontSize: 'clamp(32px, 5vw, 64px)', fontWeight: 800, lineHeight: 1.1, letterSpacing: -2, marginBottom: 24, color: 'var(--color-navy)' }}
+            style={{ fontSize: 'clamp(32px, 5vw, 56px)', fontWeight: 800, lineHeight: 1.1, letterSpacing: -2, marginBottom: 24, color: 'var(--color-navy)' }}
           >
-            Descubre cómo{' '}
-            <span style={{ color: 'var(--color-cloud-blue)' }}>multiplicar</span> tu dinero.
+            Bienvenido al primer Club VIP de servicios en línea{' '}
+            <span style={{ color: 'var(--color-cloud-blue)' }}>impulsado por IA.</span>
           </motion.h1>
 
           <motion.p
@@ -260,9 +260,9 @@ function App() {
             transition={{ delay: 0.2 }}
             style={{ fontSize: 16, color: 'var(--color-text-muted)', marginBottom: 40, lineHeight: 1.7 }}
           >
-            TrueCoin no es solo una billetera. Es un club VIP donde tus compras en el <strong>Marketplace</strong> y tu <strong>Red de Referidos</strong> te generan rendimientos diarios.
+            Únete a nuestra red de referidos como <strong>Miembro VIP</strong> y recibe todos los beneficios que tenemos para ti. Ahorra, gana y crece con nosotros.
             <br /><br />
-            Reproduce el video para entender paso a paso cómo funciona nuestra matriz automática de capitalización.
+            Reproduce el video para descubrir cómo funciona.
           </motion.p>
 
           <motion.div

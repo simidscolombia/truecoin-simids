@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Package, Calculator, FileText, LayoutDashboard,
+    Package, Calculator, LayoutDashboard,
     TrendingUp, TrendingDown, History, ShoppingCart,
-    AlertTriangle, Plus, DollarSign, Wifi, ChevronRight,
+    AlertTriangle, Plus, DollarSign, Wifi,
     Settings
 } from 'lucide-react';
 import SalesTerminal from './SalesTerminal';

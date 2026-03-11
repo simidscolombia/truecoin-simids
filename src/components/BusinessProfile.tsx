@@ -16,10 +16,10 @@ interface BusinessProfileProps {
 }
 
 const MOCK_CATALOG: Product[] = [
-    { id: 'p1', business_id: '', name: 'Menú del Día Completo', description: 'Sopa, plato fuerte, jugo y postre.', price_cop: 15000, price_tc: 15, mlm_utility: 1.5, image_url: 'https://images.unsplash.com/photo-1547592180-85f173990554?q=80&w=400', is_available: true, stock: 50 },
-    { id: 'p2', business_id: '', name: 'Bandeja Paisa Premium', description: 'La auténtica bandeja con chicharrón, chorizo y más.', price_cop: 28000, price_tc: 28, mlm_utility: 2.8, image_url: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?q=80&w=400', is_available: true, stock: 30 },
-    { id: 'p3', business_id: '', name: 'Café Especial + Postre', description: 'Café de origen colombiano con torta de la casa.', price_cop: 12000, price_tc: 12, mlm_utility: 1.2, image_url: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=400', is_available: true, stock: 100 },
-    { id: 'p4', business_id: '', name: 'Ceviche de Camarón', description: 'Fresco, con limón y aguacate de la costa.', price_cop: 22000, price_tc: 22, mlm_utility: 2.2, image_url: 'https://images.unsplash.com/photo-1534080564583-6be75777b70a?q=80&w=400', is_available: true, stock: 20 },
+    { id: 'p1', business_id: '', name: 'Menú del Día Completo', description: 'Sopa, plato fuerte, jugo y postre.', price_tc: 15, mlm_utility: 1.5, image_url: 'https://images.unsplash.com/photo-1547592180-85f173990554?q=80&w=400', stock: 50, category: 'Comida', is_marketplace: false },
+    { id: 'p2', business_id: '', name: 'Bandeja Paisa Premium', description: 'La auténtica bandeja con chicharrón, chorizo y más.', price_tc: 28, mlm_utility: 2.8, image_url: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?q=80&w=400', stock: 30, category: 'Comida', is_marketplace: false },
+    { id: 'p3', business_id: '', name: 'Café Especial + Postre', description: 'Café de origen colombiano con torta de la casa.', price_tc: 12, mlm_utility: 1.2, image_url: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=400', stock: 100, category: 'Café', is_marketplace: false },
+    { id: 'p4', business_id: '', name: 'Ceviche de Camarón', description: 'Fresco, con limón y aguacate de la costa.', price_tc: 22, mlm_utility: 2.2, image_url: 'https://images.unsplash.com/photo-1534080564583-6be75777b70a?q=80&w=400', stock: 20, category: 'Comida', is_marketplace: false },
 ];
 
 export default function BusinessProfile({ business, onBack, onPurchase, userBalance }: BusinessProfileProps) {

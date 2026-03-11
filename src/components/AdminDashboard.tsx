@@ -2,8 +2,8 @@
 
 import {
     Users, Wallet, TrendingUp, ArrowLeft, Search, Edit3, ShieldAlert,
-    Database, LayoutDashboard, Save, X, BarChart3, SearchCode,
-    Globe, Sparkles, Zap, Palette
+    Database, LayoutDashboard, Save, BarChart3, SearchCode,
+    Globe, Sparkles, Palette
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';

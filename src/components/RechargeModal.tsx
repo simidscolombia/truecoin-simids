@@ -50,11 +50,35 @@ export default function RechargeModal({ isOpen, onClose, user, onRechargeRequest
 
     const simulateWompiPayment = () => {
         setIsProcessing(true);
-        // Simulamos el tiempo que tarda el usuario en la pasarela de Wompi
-        setTimeout(() => {
+
+        if (!wompiKey || wompiKey === 'pub_test_xxxx') {
+            alert('⚠️ La llave pública de Wompi no está configurada. Usa el Panel de SuperAdmin para configurar tus credenciales FIAT.');
             setIsProcessing(false);
-            setStep(3);
-        }, 3000);
+            return;
+        }
+
+        const amountCOP = Number(amountTC) * 1000;
+
+        // El widget de Wompi se expone en window.WidgetCheckout (Lo cargamos en index.html)
+        const checkout = new (window as any).WidgetCheckout({
+            currency: 'COP',
+            amountInCents: amountCOP * 100, // Wompi requiere centavos
+            reference: `TC-REQ-${Date.now()}-${user.id || 'ANON'}`,
+            publicKey: wompiKey,
+        });
+
+        checkout.open(function (result: any) {
+            setIsProcessing(false);
+            const transaction = result.transaction;
+            console.log('Resultado Wompi:', transaction);
+
+            // Wompi Modal callback response
+            if (transaction.status === 'APPROVED') {
+                setStep(3);
+            } else {
+                alert(`El pago no fue exitoso. Estado devuelto por el banco: ${transaction.status}`);
+            }
+        });
     };
 
     if (!isOpen) return null;

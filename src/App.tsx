@@ -187,7 +187,6 @@ function App() {
               onGoToStore={() => setCurrentView('marketplace')}
               onGoToPOS={() => setCurrentView('pos')}
               onGoToDirectory={() => setCurrentView('directory')}
-              onGoToAdmin={() => setCurrentView('admin')}
             />
           )}
           {currentView === 'marketplace' && (

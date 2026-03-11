@@ -239,7 +239,7 @@ function App() {
           </div>
           <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--color-navy)', letterSpacing: -0.5 }}>
             True<span style={{ color: 'var(--color-wallet)' }}>Coin</span>
-            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', background: 'var(--color-surface-2)', padding: '2px 6px', borderRadius: 6, marginLeft: 8, verticalAlign: 'middle' }}>v1.0.1</span>
+            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', background: 'var(--color-surface-2)', padding: '2px 6px', borderRadius: 6, marginLeft: 8, verticalAlign: 'middle' }}>v1.0.2</span>
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
@@ -269,78 +269,84 @@ function App() {
       )}
 
       {/* Hero */}
-      <section style={{ maxWidth: 1200, margin: '0 auto', padding: '80px 32px 60px', textAlign: 'center' }}>
+      <section style={{ maxWidth: 1280, margin: '0 auto', padding: '60px 32px', display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.2fr)', gap: 60, alignItems: 'center' }}>
+
+        {/* Left: Content */}
+        <div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 16px', borderRadius: 999, background: 'color-mix(in srgb, var(--color-wallet) 12%, white)', color: 'var(--color-wallet)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 24, border: '1px solid color-mix(in srgb, var(--color-wallet) 25%, white)' }}
+          >
+            <Zap size={13} /> Ecosistema Digital Unificado
+          </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            style={{ fontSize: 'clamp(32px, 5vw, 64px)', fontWeight: 800, lineHeight: 1.1, letterSpacing: -2, marginBottom: 24, color: 'var(--color-navy)' }}
+          >
+            Descubre cómo{' '}
+            <span style={{ color: 'var(--color-cloud-blue)' }}>multiplicar</span> tu dinero.
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            style={{ fontSize: 16, color: 'var(--color-text-muted)', marginBottom: 40, lineHeight: 1.7 }}
+          >
+            TrueCoin no es solo una billetera. Es un club VIP donde tus compras en el <strong>Marketplace</strong> y tu <strong>Red de Referidos</strong> te generan rendimientos diarios.
+            <br /><br />
+            Reproduce el video para entender paso a paso cómo funciona nuestra matriz automática de capitalización.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}
+          >
+            <button onClick={() => setShowAuth(true)} className="btn btn-navy btn-lg" style={{ gap: 10, flex: '1 1 auto', justifyContent: 'center' }}>
+              Registrarme Ahora <ArrowRight size={18} />
+            </button>
+            <button className="btn btn-outline btn-lg" style={{ flex: '1 1 auto', justifyContent: 'center' }}>
+              Ver Productos VIP
+            </button>
+          </motion.div>
+        </div>
+
+        {/* Right: Embedded Video */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 16px', borderRadius: 999, background: 'color-mix(in srgb, var(--color-wallet) 12%, white)', color: 'var(--color-wallet)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 24, border: '1px solid color-mix(in srgb, var(--color-wallet) 25%, white)' }}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.4 }}
+          style={{
+            width: '100%',
+            aspectRatio: '16/9',
+            background: 'var(--color-surface)',
+            borderRadius: 24,
+            overflow: 'hidden',
+            boxShadow: '0 24px 50px rgba(11,31,75,0.15)',
+            border: '8px solid color-mix(in srgb, var(--color-cloud-blue) 10%, white)'
+          }}
         >
-          <Zap size={13} /> Ecosistema Digital Unificado · Colombia
+          {/* Aquí iría el iframe de YouTube/Vimeo. Usamos un div como placeholder dinámico. */}
+          <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, var(--color-navy), var(--color-pos))', color: 'white', position: 'relative' }}>
+
+            {/* Simulación del botón Play de YouTube */}
+            <div style={{ width: 64, height: 44, background: '#FF0000', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 10, boxShadow: '0 10px 20px rgba(255,0,0,0.3)' }}>
+              <div style={{ width: 0, height: 0, borderTop: '10px solid transparent', borderBottom: '10px solid transparent', borderLeft: '16px solid white', marginLeft: 4 }} />
+            </div>
+            <p style={{ marginTop: 16, fontSize: 13, fontWeight: 600, opacity: 0.8 }}>¿Cómo funciona TrueCoin? (3 Min)</p>
+
+            {/* Para embeber el video real, reemplazarías todos los div anteriores con:
+                 <iframe width="100%" height="100%" src="https://www.youtube.com/embed/TU_ID_DE_VIDEO?autoplay=0" title="Explicación TrueCoin" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe> 
+             */}
+          </div>
         </motion.div>
 
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          style={{ fontSize: 'clamp(36px, 6vw, 72px)', fontWeight: 800, lineHeight: 1.1, letterSpacing: -2, marginBottom: 24, color: 'var(--color-navy)' }}
-        >
-          Tu Red de Valor,{' '}
-          <span style={{ color: 'var(--color-cloud-blue)' }}>Empoderada por IA</span>
-        </motion.h1>
-
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          style={{ fontSize: 18, color: 'var(--color-text-muted)', maxWidth: 560, margin: '0 auto 40px', lineHeight: 1.7 }}
-        >
-          El primer ecosistema financiero en Latinoamérica que combina recompensas masivas, comercio real y gestión empresarial con Simids POS.
-        </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}
-        >
-          <button onClick={() => setShowAuth(true)} className="btn btn-navy btn-lg" style={{ gap: 10 }}>
-            Comenzar con Referido <ArrowRight size={18} />
-          </button>
-          <button className="btn btn-outline btn-lg">
-            Ver Marketplace
-          </button>
-        </motion.div>
-      </section>
-
-      {/* Features */}
-      <section style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px 80px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24 }}>
-          <FeatureCard
-            icon={<ShieldCheck size={22} />}
-            title="Seguridad Total"
-            description="TrueWallet con protección de 24h y verificación doble para tu tranquilidad financiera."
-          />
-          <FeatureCard
-            icon={<Users size={22} />}
-            title="Matriz de 12 Niveles"
-            description="Sistema de capitalización automatizada que escala tu red mientras te enfocas en crecer."
-          />
-          <FeatureCard
-            icon={<ShoppingBag size={22} />}
-            title="Marketplace VIP"
-            description="Acceso a precios de mayorista y redención de puntos en productos reales."
-          />
-        </div>
-      </section>
-
-      {/* Stats */}
-      <section style={{ background: 'var(--color-surface)', borderTop: '1px solid var(--color-border)', borderBottom: '1px solid var(--color-border)', padding: '60px 32px' }}>
-        <div style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 40 }}>
-          <Stat label="Usuarios Activos" value="+12K" />
-          <Stat label="Transacciones" value="+850K" />
-          <Stat label="Puntos Redimidos" value="98.5%" />
-          <Stat label="Niveles de Red" value="12" />
-        </div>
       </section>
 
       {/* Footer */}

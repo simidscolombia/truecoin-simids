@@ -44,8 +44,16 @@ export const userService = {
             if (referrer) referredById = referrer.id;
         }
 
-        // 2. Generar un código único para el nuevo usuario (ej: ELKIN23)
-        const newCode = (userData.fullName.split(' ')[0] + Math.floor(Math.random() * 999)).toUpperCase();
+        // 2. Generar un código único alfanumérico corto (6 caracteres sin caracteres ambiguos O,0,I,1,L)
+        const generateCode = () => {
+            const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+            let result = '';
+            for (let i = 0; i < 6; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        };
+        const newCode = generateCode();
 
         // 3. Crear el perfil vinculado
         const { data: profile, error: pError } = await supabase

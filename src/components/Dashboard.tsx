@@ -205,7 +205,7 @@ export default function Dashboard({ user, balance, onGoToStore, onGoToPOS, onGoT
                             <button
                                 className="btn btn-wallet"
                                 style={{ flex: 1 }}
-                                onClick={() => alert('¡Módulo de recarga de saldo mediante Wompi/Bancolombia programado para la Fase 3 de Integración!')}
+                                onClick={() => setShowRecharge(true)}
                             >
                                 <ArrowUpRight size={16} /> Comprar TC
                             </button>

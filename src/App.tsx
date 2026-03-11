@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Coins, ShieldCheck, Users, ShoppingBag, ArrowRight, Zap,
+  Coins, ShoppingBag, ArrowRight, Zap,
   LayoutDashboard, Search, Settings, LogOut, ChevronRight
 } from 'lucide-react';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -91,43 +91,6 @@ function Sidebar({
         </div>
       </div>
     </aside>
-  );
-}
-
-// ── Feature Card (Landing) ──────────────────────────────────
-function FeatureCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
-  return (
-    <motion.div
-      whileHover={{ y: -4 }}
-      style={{
-        background: 'var(--color-surface)',
-        border: '1px solid var(--color-border)',
-        borderRadius: 20,
-        padding: '32px 28px',
-        boxShadow: 'var(--shadow-sm)',
-      }}
-    >
-      <div style={{
-        width: 48, height: 48, borderRadius: 12, marginBottom: 20,
-        background: 'color-mix(in srgb, var(--color-navy) 8%, white)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        color: 'var(--color-navy)',
-      }}>
-        {icon}
-      </div>
-      <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8, color: 'var(--color-navy)' }}>{title}</h3>
-      <p style={{ fontSize: 14, color: 'var(--color-text-muted)', lineHeight: 1.6 }}>{description}</p>
-    </motion.div>
-  );
-}
-
-// ── Stat (Landing) ──────────────────────────────────────────
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div style={{ textAlign: 'center' }}>
-      <div style={{ fontSize: 36, fontWeight: 800, color: 'var(--color-navy)', letterSpacing: -1 }}>{value}</div>
-      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: 6 }}>{label}</div>
-    </div>
   );
 }
 

@@ -1,6 +1,6 @@
 /**
- * AI Service - v1.6.0
- * Transparent Diagnostics Mode
+ * AI Service - v1.6.1
+ * Cleaned production version for new API Key with credits.
  */
 
 export interface Message {
@@ -13,17 +13,29 @@ const API_KEY = (import.meta.env.VITE_GEMINI_API_KEY || "").trim();
 export const aiService = {
     async getResponse(userMessage: string, history: Message[] = []): Promise<string> {
         if (!API_KEY || API_KEY.length < 10) {
-            return "Error: API Key no detectada. Revisa Vercel.";
+            return "Error: No se ha detectado la Nueva API Key.";
         }
 
+        // Formato de historial compatible con Gemini 1.5
+        const historyParts = history.slice(-6).map(m => ({
+            role: m.role === 'user' ? 'user' : 'model',
+            parts: [{ text: m.content }]
+        }));
+
         const payload = {
-            contents: [{
-                parts: [{ text: `Responde en español como el Cerebro de TrueCoin.\n\nUsuario: ${userMessage}` }]
-            }]
+            contents: [
+                ...historyParts,
+                {
+                    role: 'user',
+                    parts: [{ text: userMessage }]
+                }
+            ],
+            systemInstruction: {
+                parts: [{ text: "Eres el Cerebro de TrueCoin Simids, una IA experta en el ecosistema. Responde de forma profesional, clara y amable en español." }]
+            }
         };
 
         try {
-            // Intento con la URL de producción más limpia posible
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
             const response = await fetch(url, {
                 method: 'POST',
@@ -33,16 +45,14 @@ export const aiService = {
 
             const data = await response.json();
 
-            if (response.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
-                return data.candidates[0].content.parts[0].text;
+            if (!response.ok) {
+                return `🚨 Google respondió: ${data.error?.message || "Error desconocido"}. (Código: ${response.status})`;
             }
 
-            // Si falla, mostramos el código y mensaje REAL de Google
-            return `🚨 ERROR DE GOOGLE (${response.status}): ${data.error?.message || "Error desconocido"}. 
-            Tip: Ve a AI Studio y verifica que la llave sea de un proyecto con la API activa.`;
+            return data.candidates[0].content.parts[0].text;
 
         } catch (err: any) {
-            return `🚨 ERROR DE RED: ${err.message}`;
+            return `🚨 Error técnico: ${err.message}. Verifica tu conexión.`;
         }
     }
 };

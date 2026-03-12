@@ -2,15 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Send, Bot, User, Minimize2 } from 'lucide-react';
-
-interface Message {
-    id: number;
-    text: string;
-    sender: 'user' | 'ai';
-    time: string;
-}
-
+import { X, Send, User, Minimize2 } from 'lucide-react';
 import { aiService, Message as AIMessage } from '../services/aiService';
 
 interface Message {
@@ -41,7 +33,6 @@ export default function AIChatSupport() {
         setIsTyping(true);
 
         try {
-            // Convert history for AI Service
             const history: AIMessage[] = messages.map(m => ({
                 role: m.sender === 'user' ? 'user' : 'assistant',
                 content: m.text
@@ -71,71 +62,92 @@ export default function AIChatSupport() {
                         exit={{ opacity: 0, y: 20, scale: 0.95 }}
                         style={{
                             position: 'fixed', bottom: 90, right: 24, zIndex: 150,
-                            width: 340, background: 'var(--color-surface)',
-                            borderRadius: 20, boxShadow: 'var(--shadow-xl)',
+                            width: 360, background: 'var(--color-surface)',
+                            borderRadius: 24, boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
                             border: '1px solid var(--color-border)',
                             overflow: 'hidden', display: 'flex', flexDirection: 'column',
-                            maxHeight: isMinimized ? 56 : 440,
-                            transition: 'max-height 0.3s ease',
+                            maxHeight: isMinimized ? 64 : 520,
+                            transition: 'max-height 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1)',
                         }}
                     >
                         {/* Header */}
                         <div style={{
-                            padding: '14px 18px', background: 'var(--color-navy)',
+                            padding: '16px 20px', background: 'var(--color-navy)',
                             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                            flexShrink: 0,
+                            flexShrink: 0, position: 'relative', overflow: 'hidden'
                         }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <Bot size={18} color="white" />
-                                </div>
+                            <motion.div
+                                animate={{ opacity: [0.3, 0.5, 0.3] }}
+                                transition={{ duration: 3, repeat: Infinity }}
+                                style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 20% 50%, rgba(212,175,55,0.2), transparent)' }}
+                            />
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 12, position: 'relative', zIndex: 1 }}>
+                                <motion.div
+                                    animate={{ y: [0, -4, 0] }}
+                                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                                    style={{ width: 42, height: 42, borderRadius: '14px', background: 'rgba(255,255,255,0.1)', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.2)' }}
+                                >
+                                    <img src="/assets/cerebro-mascot.png" alt="Cerebro" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                </motion.div>
                                 <div>
-                                    <p style={{ fontSize: 14, fontWeight: 700, color: 'white' }}>Asistente TrueCoin</p>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#4ADE80' }} />
-                                        <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>En línea</span>
+                                    <p style={{ fontSize: 15, fontWeight: 700, color: 'white', margin: 0 }}>Cerebro Intelligence</p>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                        <motion.span
+                                            animate={{ opacity: [1, 0.5, 1], scale: [1, 1.2, 1] }}
+                                            transition={{ duration: 2, repeat: Infinity }}
+                                            style={{ width: 8, height: 8, borderRadius: '50%', background: '#4ADE80', display: 'inline-block' }}
+                                        />
+                                        <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>Ecosistema Activo</span>
                                     </div>
                                 </div>
                             </div>
-                            <div style={{ display: 'flex', gap: 6 }}>
+                            <div style={{ display: 'flex', gap: 8, position: 'relative', zIndex: 1 }}>
                                 <button
                                     onClick={() => setIsMinimized(!isMinimized)}
-                                    style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(255,255,255,0.1)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}
+                                    style={{ width: 32, height: 32, borderRadius: 10, background: 'rgba(255,255,255,0.1)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', transition: 'background 0.2s' }}
                                 >
-                                    <Minimize2 size={14} />
+                                    <Minimize2 size={16} />
                                 </button>
                                 <button
                                     onClick={() => setIsOpen(false)}
-                                    style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(255,255,255,0.1)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}
+                                    style={{ width: 32, height: 32, borderRadius: 10, background: 'rgba(255,255,255,0.1)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', transition: 'background 0.2s' }}
                                 >
-                                    <X size={14} />
+                                    <X size={16} />
                                 </button>
                             </div>
                         </div>
 
                         {!isMinimized && (
                             <>
-                                {/* Messages */}
-                                <div style={{ flex: 1, overflowY: 'auto', padding: '14px 14px 8px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                <div style={{ flex: 1, overflowY: 'auto', padding: '20px 20px 10px', display: 'flex', flexDirection: 'column', gap: 14 }}>
                                     {messages.map(msg => (
-                                        <div key={msg.id} style={{ display: 'flex', gap: 8, flexDirection: msg.sender === 'user' ? 'row-reverse' : 'row', alignItems: 'flex-end' }}>
+                                        <div key={msg.id} style={{ display: 'flex', gap: 10, flexDirection: msg.sender === 'user' ? 'row-reverse' : 'row', alignItems: 'flex-start' }}>
                                             <div style={{
-                                                width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
-                                                background: msg.sender === 'ai' ? 'var(--color-navy)' : 'var(--color-cloud-blue)',
+                                                width: 32, height: 32, borderRadius: '10px', flexShrink: 0,
+                                                background: msg.sender === 'ai' ? 'var(--color-navy)' : 'var(--color-surface-2)',
                                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                overflow: 'hidden', border: '1px solid var(--color-border)',
+                                                marginTop: 4
                                             }}>
-                                                {msg.sender === 'ai' ? <Bot size={14} color="white" /> : <User size={14} color="white" />}
+                                                {msg.sender === 'ai' ? (
+                                                    <img src="/assets/cerebro-mascot.png" alt="AI" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                ) : (
+                                                    <User size={16} color="var(--color-navy)" />
+                                                )}
                                             </div>
-                                            <div style={{ maxWidth: '75%' }}>
+                                            <div style={{ maxWidth: '80%' }}>
                                                 <div style={{
-                                                    padding: '9px 13px', borderRadius: msg.sender === 'ai' ? '16px 16px 16px 4px' : '16px 16px 4px 16px',
+                                                    padding: '12px 16px',
+                                                    borderRadius: msg.sender === 'ai' ? '0 18px 18px 18px' : '18px 0 18px 18px',
                                                     background: msg.sender === 'ai' ? 'var(--color-surface-2)' : 'var(--color-navy)',
                                                     color: msg.sender === 'ai' ? 'var(--color-text)' : 'white',
-                                                    fontSize: 13, lineHeight: 1.5,
+                                                    fontSize: 14, lineHeight: 1.5,
+                                                    boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
                                                 }}>
                                                     {msg.text}
                                                 </div>
-                                                <p style={{ fontSize: 10, color: 'var(--color-text-muted)', marginTop: 3, textAlign: msg.sender === 'user' ? 'right' : 'left', paddingLeft: 4 }}>
+                                                <p style={{ fontSize: 10, color: 'var(--color-text-muted)', marginTop: 4, textAlign: msg.sender === 'user' ? 'right' : 'left', fontWeight: 500 }}>
                                                     {msg.time}
                                                 </p>
                                             </div>
@@ -143,11 +155,11 @@ export default function AIChatSupport() {
                                     ))}
 
                                     {isTyping && (
-                                        <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
-                                            <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--color-navy)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                <Bot size={14} color="white" />
+                                        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                                            <div style={{ width: 32, height: 32, borderRadius: '10px', background: 'var(--color-navy)', overflow: 'hidden' }}>
+                                                <img src="/assets/cerebro-mascot.png" alt="AI" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                             </div>
-                                            <div style={{ padding: '10px 14px', background: 'var(--color-surface-2)', borderRadius: '16px 16px 16px 4px', display: 'flex', gap: 4 }}>
+                                            <div style={{ padding: '12px 16px', background: 'var(--color-surface-2)', borderRadius: '0 18px 18px 18px', display: 'flex', gap: 4 }}>
                                                 {[0, 0.2, 0.4].map((delay, i) => (
                                                     <motion.span
                                                         key={i}
@@ -161,44 +173,57 @@ export default function AIChatSupport() {
                                     )}
                                 </div>
 
-                                {/* Quick Suggestions */}
-                                <div style={{ padding: '0 12px 8px', display: 'flex', gap: 6, overflowX: 'auto', flexShrink: 0 }}>
-                                    {['Mi saldo', 'Referidos', 'Marketplace'].map(s => (
+                                <div style={{ padding: '0 18px 12px', display: 'flex', gap: 8, overflowX: 'auto', flexShrink: 0, scrollbarWidth: 'none' }}>
+                                    {[
+                                        { l: '¿Cómo subo de nivel?', v: 'nivel' },
+                                        { l: 'Saldo actual', v: 'saldo' },
+                                        { l: 'Precios VIP', v: 'vip' }
+                                    ].map(s => (
                                         <button
-                                            key={s}
-                                            onClick={() => setInput(s)}
+                                            key={s.v}
+                                            onClick={() => setInput(s.l)}
                                             style={{
-                                                padding: '4px 10px', borderRadius: 999, border: '1px solid var(--color-border)',
-                                                background: 'var(--color-surface)', fontSize: 11, fontWeight: 600,
+                                                padding: '6px 14px', borderRadius: 12, border: '1px solid var(--color-border)',
+                                                background: 'var(--color-surface)', fontSize: 12, fontWeight: 600,
                                                 color: 'var(--color-text-muted)', cursor: 'pointer', whiteSpace: 'nowrap',
-                                                flexShrink: 0,
+                                                flexShrink: 0, transition: 'all 0.2s', boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
                                             }}
                                         >
-                                            {s}
+                                            {s.l}
                                         </button>
                                     ))}
                                 </div>
 
-                                {/* Input */}
-                                <div style={{ padding: '8px 12px 12px', borderTop: '1px solid var(--color-border)', display: 'flex', gap: 8, flexShrink: 0 }}>
+                                <div style={{ padding: '12px 18px 18px', borderTop: '1px solid var(--color-border)', display: 'flex', gap: 10, flexShrink: 0 }}>
                                     <input
                                         type="text"
                                         value={input}
                                         onChange={e => setInput(e.target.value)}
                                         onKeyDown={e => e.key === 'Enter' && handleSend()}
-                                        placeholder="Escribe tu pregunta..."
-                                        className="input"
-                                        style={{ flex: 1 }}
+                                        placeholder="Optimizar mi ecosistema..."
+                                        style={{
+                                            flex: 1,
+                                            padding: '12px 16px',
+                                            borderRadius: 14,
+                                            border: '1px solid var(--color-border)',
+                                            background: 'var(--color-bg)',
+                                            fontSize: 14,
+                                            outline: 'none',
+                                            transition: 'border-color 0.2s'
+                                        }}
                                     />
-                                    <button
+                                    <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
                                         onClick={handleSend}
                                         style={{
-                                            width: 40, height: 40, borderRadius: 10, background: 'var(--color-navy)', border: 'none',
+                                            width: 46, height: 46, borderRadius: 14, background: 'var(--color-navy)', border: 'none',
                                             display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0,
+                                            boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
                                         }}
                                     >
-                                        <Send size={16} color="white" />
-                                    </button>
+                                        <Send size={20} color="white" />
+                                    </motion.button>
                                 </div>
                             </>
                         )}
@@ -208,30 +233,41 @@ export default function AIChatSupport() {
 
             {/* FAB Button */}
             <motion.button
-                whileHover={{ scale: 1.08 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={() => { setIsOpen(!isOpen); setIsMinimized(false); }}
                 style={{
                     position: 'fixed', bottom: 24, right: 24, zIndex: 150,
-                    width: 56, height: 56, borderRadius: '50%',
-                    background: 'var(--color-navy)', boxShadow: 'var(--shadow-lg)',
+                    width: 64, height: 64, borderRadius: '22px',
+                    background: 'var(--color-navy)', boxShadow: '0 8px 25px rgba(0,0,0,0.2)',
                     border: 'none', cursor: 'pointer',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    padding: 0, overflow: 'hidden'
                 }}
             >
                 <AnimatePresence mode="wait">
                     {isOpen ? (
-                        <motion.span key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }}>
-                            <X size={22} color="white" />
-                        </motion.span>
+                        <motion.div key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }}>
+                            <X size={28} color="white" />
+                        </motion.div>
                     ) : (
-                        <motion.span key="open" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }}>
-                            <MessageCircle size={22} color="white" />
-                        </motion.span>
+                        <motion.div
+                            key="open"
+                            initial={{ scale: 0.5, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.5, opacity: 0 }}
+                            style={{ width: '100%', height: '100%', position: 'relative' }}
+                        >
+                            <img src="/assets/cerebro-mascot.png" alt="Cerebro" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        </motion.div>
                     )}
                 </AnimatePresence>
                 {!isOpen && (
-                    <span style={{ position: 'absolute', top: 0, right: 0, width: 14, height: 14, background: '#4ADE80', borderRadius: '50%', border: '2px solid white' }} />
+                    <motion.span
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        style={{ position: 'absolute', top: 6, right: 6, width: 14, height: 14, background: '#4ADE80', borderRadius: '50%', border: '2px solid var(--color-navy)' }}
+                    />
                 )}
             </motion.button>
         </>

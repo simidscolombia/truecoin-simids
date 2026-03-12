@@ -1,6 +1,6 @@
 /**
- * AI Service - v1.6.3
- * Deep Diagnostics Mode - REST API
+ * AI Service - v1.6.4
+ * Production Version - Fixed Unused Variables & Integrated History
  */
 
 export interface Message {
@@ -13,24 +13,33 @@ const API_KEY = (import.meta.env.VITE_GEMINI_API_KEY || "").trim();
 export const aiService = {
     async getResponse(userMessage: string, history: Message[] = []): Promise<string> {
         if (!API_KEY || API_KEY.length < 10) {
-            return "Error: No hay API Key válida.";
+            return "Error: No hay API Key cargada correctamente.";
         }
 
-        // Simplificamos al máximo el mensaje para evitar errores de formato
-        const contents = [
-            {
-                role: 'user',
-                parts: [{ text: `Responde en español de forma breve.\nPregunta: ${userMessage}` }]
-            }
-        ];
+        // Mapeamos el historial para que Google lo entienda (User -> model)
+        // Esto también soluciona el error de variable no usada en Vercel
+        const historyParts = history.slice(-4).map(m => ({
+            role: m.role === 'user' ? 'user' : 'model',
+            parts: [{ text: m.content }]
+        }));
+
+        const payload = {
+            contents: [
+                ...historyParts,
+                {
+                    role: 'user',
+                    parts: [{ text: `Eres el Cerebro de TrueCoin. Responde breve en español.\nPregunta: ${userMessage}` }]
+                }
+            ]
+        };
 
         try {
-            // INTENTO 1: v1beta (El más común para Flash)
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+            // Intentamos por la puerta estable de producción (v1)
+            const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
             const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents })
+                body: JSON.stringify(payload)
             });
 
             const data = await response.json();
@@ -39,26 +48,20 @@ export const aiService = {
                 return data.candidates[0].content.parts[0].text;
             }
 
-            // INTENTO 2: v1 estable (Para cuentas con facturación activa)
-            const urlV1 = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
-            const responseV1 = await fetch(urlV1, {
+            // Fallback a v1beta si v1 falla (algunas llaves nuevas operan así)
+            const urlBeta = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+            const resBeta = await fetch(urlBeta, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents })
+                body: JSON.stringify(payload)
             });
 
-            const dataV1 = await responseV1.json();
-            if (responseV1.ok && dataV1.candidates?.[0]?.content?.parts?.[0]?.text) {
-                return dataV1.candidates[0].content.parts[0].text;
+            const dataBeta = await resBeta.json();
+            if (resBeta.ok && dataBeta.candidates?.[0]?.content?.parts?.[0]?.text) {
+                return dataBeta.candidates[0].content.parts[0].text;
             }
 
-            // REPORTE DE ERROR FINAL si nada funciona
-            const finalError = dataV1.error?.message || data.error?.message || "Error Desconocido";
-            const statusCode = responseV1.status || response.status;
-
-            return `🚨 ERROR (${statusCode}): ${finalError}. 
-            
-            TIP: Verifica en tu consola de Google que la opción 'Restricciones de API' esté en 'No restringir clave' o que la 'Generative Language API' esté realmente Habilitada en la Biblioteca.`;
+            return `🚨 ERROR (${resBeta.status}): ${dataBeta.error?.message || "Google no respondió correctamente"}.`;
 
         } catch (err: any) {
             return `🚨 ERROR DE RED: ${err.message}`;

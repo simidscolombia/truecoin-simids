@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 /**
  * AI Service - The "Brain" of TrueCoin Simids
- * v1.5.4 - Forced Production API v1
+ * v1.5.5 - Standard Model Selection
  */
 
 export interface Message {
@@ -11,41 +11,41 @@ export interface Message {
 }
 
 const API_KEY = (import.meta.env.VITE_GEMINI_API_KEY || "").trim();
-// Configuración de la IA forzando la versión estable de la API de Google
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 export const aiService = {
     async getResponse(userMessage: string, history: Message[] = []): Promise<string> {
         if (!API_KEY || API_KEY.length < 10) {
-            return "Error: Revisa la configuración de la API Key en Vercel.";
+            return "Error: No hay API Key configurada.";
         }
 
-        const historyText = history.slice(-4).map(m => `${m.role}: ${m.content}`).join('\n');
-        const prompt = `Responde breve en español como el Cerebro de TrueCoin Simids.\n\n${historyText}\nUsuario: ${userMessage}\nCerebro:`;
+        const prompt = `Responde breve en español como el Cerebro de TrueCoin Simids.\n\nUsuario: ${userMessage}\nCerebro:`;
 
+        // Intentamos con el modelo más compatible del mundo: gemini-1.5-flash
         try {
-            // FORZAMOS VERSION v1 (Producción) y modelo 1.5-flash
-            const model = genAI.getGenerativeModel(
-                { model: "gemini-1.5-flash" },
-                { apiVersion: "v1" } // <-- Esto soluciona el error 404 de v1beta
-            );
-
+            console.log("CEREBRO: Intentando con gemini-1.5-flash estándar...");
+            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
             const result = await model.generateContent(prompt);
             const response = await result.response;
-            const text = response.text();
-
-            return text || "El Cerebro está pensando, pero no pudo emitir palabras.";
+            return response.text();
         } catch (err: any) {
-            console.error("CEREBRO FATAL ERROR:", err);
+            console.error("CEREBRO FLASH FAILED:", err);
 
-            // Intento final con gemini-1.5-pro en v1 si falla el flash
             try {
-                const modelPro = genAI.getGenerativeModel({ model: "gemini-1.5-pro" }, { apiVersion: "v1" });
+                // Segundo intento con gemini-pro (legacy 1.0)
+                const modelPro = genAI.getGenerativeModel({ model: "gemini-pro" });
                 const resultPro = await modelPro.generateContent(prompt);
                 const responsePro = await resultPro.response;
                 return responsePro.text();
             } catch (err2: any) {
-                return `ERROR DE GOOGLE (v1): ${err2.message}. Por favor verifica que la API 'Generative Language' esté habilitada en tu Google Cloud Console.`;
+                return `🚨 ERROR CRÍTICO: Google no reconoce los modelos o tu API Key no tiene permisos. 
+                
+                POR FAVOR VERIFICA:
+                1. Entra a https://aistudio.google.com/
+                2. Asegúrate de que tu API Key esté ACTIVA.
+                3. Verifica que en Google Cloud Console tengas habilitada la 'Generative Language API'.
+                
+                Error recibido: ${err2.message}`;
             }
         }
     }

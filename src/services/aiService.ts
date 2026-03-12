@@ -38,15 +38,17 @@ export const aiService = {
      * Generates a response using Google Gemini 1.5 Flash.
      */
     async getResponse(userMessage: string, history: Message[] = []): Promise<string> {
-        if (!API_KEY || API_KEY === "") {
-            console.error('CEREBRO: Missing Gemini API Key in environment variables.');
-            return "Error: No se ha detectado la llave de acceso (API Key). Por favor, reinicia el servidor o revisa el archivo .env.";
+        const maskedKey = API_KEY ? `${API_KEY.substring(0, 6)}...${API_KEY.substring(API_KEY.length - 4)}` : "MISSING";
+        console.log(`CEREBRO: Intentando conexión con API Key: ${maskedKey}`);
+
+        if (!API_KEY || API_KEY.length < 10) {
+            console.error('CEREBRO ERROR: API Key no válida o ausente.');
+            return "Error: No se ha detectado la llave de acceso (API Key) correctamente. Revisa los Environment Variables en Vercel.";
         }
 
         try {
             const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-            // Create a structured prompt that separates system knowledge from history
             const systemPrompt = `[SYSTEM KNOWLEDGE]\n${ECOSYSTEM_KNOWLEDGE}\n\n[CONVERSATION HISTORY]\n`;
             const historyText = history.slice(-6).map(m => `${m.role === 'user' ? 'USER' : 'ASSISTANT'}: ${m.content}`).join('\n');
             const fullPrompt = `${systemPrompt}${historyText}\nUSER: ${userMessage}\nASSISTANT:`;
@@ -55,21 +57,23 @@ export const aiService = {
             const response = await result.response;
             const text = response.text();
 
-            if (!text) throw new Error("Empty response from Gemini");
+            if (!text) throw new Error("Google devolvió una respuesta vacía.");
 
             return text.trim();
         } catch (error: any) {
-            console.error('CRITICAL ERROR - CEREBRO:', error);
+            console.error('CRITICAL ERROR - CEREBRO DETAILED:', error);
 
-            // Helpful error messages for the user/dev
-            if (error.message?.includes('API_KEY_INVALID')) {
-                return "Error: La API Key de Gemini no es válida. Por favor, revísala en Google AI Studio.";
-            }
-            if (error.message?.includes('429')) {
-                return "Parece que estoy procesando muchas neuronas a la vez. Por favor, espera un minuto e intenta de nuevo.";
+            let userFriendlyError = "Hipo técnico neuronal.";
+
+            if (error.message?.includes('fetch')) {
+                userFriendlyError = "Error de red: Google ha rechazado la conexión. ¿Tienes algún bloqueador de anuncios o VPN activo?";
+            } else if (error.message?.includes('API_KEY_INVALID')) {
+                userFriendlyError = "La API Key configurada en Vercel es inválida.";
+            } else if (error.message?.includes('429')) {
+                userFriendlyError = "Límite de mensajes alcanzado. Espera un momento.";
             }
 
-            return "Lo siento, mi conexión neuronal ha tenido un pequeño hipo técnico. (Error: " + (error.message || 'Unknown') + ")";
+            return `Lo siento, el Cerebro dice: ${userFriendlyError} (Error: ${error.message || 'Unknown'})`;
         }
     }
 };

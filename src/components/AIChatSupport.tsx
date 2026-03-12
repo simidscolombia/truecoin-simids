@@ -11,26 +11,14 @@ interface Message {
     time: string;
 }
 
-const AI_RESPONSES: Record<string, string> = {
-    default: '¡Hola! Soy el asistente de TrueCoin Simids. Puedo ayudarte con tu saldo, referidos, marketplace y más.',
-    saldo: 'Tu saldo actual aparece en el Dashboard en tiempo real. Recuerda que 1 TC = $1,000 COP.',
-    referido: 'Tu código de referido está en el Dashboard. Compártelo y gana beneficios cuando tus invitados se unan.',
-    compra: 'Para comprar en el Marketplace, ve al módulo correspondiente. Puedes pagar directamente con tus TrueCoins.',
-    nivel: 'La Matriz de Regalos tiene 12 niveles. Debes invitar a 4 personas por nivel para avanzar y recibir TC.',
-    transferir: 'Para enviar TC a otro socio, haz clic en "Enviar" en tu TrueWallet del Dashboard.',
-    help: 'Puedo ayudarte con: saldo, referidos, compras, niveles, transferencias.',
-};
+import { aiService, Message as AIMessage } from '../services/aiService';
 
-const getResponse = (msg: string): string => {
-    const lower = msg.toLowerCase();
-    if (lower.includes('saldo') || lower.includes('balance')) return AI_RESPONSES.saldo;
-    if (lower.includes('referido') || lower.includes('invitar')) return AI_RESPONSES.referido;
-    if (lower.includes('compra') || lower.includes('marketplace')) return AI_RESPONSES.compra;
-    if (lower.includes('nivel') || lower.includes('matriz')) return AI_RESPONSES.nivel;
-    if (lower.includes('transfer') || lower.includes('enviar')) return AI_RESPONSES.transferir;
-    if (lower.includes('ayuda') || lower.includes('help')) return AI_RESPONSES.help;
-    return AI_RESPONSES.default;
-};
+interface Message {
+    id: number;
+    text: string;
+    sender: 'user' | 'ai';
+    time: string;
+}
 
 const now = () => new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
 
@@ -38,12 +26,12 @@ export default function AIChatSupport() {
     const [isOpen, setIsOpen] = useState(false);
     const [isMinimized, setIsMinimized] = useState(false);
     const [messages, setMessages] = useState<Message[]>([
-        { id: 1, text: '¡Hola! Soy tu asistente TrueCoin. ¿En qué puedo ayudarte hoy?', sender: 'ai', time: now() },
+        { id: 1, text: '¡Hola! Soy el Cerebro de TrueCoin Simids. Estoy aquí para optimizar tu experiencia en el ecosistema. ¿Qué deseas consultar hoy?', sender: 'ai', time: now() },
     ]);
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
 
-    const handleSend = () => {
+    const handleSend = async () => {
         const text = input.trim();
         if (!text) return;
 
@@ -52,11 +40,24 @@ export default function AIChatSupport() {
         setInput('');
         setIsTyping(true);
 
-        setTimeout(() => {
-            const aiMsg: Message = { id: Date.now() + 1, text: getResponse(text), sender: 'ai', time: now() };
-            setMessages(prev => [...prev, aiMsg]);
+        try {
+            // Convert history for AI Service
+            const history: AIMessage[] = messages.map(m => ({
+                role: m.sender === 'user' ? 'user' : 'assistant',
+                content: m.text
+            }));
+
+            const response = await aiService.getResponse(text, history);
+
+            setTimeout(() => {
+                const aiMsg: Message = { id: Date.now() + 1, text: response, sender: 'ai', time: now() };
+                setMessages(prev => [...prev, aiMsg]);
+                setIsTyping(false);
+            }, 800);
+        } catch (error) {
+            console.error('Error en el Cerebro:', error);
             setIsTyping(false);
-        }, 1200);
+        }
     };
 
     return (

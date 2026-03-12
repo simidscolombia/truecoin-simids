@@ -2,108 +2,112 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Search, Star, Zap, CheckCircle2, Building2, MapPin, Phone } from 'lucide-react';
+import { ShoppingBag, Search, Star, Zap, CheckCircle2, Building2, MapPin, Phone, LayoutGrid, List } from 'lucide-react';
 import { businessService, Product, Business } from '../services/businessService';
 
 const CATEGORIES = ['Todos', 'Alimentos', 'Electrónica', 'Hogar', 'Moda', 'Salud'];
 const CITIES = ['Todas', 'Bogotá', 'Medellín', 'Cali', 'Barranquilla', 'Bucaramanga'];
 
 const MOCK_FALLBACK: Product[] = [
-    { id: '1', business_id: null, name: 'Arroz Premium Bolívar 5kg', description: 'Arroz de grano largo seleccionado, cosecha directa.', price_tc: 18.00, mlm_utility: 1.80, image_url: '', stock: 120, category: 'Alimentos', is_marketplace: true },
-    { id: '2', business_id: null, name: 'Aceite La Favorita 3L', description: 'Aceite de girasol 100% natural, prensado en frío.', price_tc: 22.00, mlm_utility: 2.20, image_url: '', stock: 80, category: 'Alimentos', is_marketplace: true },
-    { id: '3', business_id: null, name: 'Audífonos Bluetooth Pro', description: 'Sonido HD con cancelación de ruido activa.', price_tc: 89.00, mlm_utility: 8.90, image_url: '', stock: 30, category: 'Electrónica', is_marketplace: true },
-    { id: '4', business_id: null, name: 'Café Juan Valdez 500g', description: 'Mezcla de origen colombiano, tostado medio.', price_tc: 32.00, mlm_utility: 3.20, image_url: '', stock: 60, category: 'Alimentos', is_marketplace: true },
-    { id: '5', business_id: null, name: 'Vitamina C 1000mg x60', description: 'Suplemento inmunológico de alta biodisponibilidad.', price_tc: 28.00, mlm_utility: 2.80, image_url: '', stock: 45, category: 'Salud', is_marketplace: true },
-    { id: '6', business_id: null, name: 'Shampoo Pantene 750ml', description: 'Fórmula Pro-V para cabello fuerte y brillante.', price_tc: 15.00, mlm_utility: 1.50, image_url: '', stock: 100, category: 'Hogar', is_marketplace: true },
-    { id: '7', business_id: null, name: 'Camiseta Essential Dry-Fit', description: 'Tela transpirable ideal para deporte y casual.', price_tc: 45.00, mlm_utility: 4.50, image_url: '', stock: 50, category: 'Moda', is_marketplace: true },
-    { id: '8', business_id: null, name: 'Azúcar Manuelita 2kg', description: 'Azúcar refinada de caña colombiana.', price_tc: 8.00, mlm_utility: 0.80, image_url: '', stock: 200, category: 'Alimentos', is_marketplace: true },
+    { id: '1', business_id: null, name: 'Arroz Premium Bolívar 5kg', description: 'Arroz de grano largo seleccionado, cosecha directa de los llanos.', price_tc: 18.00, price_fiat: 24000, currency: 'COP', mlm_utility: 1.80, image_url: '', stock: 120, category: 'Alimentos', is_marketplace: true },
+    { id: '2', business_id: null, name: 'Aceite La Favorita 3L', description: 'Aceite de girasol 100% natural, prensado en frío para tu salud.', price_tc: 22.00, price_fiat: 28000, currency: 'COP', mlm_utility: 2.20, image_url: '', stock: 80, category: 'Alimentos', is_marketplace: true },
+    { id: '3', business_id: null, name: 'Audífonos Bluetooth Pro', description: 'Sonido HD con cancelación de ruido activa y batería de 40h.', price_tc: 89.00, price_fiat: 120000, currency: 'COP', mlm_utility: 8.90, image_url: '', stock: 30, category: 'Electrónica', is_marketplace: true },
+    { id: '4', business_id: null, name: 'Café Juan Valdez 500g', description: 'Mezcla de origen colombiano, tostado medio, aroma intenso.', price_tc: 32.00, price_fiat: 42000, currency: 'COP', mlm_utility: 3.20, image_url: '', stock: 60, category: 'Alimentos', is_marketplace: true },
+    { id: '5', business_id: null, name: 'Vitamina C 1000mg x60', description: 'Suplemento inmunológico de alta biodisponibilidad y pureza.', price_tc: 28.00, price_fiat: 38000, currency: 'COP', mlm_utility: 2.80, image_url: '', stock: 45, category: 'Salud', is_marketplace: true },
+    { id: '6', business_id: null, name: 'Shampoo Pantene 750ml', description: 'Fórmula Pro-V para un cabello fuerte, brillante y saludable.', price_tc: 15.00, price_fiat: 22000, currency: 'COP', mlm_utility: 1.50, image_url: '', stock: 100, category: 'Hogar', is_marketplace: true },
+    { id: '7', business_id: null, name: 'Camiseta Essential Dry-Fit', description: 'Tela transpirable ideal para deporte y uso casual diario.', price_tc: 45.00, price_fiat: 65000, currency: 'COP', mlm_utility: 4.50, image_url: '', stock: 50, category: 'Moda', is_marketplace: true },
+    { id: '8', business_id: null, name: 'Azúcar Manuelita 2kg', description: 'Azúcar refinada de caña colombiana, calidad superior.', price_tc: 8.00, price_fiat: 12000, currency: 'COP', mlm_utility: 0.80, image_url: '', stock: 200, category: 'Alimentos', is_marketplace: true },
 ];
 
 const CATEGORY_EMOJIS: Record<string, string> = {
     Alimentos: '🥗', Electrónica: '📱', Hogar: '🏠', Moda: '👕', Salud: '💊', Todos: '✨',
 };
 
-function ProductCard({ product, onBuy, isGuest }: { product: Product; onBuy: (p: Product) => void; isGuest?: boolean }) {
-    const netPrice = product.price_tc;
-    const publicPrice = netPrice * 1.3; // 30% más para público general
-    const aporte = (product.mlm_utility * 0.1).toFixed(2);
+function ProductCard({ product, onBuy, isGuest, layout = 'grid' }: { product: Product; onBuy: (p: Product) => void; isGuest?: boolean; layout?: 'grid' | 'list' }) {
+    const isList = layout === 'list';
+    const fiatPrice = product.price_fiat;
+    const fiatPublic = fiatPrice * 1.35; // 35% de margen estimado
+    const formatCurrency = (val: number) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: product.currency || 'COP', maximumFractionDigits: 0 }).format(val);
 
     return (
         <motion.div
-            whileHover={{ y: -4 }}
+            whileHover={{ y: isList ? 0 : -4, x: isList ? 4 : 0 }}
             className="product-card"
-            style={{ display: 'flex', flexDirection: 'column' }}
+            style={{
+                display: 'flex',
+                flexDirection: isList ? 'row' : 'column',
+                height: isList ? 140 : 'auto',
+                alignItems: isList ? 'center' : 'stretch'
+            }}
         >
             {/* Image */}
             <div style={{
-                height: 160, background: 'color-mix(in srgb, var(--color-marketplace) 8%, white)',
+                width: isList ? 160 : '100%',
+                height: isList ? '100%' : 160,
+                background: 'color-mix(in srgb, var(--color-marketplace) 8%, white)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                borderBottom: '1px solid var(--color-border)', position: 'relative',
+                borderRight: isList ? '1px solid var(--color-border)' : 'none',
+                borderBottom: isList ? 'none' : '1px solid var(--color-border)',
+                position: 'relative',
                 overflow: 'hidden',
+                flexShrink: 0
             }}>
                 {product.image_url ? (
                     <img src={product.image_url} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
-                    <ShoppingBag size={48} style={{ color: 'var(--color-marketplace)', opacity: 0.25 }} />
+                    <ShoppingBag size={isList ? 32 : 48} style={{ color: 'var(--color-marketplace)', opacity: 0.25 }} />
                 )}
-                <span
-                    style={{
-                        position: 'absolute', top: 12, left: 12,
-                        background: 'var(--color-marketplace)', color: 'white',
-                        fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
-                        letterSpacing: '0.08em', padding: '3px 10px', borderRadius: 999,
-                    }}
-                >
-                    {product.category}
-                </span>
             </div>
 
             {/* Info */}
-            <div style={{ padding: '16px 18px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--color-navy)', marginBottom: 6, lineHeight: 1.3 }}>
-                    {product.name}
-                </h3>
-                <p style={{ fontSize: 12, color: 'var(--color-text-muted)', lineHeight: 1.5, marginBottom: 14, flex: 1 }}>
-                    {product.description}
-                </p>
+            <div style={{ padding: isList ? '12px 24px' : '16px 18px', flex: 1, display: 'flex', flexDirection: isList ? 'row' : 'column', gap: isList ? 20 : 0 }}>
+                <div style={{ flex: 1 }}>
+                    <h3 style={{ fontSize: isList ? 16 : 15, fontWeight: 700, color: 'var(--color-navy)', marginBottom: 4, lineHeight: 1.3 }}>
+                        {product.name}
+                    </h3>
+                    <p style={{ fontSize: 12, color: 'var(--color-text-muted)', lineHeight: 1.5, marginBottom: isList ? 8 : 14, flex: 1, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                        {product.description}
+                    </p>
 
-                {/* Stars */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 14 }}>
-                    {[1, 2, 3, 4, 5].map(s => (
-                        <Star key={s} size={12} fill={s <= 4 ? 'var(--color-wallet)' : 'none'} color={s <= 4 ? 'var(--color-wallet)' : 'var(--color-border-strong)'} />
-                    ))}
-                    <span style={{ fontSize: 11, color: 'var(--color-text-muted)', marginLeft: 4 }}>(24)</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                        {[1, 2, 3, 4, 5].map(s => (
+                            <Star key={s} size={10} fill={s <= 4 ? 'var(--color-wallet)' : 'none'} color={s <= 4 ? 'var(--color-wallet)' : 'var(--color-border-strong)'} />
+                        ))}
+                    </div>
                 </div>
 
-                <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 14 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 12 }}>
-                        <div>
-                            <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', color: 'var(--color-text-muted)', textDecoration: 'line-through', marginBottom: 2 }}>
-                                Precio Público: {publicPrice.toFixed(2)} TC
+                {/* Price Area */}
+                <div style={{
+                    width: isList ? 240 : '100%',
+                    borderTop: isList ? 'none' : '1px solid var(--color-border)',
+                    borderLeft: isList ? '1px solid var(--color-border)' : 'none',
+                    paddingTop: isList ? 0 : 14,
+                    paddingLeft: isList ? 20 : 0,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center'
+                }}>
+                    <div style={{ marginBottom: isList ? 12 : 12 }}>
+                        <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', textDecoration: 'line-through', marginBottom: 2 }}>
+                            Precio Público: {formatCurrency(fiatPublic)}
+                        </p>
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                            <p style={{ fontSize: isList ? 20 : 20, fontWeight: 800, color: 'var(--color-navy)', margin: 0 }}>
+                                {formatCurrency(fiatPrice)}
                             </p>
-                            <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-marketplace)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                                <Star size={12} fill="var(--color-marketplace)" /> Precio VIP
-                            </p>
-                            <p style={{ fontSize: 24, fontWeight: 800, color: 'var(--color-navy)', lineHeight: 1 }}>
-                                {netPrice.toFixed(2)} <span style={{ fontSize: 13, fontWeight: 600, opacity: 0.7 }}>TC</span>
-                            </p>
+                            <span style={{ fontSize: 11, fontWeight: 700, color: '#16A34A', background: '#DCFCE7', padding: '1px 6px', borderRadius: 4 }}>-35% VIP</span>
                         </div>
-                        <div style={{
-                            background: '#F0FDF4',
-                            border: '1px solid #A2C523',
-                            borderRadius: 8, padding: '4px 10px', textAlign: 'right',
-                        }}>
-                            <p style={{ fontSize: 10, color: '#166534', fontWeight: 700, textTransform: 'uppercase' }}>Aporte Red</p>
-                            <p style={{ fontSize: 13, color: '#A2C523', fontWeight: 800 }}>{aporte} TC</p>
-                        </div>
+                        <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-marketplace)', display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
+                            <Zap size={14} fill="var(--color-marketplace)" /> {product.price_tc.toFixed(2)} TC
+                        </p>
                     </div>
 
                     <button
                         onClick={() => onBuy(product)}
-                        className={`btn ${isGuest ? 'btn-gold' : 'btn-marketplace'} btn-full`}
-                        style={{ borderRadius: 10, gap: 8 }}
+                        className={`btn ${isGuest ? 'btn-gold' : 'btn-marketplace'} btn-full btn-sm`}
+                        style={{ borderRadius: 8, height: 36 }}
                     >
-                        {isGuest ? <><Zap size={15} /> Obtener Precio VIP</> : <><ShoppingBag size={15} /> Comprar Ahora</>}
+                        {isGuest ? 'Obtener VIP' : '🛒 Comprar'}
                     </button>
                 </div>
             </div>
@@ -177,6 +181,7 @@ export default function Marketplace({ onPurchase, isGuest, onLoginRequired, view
     const [loading, setLoading] = useState(true);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [layoutMode, setLayoutMode] = useState<'grid' | 'list'>('grid');
 
     useEffect(() => {
         const fetch = async () => {
@@ -288,6 +293,32 @@ export default function Marketplace({ onPurchase, isGuest, onLoginRequired, view
                         ))}
                     </select>
                 </div>
+
+                {/* Layout Toggle */}
+                {viewMode === 'products' && (
+                    <div style={{ display: 'flex', background: 'rgba(255,255,255,0.1)', borderRadius: 10, padding: 3, marginLeft: 'auto' }}>
+                        <button
+                            onClick={() => setLayoutMode('grid')}
+                            style={{
+                                border: 'none', background: layoutMode === 'grid' ? 'white' : 'transparent',
+                                color: layoutMode === 'grid' ? '#0a3d2e' : 'white',
+                                padding: '6px 10px', borderRadius: 8, cursor: 'pointer', display: 'flex'
+                            }}
+                        >
+                            <LayoutGrid size={16} />
+                        </button>
+                        <button
+                            onClick={() => setLayoutMode('list')}
+                            style={{
+                                border: 'none', background: layoutMode === 'list' ? 'white' : 'transparent',
+                                color: layoutMode === 'list' ? '#0a3d2e' : 'white',
+                                padding: '6px 10px', borderRadius: 8, cursor: 'pointer', display: 'flex'
+                            }}
+                        >
+                            <List size={16} />
+                        </button>
+                    </div>
+                )}
             </div>
             {loading ? (
                 <div style={{ display: 'flex', justifyContent: 'center', padding: 80 }}>
@@ -299,10 +330,15 @@ export default function Marketplace({ onPurchase, isGuest, onLoginRequired, view
                     <p style={{ fontWeight: 600 }}>{viewMode === 'products' ? 'No se encontraron productos' : 'No se encontraron negocios'}</p>
                 </div>
             ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: 20 }}>
+                <div style={{
+                    display: viewMode === 'products' && layoutMode === 'list' ? 'flex' : 'grid',
+                    flexDirection: 'column',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+                    gap: 16
+                }}>
                     {viewMode === 'products'
                         ? filteredProducts.map(p => (
-                            <ProductCard key={p.id} product={p} onBuy={handleProductAction} isGuest={isGuest} />
+                            <ProductCard key={p.id} product={p} onBuy={handleProductAction} isGuest={isGuest} layout={layoutMode} />
                         ))
                         : filteredBusinesses.map(b => (
                             <BusinessCard key={b.id} business={b} isGuest={isGuest} onLoginRequired={onLoginRequired} />

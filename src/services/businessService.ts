@@ -6,6 +6,8 @@ export interface Product {
     name: string;
     description: string;
     price_tc: number;
+    price_fiat: number; // Precio real en moneda local
+    currency: string;   // e.g., 'COP', 'USD'
     mlm_utility: number;
     image_url: string;
     stock: number;

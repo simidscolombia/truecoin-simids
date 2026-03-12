@@ -30,7 +30,7 @@ function Sidebar({
 }) {
   const navItems: { id: AppView; label: string; icon: React.ReactNode; activeClass: string }[] = [
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} />, activeClass: 'active-wallet' },
-    { id: 'marketplace', label: 'Marketplace', icon: <ShoppingBag size={18} />, activeClass: 'active-market' },
+    { id: 'marketplace', label: 'ShopyBrands', icon: <ShoppingBag size={18} />, activeClass: 'active-market' },
     { id: 'directory', label: 'Directorio', icon: <Search size={18} />, activeClass: 'active-dir' },
     { id: 'pos', label: 'POS Simids', icon: <Coins size={18} />, activeClass: 'active-pos' },
     { id: 'admin', label: 'Admin', icon: <Settings size={18} />, activeClass: 'active-admin' },
@@ -101,6 +101,7 @@ function App() {
   const [user, setUser] = useState<any>(null);
   const [currentView, setCurrentView] = useState<AppView>('dashboard');
   const [balance, setBalance] = useState('0.00');
+  const [guestViewMode, setGuestViewMode] = useState<'products' | 'businesses'>('products');
 
   const handleRegisterSuccess = async (profile: any) => {
     setUser({ fullName: profile.full_name, referralCode: profile.referral_code, id: profile.id });
@@ -182,7 +183,7 @@ function App() {
   // ── Landing Page ──
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-bg)' }}>
-      {/* Navbar */}
+      {/* Navbar Unified (Integrated with ShopyBrands) */}
       <nav style={{
         background: 'var(--color-surface)',
         borderBottom: '1px solid var(--color-border)',
@@ -196,17 +197,45 @@ function App() {
         zIndex: 50,
         boxShadow: 'var(--shadow-sm)',
       }}>
+        {/* Logo Left */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ width: 36, height: 36, background: 'var(--color-navy)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Coins size={20} color="white" />
           </div>
           <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--color-navy)', letterSpacing: -0.5 }}>
             True<span style={{ color: 'var(--color-wallet)' }}>Coin</span>
-            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', background: 'var(--color-surface-2)', padding: '2px 6px', borderRadius: 6, marginLeft: 8, verticalAlign: 'middle' }}>v1.0.8</span>
+            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', background: 'var(--color-surface-2)', padding: '2px 6px', borderRadius: 6, marginLeft: 8, verticalAlign: 'middle' }}>v1.0.9</span>
           </span>
         </div>
+
+        {/* Tabs and Login Right */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-          <span style={{ fontSize: 14, color: 'var(--color-text-muted)', display: 'none' }}>Ecosistema</span>
+          {/* Navigation Tabs */}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              onClick={() => setGuestViewMode('products')}
+              style={{
+                border: 'none', padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 700,
+                background: guestViewMode === 'products' ? 'var(--color-navy)' : 'transparent',
+                color: guestViewMode === 'products' ? 'white' : 'var(--color-text-muted)',
+                display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', transition: 'all 0.2s'
+              }}
+            >
+              <ShoppingBag size={14} /> Tienda en Línea
+            </button>
+            <button
+              onClick={() => setGuestViewMode('businesses')}
+              style={{
+                border: 'none', padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 700,
+                background: guestViewMode === 'businesses' ? 'var(--color-navy)' : 'transparent',
+                color: guestViewMode === 'businesses' ? 'white' : 'var(--color-text-muted)',
+                display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', transition: 'all 0.2s'
+              }}
+            >
+              <Search size={14} /> Directorio
+            </button>
+          </div>
+
           <button
             onClick={() => setShowAuth(true)}
             className="btn btn-navy btn-sm"
@@ -231,8 +260,13 @@ function App() {
         </div>
       )}
 
-      {/* 1. Marketplace Top (Main focus) */}
-      <Marketplace isGuest={true} onLoginRequired={() => setShowAuth(true)} />
+      {/* 1. Marketplace Top (Main focus - Integrated as ShopyBrands) */}
+      <Marketplace
+        isGuest={true}
+        onLoginRequired={() => setShowAuth(true)}
+        viewMode={guestViewMode}
+        setViewMode={setGuestViewMode}
+      />
 
       {/* 2. VIP Club Benefits & Video (Secondary/Validation) */}
       <section style={{ background: 'var(--color-bg)', borderTop: '1px solid var(--color-border)', padding: '80px 32px' }}>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Search, Star, Zap, CheckCircle2, Tag, Building2, MapPin, Phone } from 'lucide-react';
+import { ShoppingBag, Search, Star, Zap, CheckCircle2, Building2, MapPin, Phone } from 'lucide-react';
 import { businessService, Product, Business } from '../services/businessService';
 
 const CATEGORIES = ['Todos', 'Alimentos', 'Electrónica', 'Hogar', 'Moda', 'Salud'];
@@ -154,14 +154,15 @@ function BusinessCard({ business, isGuest, onLoginRequired }: { business: Busine
     );
 }
 
-export default function Marketplace({ onBack, userBalance, onPurchase, isGuest, onLoginRequired }: {
+export default function Marketplace({ onPurchase, isGuest, onLoginRequired, viewMode = 'products' }: {
     onBack?: () => void;
     userBalance?: string;
     onPurchase?: (amount: number) => void;
     isGuest?: boolean;
     onLoginRequired?: () => void;
+    viewMode?: 'products' | 'businesses';
+    setViewMode?: (v: 'products' | 'businesses') => void;
 }) {
-    const [viewMode, setViewMode] = useState<'products' | 'businesses'>('products');
     const [activeCategory, setActiveCategory] = useState('Todos');
     const [activeCity, setActiveCity] = useState('Todas');
     const [searchTerm, setSearchTerm] = useState('');
@@ -170,7 +171,6 @@ export default function Marketplace({ onBack, userBalance, onPurchase, isGuest, 
     const [loading, setLoading] = useState(true);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [isSuccess, setIsSuccess] = useState(false);
-    void onBack; // retained for navigation prop interface
 
     useEffect(() => {
         const fetch = async () => {
@@ -223,131 +223,74 @@ export default function Marketplace({ onBack, userBalance, onPurchase, isGuest, 
     return (
         <div className="module-page animate-in">
 
-            {/* Integrated Header & Filters Bar */}
-            <div className="module-header-marketplace" style={{ padding: isGuest ? '16px 32px' : '24px 32px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                    {/* Top Row: Title, Balance & View Mode */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                            <ShoppingBag size={20} color="white" />
-                            <h1 style={{ fontSize: 20, fontWeight: 800, color: 'white', letterSpacing: -0.5, margin: 0 }}>
-                                Marketplace <span style={{ opacity: 0.8 }}>VIP</span>
-                            </h1>
-                        </div>
+            {/* Renamed Section Title (Optional/Small) */}
+            <div style={{ padding: '20px 32px 0', display: 'flex', alignItems: 'center', gap: 10 }}>
+                <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    ShopyBrands <span style={{ opacity: 0.5 }}>/</span> {viewMode === 'products' ? 'Tienda en Línea' : 'Directorio'}
+                </p>
+            </div>
 
-                        <div style={{ display: 'flex', background: 'rgba(0,0,0,0.2)', padding: 4, borderRadius: 12, gap: 4 }}>
-                            <button
-                                onClick={() => setViewMode('products')}
-                                style={{
-                                    border: 'none', padding: '6px 16px', borderRadius: 8, fontSize: 13, fontWeight: 700,
-                                    background: viewMode === 'products' ? 'white' : 'transparent',
-                                    color: viewMode === 'products' ? 'var(--color-marketplace)' : 'white',
-                                    display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', transition: 'all 0.2s'
-                                }}
-                            >
-                                <ShoppingBag size={14} /> Productos
-                            </button>
-                            <button
-                                onClick={() => setViewMode('businesses')}
-                                style={{
-                                    border: 'none', padding: '6px 16px', borderRadius: 8, fontSize: 13, fontWeight: 700,
-                                    background: viewMode === 'businesses' ? 'white' : 'transparent',
-                                    color: viewMode === 'businesses' ? 'var(--color-marketplace)' : 'white',
-                                    display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', transition: 'all 0.2s'
-                                }}
-                            >
-                                <Building2 size={14} /> Directorio
-                            </button>
-                        </div>
+            {/* Filters Bar (Freely below as it was) */}
+            <div style={{
+                background: 'var(--color-surface)', borderBottom: '1px solid var(--color-border)',
+                padding: '12px 32px', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
+            }}>
+                <div className="input-with-icon" style={{ flex: '1 1 200px', maxWidth: 300 }}>
+                    <Search size={14} className="input-icon" />
+                    <input
+                        type="text"
+                        placeholder={viewMode === 'products' ? "Buscar productos..." : "Buscar negocios..."}
+                        value={searchTerm}
+                        onChange={e => setSearchTerm(e.target.value)}
+                        className="input input-sm"
+                        style={{ paddingLeft: 36 }}
+                    />
+                </div>
 
-                        {!isGuest && (
-                            <div style={{
-                                background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)',
-                                borderRadius: 12, padding: '6px 14px', border: '1px solid rgba(255,255,255,0.2)',
-                                display: 'flex', alignItems: 'center', gap: 8,
-                            }}>
-                                <Tag size={14} color="white" />
-                                <span style={{ color: 'white', fontWeight: 700, fontSize: 14 }}>{Number(userBalance || 0).toFixed(1)} <span style={{ fontSize: 10, opacity: 0.7 }}>TC</span></span>
-                            </div>
-                        )}
-                    </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <select
+                        value={activeCity}
+                        onChange={(e) => setActiveCity(e.target.value)}
+                        className="input input-sm"
+                        style={{ width: 'auto', minWidth: 140 }}
+                    >
+                        {CITIES.map(c => <option key={c} value={c}>{c === 'Todas' ? 'Toda Colombia' : c}</option>)}
+                    </select>
+                </div>
 
-                    {/* Bottom Row: Search, City & Categories */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-                        <div className="input-with-icon" style={{ flex: '1 1 200px', maxWidth: 350 }}>
-                            <Search size={14} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.6)' }} />
-                            <input
-                                type="text"
-                                placeholder={viewMode === 'products' ? "Buscar productos..." : "Buscar negocios..."}
-                                value={searchTerm}
-                                onChange={e => setSearchTerm(e.target.value)}
-                                style={{
-                                    width: '100%', height: 38, padding: '0 16px 0 44px', borderRadius: 10,
-                                    background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)',
-                                    color: 'white', fontSize: 14, outline: 'none'
-                                }}
-                            />
-                        </div>
-
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <select
-                                value={activeCity}
-                                onChange={(e) => setActiveCity(e.target.value)}
-                                style={{
-                                    height: 38, padding: '0 12px', borderRadius: 10,
-                                    background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)',
-                                    color: 'white', fontSize: 14, outline: 'none', minWidth: 140
-                                }}
-                            >
-                                {CITIES.map(c => <option key={c} value={c} style={{ color: 'var(--color-navy)' }}>{c === 'Todas' ? 'Toda Colombia' : c}</option>)}
-                            </select>
-                        </div>
-
-                        <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, flex: 1 }}>
-                            {CATEGORIES.map(cat => (
-                                <button
-                                    key={cat}
-                                    onClick={() => setActiveCategory(cat)}
-                                    style={{
-                                        whiteSpace: 'nowrap', border: '1px solid rgba(255,255,255,0.15)',
-                                        padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600,
-                                        background: activeCategory === cat ? 'white' : 'rgba(255,255,255,0.05)',
-                                        color: activeCategory === cat ? 'var(--color-marketplace)' : 'rgba(255,255,255,0.8)',
-                                        cursor: 'pointer', transition: 'all 0.2s'
-                                    }}
-                                >
-                                    {CATEGORY_EMOJIS[cat]} {cat}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
+                <div className="category-pills" style={{ flex: 1 }}>
+                    {CATEGORIES.map(cat => (
+                        <button
+                            key={cat}
+                            onClick={() => setActiveCategory(cat)}
+                            className={`pill pill-sm ${activeCategory === cat ? 'active-marketplace' : ''}`}
+                        >
+                            {CATEGORY_EMOJIS[cat]} {cat}
+                        </button>
+                    ))}
                 </div>
             </div>
-
-            {/* Content Grid */}
-            <div style={{ padding: '24px 32px' }}>
-                {loading ? (
-                    <div style={{ display: 'flex', justifyContent: 'center', padding: 80 }}>
-                        <div style={{ width: 40, height: 40, border: '3px solid var(--color-border)', borderTopColor: 'var(--color-marketplace)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                    </div>
-                ) : (viewMode === 'products' ? filteredProducts : filteredBusinesses).length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: 80, color: 'var(--color-text-muted)' }}>
-                        {viewMode === 'products' ? <ShoppingBag size={48} style={{ opacity: 0.3, marginBottom: 16 }} /> : <Building2 size={48} style={{ opacity: 0.3, marginBottom: 16 }} />}
-                        <p style={{ fontWeight: 600 }}>{viewMode === 'products' ? 'No se encontraron productos' : 'No se encontraron negocios'}</p>
-                    </div>
-                ) : (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: 20 }}>
-                        {viewMode === 'products'
-                            ? filteredProducts.map(p => (
-                                <ProductCard key={p.id} product={p} onBuy={handleProductAction} isGuest={isGuest} />
-                            ))
-                            : filteredBusinesses.map(b => (
-                                <BusinessCard key={b.id} business={b} isGuest={isGuest} onLoginRequired={onLoginRequired} />
-                            ))
-                        }
-                    </div>
-                )}
-            </div>
+            {loading ? (
+                <div style={{ display: 'flex', justifyContent: 'center', padding: 80 }}>
+                    <div style={{ width: 40, height: 40, border: '3px solid var(--color-border)', borderTopColor: 'var(--color-marketplace)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                </div>
+            ) : (viewMode === 'products' ? filteredProducts : filteredBusinesses).length === 0 ? (
+                <div style={{ textAlign: 'center', padding: 80, color: 'var(--color-text-muted)' }}>
+                    {viewMode === 'products' ? <ShoppingBag size={48} style={{ opacity: 0.3, marginBottom: 16 }} /> : <Building2 size={48} style={{ opacity: 0.3, marginBottom: 16 }} />}
+                    <p style={{ fontWeight: 600 }}>{viewMode === 'products' ? 'No se encontraron productos' : 'No se encontraron negocios'}</p>
+                </div>
+            ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: 20 }}>
+                    {viewMode === 'products'
+                        ? filteredProducts.map(p => (
+                            <ProductCard key={p.id} product={p} onBuy={handleProductAction} isGuest={isGuest} />
+                        ))
+                        : filteredBusinesses.map(b => (
+                            <BusinessCard key={b.id} business={b} isGuest={isGuest} onLoginRequired={onLoginRequired} />
+                        ))
+                    }
+                </div>
+            )}
 
             {/* Confirm Modal */}
             <AnimatePresence>

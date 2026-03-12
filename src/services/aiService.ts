@@ -1,6 +1,6 @@
 /**
- * AI Service - v1.8.0
- * Next-Gen Engine: Gemini 2.0 Flash
+ * AI Service - v1.8.1
+ * Next-Gen Engine: Gemini 2.0 Flash (Forced Update)
  */
 
 export interface Message {
@@ -20,7 +20,7 @@ export const aiService = {
         const contents = [
             {
                 role: 'user',
-                parts: [{ text: "Eres el Cerebro de TrueCoin Simids, una IA de nueva generación. Eres profesional, experto en economía y muy servicial. Responde siempre en español." }]
+                parts: [{ text: "Eres el Cerebro de TrueCoin Simids. Eres una IA de última generación (Gemini 2.0). Responde en español de forma profesional y servicial." }]
             },
             ...history.slice(-4).map(m => ({
                 role: m.role === 'user' ? 'user' : 'model',
@@ -32,17 +32,16 @@ export const aiService = {
             }
         ];
 
-        // Lista de modelos detectados en el escaneo V.I.P.
+        // Modelos detectados en tu cuenta (Prioridad 2.0)
         const nextGenModels = [
             "gemini-2.0-flash",
             "gemini-flash-latest",
             "gemini-2.0-flash-lite",
-            "gemini-pro-latest"
+            "gemini-1.5-flash"
         ];
 
         for (const modelName of nextGenModels) {
             try {
-                // Usamos v1beta ya que es donde estos modelos están habilitados según tu consola
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${API_KEY}`;
 
                 const response = await fetch(url, {
@@ -60,6 +59,6 @@ export const aiService = {
             }
         }
 
-        return "🚨 ERROR CRÍTICO: Aunque tienes modelos 2.0 y 3.0 activos, Google bloqueó la generación. Verifica que tu cuenta de Google Cloud no tenga restricciones de facturación.";
+        return "🚨 ERROR FINAL: Aunque los modelos 2.0 están habilitados, la conexión fue rechazada. Por favor, verifica en Google Cloud que el proyecto tenga la facturación activa.";
     }
 };

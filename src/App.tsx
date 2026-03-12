@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Coins, ShoppingBag, ArrowRight, Zap,
@@ -13,6 +13,8 @@ import Directory from './components/Directory';
 import AIChatSupport from './components/AIChatSupport';
 import AdminDashboard from './components/AdminDashboard';
 import { userService } from './services/userService';
+import { Product } from './services/businessService';
+import ShoppingCart from './components/ShoppingCart';
 
 type AppView = 'dashboard' | 'marketplace' | 'pos' | 'directory' | 'admin';
 
@@ -102,6 +104,37 @@ function App() {
   const [currentView, setCurrentView] = useState<AppView>('dashboard');
   const [balance, setBalance] = useState('0.00');
   const [guestViewMode, setGuestViewMode] = useState<'products' | 'businesses'>('products');
+  const [cart, setCart] = useState<{ product: Product; quantity: number }[]>([]);
+  const [showCart, setShowCart] = useState(false);
+
+  const addToCart = (product: Product) => {
+    setCart(prev => {
+      const existing = prev.find(item => item.product.id === product.id);
+      if (existing) {
+        return prev.map(item => item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item);
+      }
+      return [...prev, { product, quantity: 1 }];
+    });
+    setShowCart(true); // Open cart when adding item
+  };
+
+  const removeFromCart = (productId: string) => {
+    setCart(prev => prev.filter(item => item.product.id !== productId));
+  };
+
+  const updateQuantity = (productId: string, delta: number) => {
+    setCart(prev => prev.map(item => {
+      if (item.product.id === productId) {
+        const newQty = Math.max(1, item.quantity + delta);
+        return { ...item, quantity: newQty };
+      }
+      return item;
+    }));
+  };
+
+  const clearCart = () => setCart([]);
+
+  const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
   const handleRegisterSuccess = async (profile: any) => {
     setUser({ fullName: profile.full_name, referralCode: profile.referral_code, id: profile.id });
@@ -158,7 +191,7 @@ function App() {
             <Marketplace
               onBack={() => setCurrentView('dashboard')}
               userBalance={balance}
-              onPurchase={handlePurchase}
+              onAddToCart={addToCart}
             />
           )}
           {currentView === 'pos' && (
@@ -262,19 +295,43 @@ function App() {
 
         {/* Right Side Actions */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <button style={{
-            background: 'var(--color-surface-2)',
-            border: 'none',
-            width: 40,
-            height: 40,
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'var(--color-text-muted)',
-            cursor: 'pointer'
-          }}>
+          <button
+            onClick={() => setShowCart(true)}
+            style={{
+              background: 'var(--color-surface-2)',
+              border: 'none',
+              width: 44,
+              height: 44,
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'var(--color-text-muted)',
+              cursor: 'pointer',
+              position: 'relative',
+              transition: 'all 0.2s'
+            }}>
             <ShoppingBag size={20} />
+            {cartCount > 0 && (
+              <span style={{
+                position: 'absolute',
+                top: -4,
+                right: -4,
+                background: 'var(--color-marketplace)',
+                color: 'white',
+                fontSize: 10,
+                fontWeight: 800,
+                width: 20,
+                height: 20,
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '2px solid white'
+              }}>
+                {cartCount}
+              </span>
+            )}
           </button>
 
           <button
@@ -306,10 +363,23 @@ function App() {
 
       {/* 1. Marketplace Top (Main focus - Integrated as ShopyBrands) */}
       <Marketplace
-        isGuest={true}
+        isGuest={!isLoggedIn}
         onLoginRequired={() => setShowAuth(true)}
         viewMode={guestViewMode}
         setViewMode={setGuestViewMode}
+        onAddToCart={addToCart}
+      />
+
+      <ShoppingCart
+        isOpen={showCart}
+        onClose={() => setShowCart(false)}
+        items={cart}
+        onUpdateQuantity={updateQuantity}
+        onRemove={removeFromCart}
+        onClear={clearCart}
+        isLoggedIn={isLoggedIn}
+        onLogin={() => setShowAuth(true)}
+        onPurchase={handlePurchase}
       />
 
       {/* 2. VIP Club Benefits & Video (Secondary/Validation) */}

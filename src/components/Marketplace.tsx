@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Search, Star, Zap, CheckCircle2, Building2, MapPin, Phone, LayoutGrid, List } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ShoppingBag, Search, Star, Zap, Building2, MapPin, Phone, LayoutGrid, List } from 'lucide-react';
 import { businessService, Product, Business } from '../services/businessService';
 
 const CATEGORIES = ['Todos', 'Alimentos', 'Electrónica', 'Hogar', 'Moda', 'Salud'];
@@ -164,10 +164,10 @@ function BusinessCard({ business, isGuest, onLoginRequired }: { business: Busine
     );
 }
 
-export default function Marketplace({ onPurchase, isGuest, onLoginRequired, viewMode = 'products' }: {
+export default function Marketplace({ onAddToCart, isGuest, onLoginRequired, viewMode = 'products' }: {
     onBack?: () => void;
     userBalance?: string;
-    onPurchase?: (amount: number) => void;
+    onAddToCart?: (p: Product) => void;
     isGuest?: boolean;
     onLoginRequired?: () => void;
     viewMode?: 'products' | 'businesses';
@@ -179,8 +179,6 @@ export default function Marketplace({ onPurchase, isGuest, onLoginRequired, view
     const [products, setProducts] = useState<Product[]>([]);
     const [businesses, setBusinesses] = useState<Business[]>([]);
     const [loading, setLoading] = useState(true);
-    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-    const [isSuccess, setIsSuccess] = useState(false);
     const [layoutMode, setLayoutMode] = useState<'grid' | 'list'>('grid');
 
     useEffect(() => {
@@ -217,18 +215,9 @@ export default function Marketplace({ onPurchase, isGuest, onLoginRequired, view
     });
 
     const handleProductAction = (p: Product) => {
-        if (isGuest) {
-            onLoginRequired?.();
-            return;
+        if (onAddToCart) {
+            onAddToCart(p);
         }
-        setSelectedProduct(p);
-    };
-
-    const confirmPurchase = () => {
-        if (!selectedProduct || !onPurchase) return;
-        onPurchase(selectedProduct.price_tc);
-        setIsSuccess(true);
-        setTimeout(() => { setIsSuccess(false); setSelectedProduct(null); }, 3000);
     };
 
     return (
@@ -344,60 +333,7 @@ export default function Marketplace({ onPurchase, isGuest, onLoginRequired, view
                 </div>
             )}
 
-            {/* Confirm Modal */}
-            <AnimatePresence>
-                {selectedProduct && (
-                    <div style={{ position: 'fixed', inset: 0, zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-                        <motion.div
-                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                            onClick={() => !isSuccess && setSelectedProduct(null)}
-                            style={{ position: 'absolute', inset: 0, background: 'rgba(11,31,75,0.6)', backdropFilter: 'blur(8px)' }}
-                        />
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-                            className="card-lg"
-                            style={{ position: 'relative', zIndex: 310, width: '100%', maxWidth: 420, padding: 36, textAlign: 'center' }}
-                        >
-                            {!isSuccess ? (
-                                <>
-                                    <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'color-mix(in srgb, var(--color-marketplace) 12%, white)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', color: 'var(--color-marketplace)' }}>
-                                        <ShoppingBag size={30} />
-                                    </div>
-                                    <h2 style={{ fontSize: 22, fontWeight: 800, color: 'var(--color-navy)', marginBottom: 8 }}>Confirmar Compra</h2>
-                                    <p style={{ fontSize: 14, color: 'var(--color-text-muted)', marginBottom: 24 }}>
-                                        Estás a punto de adquirir: <strong style={{ color: 'var(--color-navy)' }}>{selectedProduct.name}</strong>
-                                    </p>
-                                    <div style={{ background: 'var(--color-bg)', borderRadius: 12, padding: '16px 20px', marginBottom: 24, textAlign: 'left' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                                            <span style={{ fontSize: 13, color: 'var(--color-text-muted)' }}>Precio del producto:</span>
-                                            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-navy)' }}>{selectedProduct.price_tc.toFixed(2)} TC</span>
-                                        </div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                            <span style={{ fontSize: 13, color: 'var(--color-marketplace)' }}>Aporte Red (10%):</span>
-                                            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-marketplace)' }}>{(selectedProduct.mlm_utility * 0.1).toFixed(2)} TC</span>
-                                        </div>
-                                    </div>
-                                    <div style={{ display: 'flex', gap: 12 }}>
-                                        <button onClick={() => setSelectedProduct(null)} className="btn btn-outline" style={{ flex: 1 }}>Cancelar</button>
-                                        <button onClick={confirmPurchase} className="btn btn-marketplace" style={{ flex: 2 }}>Confirmar y Comprar</button>
-                                    </div>
-                                </>
-                            ) : (
-                                <div style={{ padding: '20px 0' }}>
-                                    <div style={{ width: 80, height: 80, borderRadius: '50%', background: '#F0FDF4', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', color: '#16A34A' }}>
-                                        <CheckCircle2 size={48} />
-                                    </div>
-                                    <h2 style={{ fontSize: 22, fontWeight: 800, color: 'var(--color-navy)', marginBottom: 8 }}>¡Compra Exitosa!</h2>
-                                    <p style={{ fontSize: 14, color: 'var(--color-text-muted)', lineHeight: 1.7 }}>
-                                        Tus puntos han sido descontados. El proveedor iniciará el despacho en breve.<br />
-                                        <span style={{ color: 'var(--color-marketplace)', fontWeight: 700 }}>10% distribuido en tu red.</span>
-                                    </p>
-                                </div>
-                            )}
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
+
         </div>
     );
 }

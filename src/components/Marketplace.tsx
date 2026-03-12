@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Search, Star, Zap, CheckCircle2, Filter, Tag, Building2, MapPin, Phone } from 'lucide-react';
+import { ShoppingBag, Search, Star, Zap, CheckCircle2, Tag, Building2, MapPin, Phone } from 'lucide-react';
 import { businessService, Product, Business } from '../services/businessService';
 
 const CATEGORIES = ['Todos', 'Alimentos', 'Electrónica', 'Hogar', 'Moda', 'Salud'];
@@ -223,88 +223,104 @@ export default function Marketplace({ onBack, userBalance, onPurchase, isGuest, 
     return (
         <div className="module-page animate-in">
 
-            {/* Module Header */}
-            <div className="module-header-marketplace" style={{ padding: isGuest ? '20px 32px' : '28px 32px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-                    <div>
+            {/* Integrated Header & Filters Bar */}
+            <div className="module-header-marketplace" style={{ padding: isGuest ? '16px 32px' : '24px 32px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    {/* Top Row: Title, Balance & View Mode */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                            <ShoppingBag size={isGuest ? 20 : 24} color="white" />
-                            <h1 style={{ fontSize: isGuest ? 20 : 24, fontWeight: 800, color: 'white', letterSpacing: -0.5 }}>
+                            <ShoppingBag size={20} color="white" />
+                            <h1 style={{ fontSize: 20, fontWeight: 800, color: 'white', letterSpacing: -0.5, margin: 0 }}>
                                 Marketplace <span style={{ opacity: 0.8 }}>VIP</span>
                             </h1>
                         </div>
-                        <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+
+                        <div style={{ display: 'flex', background: 'rgba(0,0,0,0.2)', padding: 4, borderRadius: 12, gap: 4 }}>
                             <button
                                 onClick={() => setViewMode('products')}
-                                className={`pill pill-sm ${viewMode === 'products' ? 'active-marketplace' : ''}`}
-                                style={{ background: viewMode === 'products' ? 'white' : 'rgba(255,255,255,0.1)', color: viewMode === 'products' ? 'var(--color-marketplace)' : 'white', border: 'none' }}
+                                style={{
+                                    border: 'none', padding: '6px 16px', borderRadius: 8, fontSize: 13, fontWeight: 700,
+                                    background: viewMode === 'products' ? 'white' : 'transparent',
+                                    color: viewMode === 'products' ? 'var(--color-marketplace)' : 'white',
+                                    display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', transition: 'all 0.2s'
+                                }}
                             >
                                 <ShoppingBag size={14} /> Productos
                             </button>
                             <button
                                 onClick={() => setViewMode('businesses')}
-                                className={`pill pill-sm ${viewMode === 'businesses' ? 'active-marketplace' : ''}`}
-                                style={{ background: viewMode === 'businesses' ? 'white' : 'rgba(255,255,255,0.1)', color: viewMode === 'businesses' ? 'var(--color-marketplace)' : 'white', border: 'none' }}
+                                style={{
+                                    border: 'none', padding: '6px 16px', borderRadius: 8, fontSize: 13, fontWeight: 700,
+                                    background: viewMode === 'businesses' ? 'white' : 'transparent',
+                                    color: viewMode === 'businesses' ? 'var(--color-marketplace)' : 'white',
+                                    display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', transition: 'all 0.2s'
+                                }}
                             >
-                                <Building2 size={14} /> Directorio de Negocios
+                                <Building2 size={14} /> Directorio
                             </button>
                         </div>
-                    </div>
-                    {!isGuest && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+
+                        {!isGuest && (
                             <div style={{
                                 background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)',
-                                borderRadius: 12, padding: '8px 18px', border: '1px solid rgba(255,255,255,0.2)',
-                                display: 'flex', alignItems: 'center', gap: 10,
+                                borderRadius: 12, padding: '6px 14px', border: '1px solid rgba(255,255,255,0.2)',
+                                display: 'flex', alignItems: 'center', gap: 8,
                             }}>
-                                <Tag size={16} color="white" />
-                                <span style={{ color: 'white', fontWeight: 700, fontSize: 16 }}>{Number(userBalance || 0).toFixed(2)}</span>
-                                <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12, fontWeight: 600 }}>TC disponibles</span>
+                                <Tag size={14} color="white" />
+                                <span style={{ color: 'white', fontWeight: 700, fontSize: 14 }}>{Number(userBalance || 0).toFixed(1)} <span style={{ fontSize: 10, opacity: 0.7 }}>TC</span></span>
                             </div>
+                        )}
+                    </div>
+
+                    {/* Bottom Row: Search, City & Categories */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                        <div className="input-with-icon" style={{ flex: '1 1 200px', maxWidth: 350 }}>
+                            <Search size={14} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.6)' }} />
+                            <input
+                                type="text"
+                                placeholder={viewMode === 'products' ? "Buscar productos..." : "Buscar negocios..."}
+                                value={searchTerm}
+                                onChange={e => setSearchTerm(e.target.value)}
+                                style={{
+                                    width: '100%', height: 38, padding: '0 16px 0 44px', borderRadius: 10,
+                                    background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)',
+                                    color: 'white', fontSize: 14, outline: 'none'
+                                }}
+                            />
                         </div>
-                    )}
-                </div>
-            </div>
 
-            {/* Filters Bar */}
-            <div style={{
-                background: 'var(--color-surface)', borderBottom: '1px solid var(--color-border)',
-                padding: '12px 32px', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
-            }}>
-                <div className="input-with-icon" style={{ flex: '1 1 200px', maxWidth: 300 }}>
-                    <Search size={14} className="input-icon" />
-                    <input
-                        type="text"
-                        placeholder={viewMode === 'products' ? "Buscar productos..." : "Buscar negocios..."}
-                        value={searchTerm}
-                        onChange={e => setSearchTerm(e.target.value)}
-                        className="input input-sm"
-                        style={{ paddingLeft: 36 }}
-                    />
-                </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <select
+                                value={activeCity}
+                                onChange={(e) => setActiveCity(e.target.value)}
+                                style={{
+                                    height: 38, padding: '0 12px', borderRadius: 10,
+                                    background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)',
+                                    color: 'white', fontSize: 14, outline: 'none', minWidth: 140
+                                }}
+                            >
+                                {CITIES.map(c => <option key={c} value={c} style={{ color: 'var(--color-navy)' }}>{c === 'Todas' ? 'Toda Colombia' : c}</option>)}
+                            </select>
+                        </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <Filter size={14} color="var(--color-text-muted)" />
-                    <select
-                        value={activeCity}
-                        onChange={(e) => setActiveCity(e.target.value)}
-                        className="input input-sm"
-                        style={{ width: 'auto', minWidth: 140 }}
-                    >
-                        {CITIES.map(c => <option key={c} value={c}>{c === 'Todas' ? 'Toda Colombia' : c}</option>)}
-                    </select>
-                </div>
-
-                <div className="category-pills" style={{ flex: 1 }}>
-                    {CATEGORIES.map(cat => (
-                        <button
-                            key={cat}
-                            onClick={() => setActiveCategory(cat)}
-                            className={`pill pill-sm ${activeCategory === cat ? 'active-marketplace' : ''}`}
-                        >
-                            {CATEGORY_EMOJIS[cat]} {cat}
-                        </button>
-                    ))}
+                        <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, flex: 1 }}>
+                            {CATEGORIES.map(cat => (
+                                <button
+                                    key={cat}
+                                    onClick={() => setActiveCategory(cat)}
+                                    style={{
+                                        whiteSpace: 'nowrap', border: '1px solid rgba(255,255,255,0.15)',
+                                        padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600,
+                                        background: activeCategory === cat ? 'white' : 'rgba(255,255,255,0.05)',
+                                        color: activeCategory === cat ? 'var(--color-marketplace)' : 'rgba(255,255,255,0.8)',
+                                        cursor: 'pointer', transition: 'all 0.2s'
+                                    }}
+                                >
+                                    {CATEGORY_EMOJIS[cat]} {cat}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             </div>
 

@@ -1,5 +1,6 @@
 /**
- * AI Service - v1.8.3
+ * AI Service - v1.8.4
+ * Fixed build error by integrating history into the payload.
  * Master Key Engine: Dual Support (2.0 Flash & 1.5 Pro)
  */
 
@@ -16,17 +17,24 @@ export const aiService = {
             return "Error: API Key no detectada.";
         }
 
+        // Mapeamos el historial para que Google lo entienda (User -> model)
+        // Esto soluciona el error de 'history' no usado en Vercel
+        const historyParts = history.slice(-4).map(m => ({
+            role: m.role === 'user' ? 'user' : 'model',
+            parts: [{ text: m.content }]
+        }));
+
         const contents = [
+            ...historyParts,
             {
                 role: 'user',
                 parts: [{ text: `Responde en español de forma breve.\nPregunta: ${userMessage}` }]
             }
         ];
 
-        // Probamos los DOS motores principales de tu cuenta
         const engineConfigs = [
             { ver: "v1beta", mod: "gemini-2.0-flash" },
-            { ver: "v1beta", mod: "gemini-1.5-pro" }, // A veces el Pro se activa antes en cuentas con créditos
+            { ver: "v1beta", mod: "gemini-1.5-pro" },
             { ver: "v1", mod: "gemini-1.5-flash" }
         ];
 
@@ -52,10 +60,6 @@ export const aiService = {
             }
         }
 
-        return `🚨 ERROR CRÍTICO: Google rechazó todas las conexiones. 
-        
-        MOTIVO: ${lastError}. 
-        
-        TIP: Si el motivo dice de los límites o facturación, por favor verifica en Google Cloud que el proyecto 'SIMIDS-IA' esté realmente vinculado a tu cuenta de pagos.`;
+        return `🚨 ERROR: Google rechazó la conexión. MOTIVO: ${lastError}.`;
     }
 };

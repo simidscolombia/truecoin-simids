@@ -23,7 +23,7 @@ const CATEGORY_EMOJIS: Record<string, string> = {
     Alimentos: '🥗', Electrónica: '📱', Hogar: '🏠', Moda: '👕', Salud: '💊', Todos: '✨',
 };
 
-function ProductCard({ product, onBuy, isGuest, layout = 'grid' }: { product: Product; onBuy: (p: Product) => void; isGuest?: boolean; layout?: 'grid' | 'list' }) {
+function ProductCard({ product, onBuy, layout = 'grid' }: { product: Product; onBuy: (p: Product) => void; layout?: 'grid' | 'list' }) {
     const isList = layout === 'list';
     const fiatPrice = product.price_fiat;
     const fiatPublic = fiatPrice * 1.35; // 35% de margen estimado
@@ -104,10 +104,10 @@ function ProductCard({ product, onBuy, isGuest, layout = 'grid' }: { product: Pr
 
                     <button
                         onClick={() => onBuy(product)}
-                        className={`btn ${isGuest ? 'btn-gold' : 'btn-marketplace'} btn-full btn-sm`}
-                        style={{ borderRadius: 8, height: 36 }}
+                        className="btn btn-marketplace btn-full btn-sm"
+                        style={{ borderRadius: 8, height: 40, gap: 10, fontSize: 13 }}
                     >
-                        {isGuest ? 'Obtener VIP' : '🛒 Comprar'}
+                        <ShoppingBag size={16} /> Añadir al Carrito
                     </button>
                 </div>
             </div>
@@ -335,7 +335,7 @@ export default function Marketplace({ onPurchase, isGuest, onLoginRequired, view
                 }}>
                     {viewMode === 'products'
                         ? filteredProducts.map(p => (
-                            <ProductCard key={p.id} product={p} onBuy={handleProductAction} isGuest={isGuest} layout={layoutMode} />
+                            <ProductCard key={p.id} product={p} onBuy={handleProductAction} layout={layoutMode} />
                         ))
                         : filteredBusinesses.map(b => (
                             <BusinessCard key={b.id} business={b} isGuest={isGuest} onLoginRequired={onLoginRequired} />

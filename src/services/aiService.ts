@@ -1,6 +1,7 @@
 /**
- * AI Service - v1.5.8
- * Multi-Version Multi-Model Fallback
+ * AI Service - v1.5.9
+ * Corrected message property names to match the local interface.
+ * Multi-Version Multi-Model Fallback with full context support.
  */
 
 export interface Message {
@@ -16,13 +17,24 @@ export const aiService = {
             return "Error: API Key no detectada.";
         }
 
-        const payload = {
-            contents: [{
-                parts: [{ text: `Eres el Cerebro de TrueCoin Simids. Responde breve en español.\n\nUsuario: ${userMessage}` }]
-            }]
-        };
+        // Construct payload using the correct 'role' and 'content' properties
+        const contents = [
+            {
+                role: 'user',
+                parts: [{ text: "Eres el Cerebro de TrueCoin Simids, un experto en economía colaborativa. Responde siempre en español de forma breve y profesional." }]
+            },
+            ...history.slice(-4).map(m => ({
+                role: m.role === 'user' ? 'user' : 'model',
+                parts: [{ text: m.content }]
+            })),
+            {
+                role: 'user',
+                parts: [{ text: userMessage }]
+            }
+        ];
 
-        // Lista de combinaciones de emergencia [URL, Modelo]
+        const payload = { contents };
+
         const attempts = [
             { ver: "v1beta", mod: "gemini-1.5-flash" },
             { ver: "v1", mod: "gemini-1.5-flash" },
@@ -33,7 +45,6 @@ export const aiService = {
         for (const attempt of attempts) {
             try {
                 const url = `https://generativelanguage.googleapis.com/${attempt.ver}/models/${attempt.mod}:generateContent?key=${API_KEY}`;
-                console.log(`CEREBRO: Probando ${attempt.mod} en ${attempt.ver}...`);
 
                 const response = await fetch(url, {
                     method: 'POST',
@@ -46,10 +57,10 @@ export const aiService = {
                     return data.candidates[0].content.parts[0].text;
                 }
             } catch (e) {
-                console.warn(`Falló intento ${attempt.mod}`);
+                // Silent fail to allow next attempt
             }
         }
 
-        return "🚨 ERROR FINAL: Google no reconoce ninguno de sus modelos con esta API Key. \n\nPOR FAVOR: \n1. Ve a https://aistudio.google.com/ \n2. Verifica que tu llave no tenga el mensaje 'API Key is restricted'. \n3. Crea una llave NUEVA e inténtalo de nuevo.";
+        return "🚨 ERROR: Google sigue rechazando la conexión. Verifica tu API Key y permisos en Google AI Studio.";
     }
 };

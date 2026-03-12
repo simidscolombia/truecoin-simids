@@ -202,7 +202,7 @@ function App() {
           </div>
           <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--color-navy)', letterSpacing: -0.5 }}>
             True<span style={{ color: 'var(--color-wallet)' }}>Coin</span>
-            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', background: 'var(--color-surface-2)', padding: '2px 6px', borderRadius: 6, marginLeft: 8, verticalAlign: 'middle' }}>v1.0.5</span>
+            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', background: 'var(--color-surface-2)', padding: '2px 6px', borderRadius: 6, marginLeft: 8, verticalAlign: 'middle' }}>v1.0.6</span>
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
@@ -231,97 +231,47 @@ function App() {
         </div>
       )}
 
-      {/* Hero */}
-      <section style={{ maxWidth: 1280, margin: '0 auto', padding: '60px 32px', display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.2fr)', gap: 60, alignItems: 'center' }}>
+      {/* 1. Marketplace Top (Main focus) */}
+      <Marketplace isGuest={true} onLoginRequired={() => setShowAuth(true)} />
 
-        {/* Left: Content */}
-        <div>
+      {/* 2. VIP Club Benefits & Video (Secondary/Validation) */}
+      <section style={{ background: 'var(--color-bg)', borderTop: '1px solid var(--color-border)', padding: '80px 32px' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', display: 'grid', gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 1fr)', gap: 60, alignItems: 'center' }}>
+
+          {/* Video Right (moved for variety) */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 16px', borderRadius: 999, background: 'color-mix(in srgb, var(--color-wallet) 12%, white)', color: 'var(--color-wallet)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 24, border: '1px solid color-mix(in srgb, var(--color-wallet) 25%, white)' }}
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            style={{ width: '100%', aspectRatio: '16/9', background: 'var(--color-surface)', borderRadius: 24, overflow: 'hidden', boxShadow: '0 24px 50px rgba(11,31,75,0.1)', border: '1px solid var(--color-border)' }}
           >
-            <Zap size={13} /> Ecosistema Digital Unificado
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            style={{ fontSize: 'clamp(32px, 5vw, 56px)', fontWeight: 800, lineHeight: 1.1, letterSpacing: -2, marginBottom: 24, color: 'var(--color-navy)' }}
-          >
-            Bienvenido al primer Club VIP de servicios en línea{' '}
-            <span style={{ color: 'var(--color-cloud-blue)' }}>impulsado por IA.</span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            style={{ fontSize: 16, color: 'var(--color-text-muted)', marginBottom: 40, lineHeight: 1.7 }}
-          >
-            Únete a nuestra red de referidos como <strong>Miembro VIP</strong> y recibe todos los beneficios que tenemos para ti. Ahorra, gana y crece con nosotros.
-            <br /><br />
-            Reproduce el video para descubrir cómo funciona.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}
-          >
-            <button onClick={() => setShowAuth(true)} className="btn btn-navy btn-lg" style={{ gap: 10, flex: '1 1 auto', justifyContent: 'center' }}>
-              Registrarme Ahora <ArrowRight size={18} />
-            </button>
-            <button className="btn btn-outline btn-lg" style={{ flex: '1 1 auto', justifyContent: 'center' }}>
-              Ver Productos VIP
-            </button>
-          </motion.div>
-        </div>
-
-        {/* Right: Embedded Video */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.4 }}
-          style={{
-            width: '100%',
-            aspectRatio: '16/9',
-            background: 'var(--color-surface)',
-            borderRadius: 24,
-            overflow: 'hidden',
-            boxShadow: '0 24px 50px rgba(11,31,75,0.15)',
-            border: '8px solid color-mix(in srgb, var(--color-cloud-blue) 10%, white)'
-          }}
-        >
-          {/* Aquí iría el iframe de YouTube/Vimeo. Usamos un div como placeholder dinámico. */}
-          <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, var(--color-navy), var(--color-pos))', color: 'white', position: 'relative' }}>
-
-            {/* Simulación del botón Play de YouTube */}
-            <div style={{ width: 64, height: 44, background: '#FF0000', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 10, boxShadow: '0 10px 20px rgba(255,0,0,0.3)' }}>
-              <div style={{ width: 0, height: 0, borderTop: '10px solid transparent', borderBottom: '10px solid transparent', borderLeft: '16px solid white', marginLeft: 4 }} />
+            <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, var(--color-navy), var(--color-pos))', color: 'white' }}>
+              <div style={{ width: 64, height: 44, background: '#FF0000', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 10 }}>
+                <div style={{ width: 0, height: 0, borderTop: '10px solid transparent', borderBottom: '10px solid transparent', borderLeft: '16px solid white', marginLeft: 4 }} />
+              </div>
+              <p style={{ marginTop: 16, fontSize: 13, fontWeight: 600, opacity: 0.8 }}>¿Cómo funciona TrueCoin? (3 Min)</p>
             </div>
-            <p style={{ marginTop: 16, fontSize: 13, fontWeight: 600, opacity: 0.8 }}>¿Cómo funciona TrueCoin? (3 Min)</p>
+          </motion.div>
 
-            {/* Para embeber el video real, reemplazarías todos los div anteriores con:
-                 <iframe width="100%" height="100%" src="https://www.youtube.com/embed/TU_ID_DE_VIDEO?autoplay=0" title="Explicación TrueCoin" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe> 
-             */}
+          {/* Content Left */}
+          <div>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 16px', borderRadius: 999, background: 'color-mix(in srgb, var(--color-wallet) 12%, white)', color: 'var(--color-wallet)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', marginBottom: 20 }}>
+              <Zap size={13} /> Club VIP TrueCoin
+            </div>
+            <h2 style={{ fontSize: 36, fontWeight: 800, color: 'var(--color-navy)', marginBottom: 20, lineHeight: 1.2 }}>
+              Bienvenido al primer Club VIP <br /> <span style={{ color: 'var(--color-cloud-blue)' }}>impulsado por IA.</span>
+            </h2>
+            <p style={{ fontSize: 16, color: 'var(--color-text-muted)', marginBottom: 32, lineHeight: 1.6 }}>
+              Únete a nuestra red de referidos como <strong>Miembro VIP</strong> y accede a precios de mayorista directo de fábrica. Ahorra en tus compras, gana por expandir la red y crece con nosotros.
+            </p>
+            <div style={{ display: 'flex', gap: 16 }}>
+              <button onClick={() => setShowAuth(true)} className="btn btn-navy btn-lg" style={{ padding: '0 32px' }}>
+                Registrarme Ahora <ArrowRight size={18} style={{ marginLeft: 8 }} />
+              </button>
+            </div>
           </div>
-        </motion.div>
-
-      </section>
-
-      {/* Landing Marketplace Section (Motivation) */}
-      <div style={{ background: 'var(--color-bg)', borderTop: '1px solid var(--color-border)', paddingBottom: 60 }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto' }}>
-          <div style={{ padding: '40px 32px 0', textAlign: 'center' }}>
-            <h2 style={{ fontSize: 24, fontWeight: 800, color: 'var(--color-navy)', marginBottom: 8 }}>Nuestro Marketplace VIP</h2>
-            <p style={{ color: 'var(--color-text-muted)', fontSize: 15 }}>Ahorros exclusivos para Miembros de la Red.</p>
-          </div>
-          <Marketplace preview={true} isGuest={true} onLoginRequired={() => setShowAuth(true)} />
         </div>
-      </div>
+      </section>
 
       {/* Footer */}
       <footer style={{ padding: '32px', textAlign: 'center', color: 'var(--color-text-muted)', fontSize: 13, borderTop: '1px solid var(--color-border)' }}>

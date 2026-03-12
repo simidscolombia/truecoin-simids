@@ -110,12 +110,13 @@ function ProductCard({ product, onBuy, isGuest }: { product: Product; onBuy: (p:
     );
 }
 
-export default function Marketplace({ onBack, userBalance, onPurchase, isGuest, onLoginRequired }: {
+export default function Marketplace({ onBack, userBalance, onPurchase, isGuest, onLoginRequired, preview }: {
     onBack?: () => void;
     userBalance?: string;
     onPurchase?: (amount: number) => void;
     isGuest?: boolean;
     onLoginRequired?: () => void;
+    preview?: boolean;
 }) {
     const [activeCategory, setActiveCategory] = useState('Todos');
     const [searchTerm, setSearchTerm] = useState('');
@@ -143,7 +144,7 @@ export default function Marketplace({ onBack, userBalance, onPurchase, isGuest, 
         const matchCat = activeCategory === 'Todos' || p.category === activeCategory;
         const matchSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
         return matchCat && matchSearch;
-    });
+    }).slice(0, preview ? 4 : undefined);
 
     const handleProductAction = (p: Product) => {
         if (isGuest) {
@@ -161,72 +162,76 @@ export default function Marketplace({ onBack, userBalance, onPurchase, isGuest, 
     };
 
     return (
-        <div className="module-page animate-in">
+        <div className={preview ? "" : "module-page animate-in"}>
 
             {/* Module Header */}
-            <div className="module-header-marketplace" style={{ padding: '28px 32px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-                    <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                            <ShoppingBag size={24} color="white" />
-                            <h1 style={{ fontSize: 24, fontWeight: 800, color: 'white', letterSpacing: -0.5 }}>
-                                Marketplace <span style={{ opacity: 0.8 }}>VIP</span>
-                            </h1>
-                        </div>
-                        <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', marginTop: 4 }}>
-                            {isGuest ? 'Únete al Club VIP para obtener descuentos exclusivos' : 'Precios de mayorista · Paga con TrueCoin'}
-                        </p>
-                    </div>
-                    {!isGuest && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                            <div style={{
-                                background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)',
-                                borderRadius: 12, padding: '8px 18px', border: '1px solid rgba(255,255,255,0.2)',
-                                display: 'flex', alignItems: 'center', gap: 10,
-                            }}>
-                                <Tag size={16} color="white" />
-                                <span style={{ color: 'white', fontWeight: 700, fontSize: 16 }}>{Number(userBalance || 0).toFixed(2)}</span>
-                                <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12, fontWeight: 600 }}>TC disponibles</span>
+            {!preview && (
+                <div className="module-header-marketplace" style={{ padding: '28px 32px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+                        <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                <ShoppingBag size={24} color="white" />
+                                <h1 style={{ fontSize: 24, fontWeight: 800, color: 'white', letterSpacing: -0.5 }}>
+                                    Marketplace <span style={{ opacity: 0.8 }}>VIP</span>
+                                </h1>
                             </div>
+                            <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', marginTop: 4 }}>
+                                {isGuest ? 'Únete al Club VIP para obtener descuentos exclusivos' : 'Precios de mayorista · Paga con TrueCoin'}
+                            </p>
                         </div>
-                    )}
+                        {!isGuest && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                <div style={{
+                                    background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)',
+                                    borderRadius: 12, padding: '8px 18px', border: '1px solid rgba(255,255,255,0.2)',
+                                    display: 'flex', alignItems: 'center', gap: 10,
+                                }}>
+                                    <Tag size={16} color="white" />
+                                    <span style={{ color: 'white', fontWeight: 700, fontSize: 16 }}>{Number(userBalance || 0).toFixed(2)}</span>
+                                    <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12, fontWeight: 600 }}>TC disponibles</span>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* Filters Bar */}
-            <div style={{
-                background: 'var(--color-surface)', borderBottom: '1px solid var(--color-border)',
-                padding: '14px 32px', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
-            }}>
-                <div className="input-with-icon" style={{ flex: 1, minWidth: 200, maxWidth: 320 }}>
-                    <Search size={16} className="input-icon" />
-                    <input
-                        type="text"
-                        placeholder="Buscar productos..."
-                        value={searchTerm}
-                        onChange={e => setSearchTerm(e.target.value)}
-                        className="input"
-                        style={{ paddingLeft: 40 }}
-                    />
+            {!preview && (
+                <div style={{
+                    background: 'var(--color-surface)', borderBottom: '1px solid var(--color-border)',
+                    padding: '14px 32px', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
+                }}>
+                    <div className="input-with-icon" style={{ flex: 1, minWidth: 200, maxWidth: 320 }}>
+                        <Search size={16} className="input-icon" />
+                        <input
+                            type="text"
+                            placeholder="Buscar productos..."
+                            value={searchTerm}
+                            onChange={e => setSearchTerm(e.target.value)}
+                            className="input"
+                            style={{ paddingLeft: 40 }}
+                        />
+                    </div>
+                    <div className="category-pills">
+                        {CATEGORIES.map(cat => (
+                            <button
+                                key={cat}
+                                onClick={() => setActiveCategory(cat)}
+                                className={`pill ${activeCategory === cat ? 'active-marketplace' : ''}`}
+                            >
+                                {CATEGORY_EMOJIS[cat]} {cat}
+                            </button>
+                        ))}
+                    </div>
+                    <button className="btn btn-outline btn-sm">
+                        <Filter size={14} /> Filtrar
+                    </button>
                 </div>
-                <div className="category-pills">
-                    {CATEGORIES.map(cat => (
-                        <button
-                            key={cat}
-                            onClick={() => setActiveCategory(cat)}
-                            className={`pill ${activeCategory === cat ? 'active-marketplace' : ''}`}
-                        >
-                            {CATEGORY_EMOJIS[cat]} {cat}
-                        </button>
-                    ))}
-                </div>
-                <button className="btn btn-outline btn-sm">
-                    <Filter size={14} /> Filtrar
-                </button>
-            </div>
+            )}
 
             {/* Products Grid */}
-            <div style={{ padding: '28px 32px' }}>
+            <div style={{ padding: preview ? '32px 0' : '28px 32px' }}>
                 {loading ? (
                     <div style={{ display: 'flex', justifyContent: 'center', padding: 80 }}>
                         <div style={{ width: 40, height: 40, border: '3px solid var(--color-border)', borderTopColor: 'var(--color-marketplace)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />

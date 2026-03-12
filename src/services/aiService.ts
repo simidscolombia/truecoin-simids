@@ -1,7 +1,6 @@
 /**
- * AI Service - v1.8.4
- * Fixed build error by integrating history into the payload.
- * Master Key Engine: Dual Support (2.0 Flash & 1.5 Pro)
+ * AI Service - v1.8.5
+ * Engine: Next-Gen Only (Gemini 2.0 & Latest Flash)
  */
 
 export interface Message {
@@ -17,30 +16,28 @@ export const aiService = {
             return "Error: API Key no detectada.";
         }
 
-        // Mapeamos el historial para que Google lo entienda (User -> model)
-        // Esto soluciona el error de 'history' no usado en Vercel
-        const historyParts = history.slice(-4).map(m => ({
-            role: m.role === 'user' ? 'user' : 'model',
-            parts: [{ text: m.content }]
-        }));
-
+        // Contexto premium
         const contents = [
-            ...historyParts,
+            ...history.slice(-4).map(m => ({
+                role: m.role === 'user' ? 'user' : 'model',
+                parts: [{ text: m.content }]
+            })),
             {
                 role: 'user',
-                parts: [{ text: `Responde en español de forma breve.\nPregunta: ${userMessage}` }]
+                parts: [{ text: `Actúa como el Cerebro de TrueCoin Simids. Responde en español.\nPregunta: ${userMessage}` }]
             }
         ];
 
-        const engineConfigs = [
+        // SOLO modelos que vimos en tu lista activa (Step 1739)
+        const activeModels = [
             { ver: "v1beta", mod: "gemini-2.0-flash" },
-            { ver: "v1beta", mod: "gemini-1.5-pro" },
-            { ver: "v1", mod: "gemini-1.5-flash" }
+            { ver: "v1beta", mod: "gemini-flash-latest" },
+            { ver: "v1beta", mod: "gemini-pro-latest" }
         ];
 
-        let lastError = "";
+        let detail = "";
 
-        for (const config of engineConfigs) {
+        for (const config of activeModels) {
             try {
                 const url = `https://generativelanguage.googleapis.com/${config.ver}/models/${config.mod}:generateContent?key=${API_KEY}`;
                 const response = await fetch(url, {
@@ -53,13 +50,12 @@ export const aiService = {
                 if (response.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
                     return data.candidates[0].content.parts[0].text;
                 }
-
-                lastError = data.error?.message || "Error desconocido";
+                detail = data.error?.message || "Error desconocido";
             } catch (e) {
-                // Siguiente config
+                // Siguiente modelo...
             }
         }
 
-        return `🚨 ERROR: Google rechazó la conexión. MOTIVO: ${lastError}.`;
+        return `🚨 ERROR: Tu cuenta tiene modelos 2.0 pero Google rechaza la petición. MOTIVO: ${detail}.`;
     }
 };

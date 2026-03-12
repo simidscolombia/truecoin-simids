@@ -1,8 +1,6 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
 /**
- * AI Service - v1.5.6
- * Fixed "Unused variable" build error
+ * AI Service - v1.5.7
+ * Direct REST API implementation to bypass SDK 404 issues
  */
 
 export interface Message {
@@ -11,35 +9,73 @@ export interface Message {
 }
 
 const API_KEY = (import.meta.env.VITE_GEMINI_API_KEY || "").trim();
-const genAI = new GoogleGenerativeAI(API_KEY);
 
 export const aiService = {
     async getResponse(userMessage: string, history: Message[] = []): Promise<string> {
         if (!API_KEY || API_KEY.length < 10) {
-            return "Error: API Key no configurada.";
+            return "Error: API Key no configurada correctamente en Vercel.";
         }
 
-        // Use history to avoid Vercel build errors
-        const context = history.slice(-2).map(m => `${m.role}: ${m.content}`).join('\n');
-        const prompt = `Responde en español como el Cerebro de TrueCoin Simids.\n\n${context}\nUsuario: ${userMessage}\nCerebro:`;
+        // URL estable de producción (v1)
+        const API_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+
+        const payload = {
+            contents: [
+                {
+                    parts: [{ text: "Eres el Cerebro de TrueCoin Simids. Responde breve en español." }]
+                },
+                ...history.slice(-4).map(m => ({
+                    role: m.role === 'user' ? 'user' : 'model',
+                    parts: [{ text: m.content }]
+                })),
+                {
+                    role: 'user',
+                    parts: [{ text: userMessage }]
+                }
+            ],
+            generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: 500,
+            }
+        };
 
         try {
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-            const result = await model.generateContent(prompt);
-            const response = await result.response;
-            return response.text().trim();
-        } catch (err: any) {
-            console.error("CEREBRO FAIL:", err);
+            console.log("CEREBRO: Intentando conexión directa REST...");
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
 
-            // Intento final con gemini-pro
-            try {
-                const modelPro = genAI.getGenerativeModel({ model: "gemini-pro" });
-                const resultPro = await modelPro.generateContent(prompt);
-                const responsePro = await resultPro.response;
-                return responsePro.text().trim();
-            } catch (err2: any) {
-                return `🚨 ERROR: Google rechazó la conexión. Verifica tu API Key en Vercel. (Detalle: ${err2.message})`;
+            const data = await response.json();
+
+            if (!response.ok) {
+                console.error("GOOGLE API ERROR:", data);
+                throw new Error(data.error?.message || "Error desconocido de Google");
             }
+
+            return data.candidates[0].content.parts[0].text;
+
+        } catch (err: any) {
+            console.error("CEREBRO REST FAIL:", err);
+
+            // Intento con el modelo pro 1.0 si el 1.5 falla
+            if (err.message.includes('404')) {
+                try {
+                    const PRO_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${API_KEY}`;
+                    const responsePro = await fetch(PRO_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const dataPro = await responsePro.json();
+                    return dataPro.candidates[0].content.parts[0].text;
+                } catch (proErr: any) {
+                    return `🚨 ERROR REST FINAL: ${proErr.message}. Verifica que la 'Generative Language API' esté activa en tu consola de Google.`;
+                }
+            }
+
+            return `Lo siento, el Cerebro dice: Error de conexión (${err.message})`;
         }
     }
 };

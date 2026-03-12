@@ -1,6 +1,6 @@
 /**
- * AI Service - v1.7.0
- * Deep Diagnostics & Auto-Model Discovery
+ * AI Service - v1.8.0
+ * Next-Gen Engine: Gemini 2.0 Flash
  */
 
 export interface Message {
@@ -16,57 +16,50 @@ export const aiService = {
             return "Error: API Key no detectada.";
         }
 
-        // Use history in a log to satisfy the linter
-        console.log(`CEREBRO: Procesando mensaje con historial de ${history.length} mensajes.`);
-
-        const prompt = `Responde en español de forma breve.\nPregunta: ${userMessage}`;
-
-        // Función interna para llamar a Google
-        const callGoogle = async (version: string, model: string) => {
-            const url = `https://generativelanguage.googleapis.com/${version}/models/${model}:generateContent?key=${API_KEY}`;
-            const res = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }]
-                })
-            });
-            return res;
-        };
-
-        try {
-            // INTENTO 1: v1 + flash (El estándar de producción)
-            const res1 = await callGoogle("v1", "gemini-1.5-flash");
-            if (res1.ok) {
-                const data = await res1.json();
-                return data.candidates[0].content.parts[0].text;
+        // Contexto premium para el Cerebro 2.0
+        const contents = [
+            {
+                role: 'user',
+                parts: [{ text: "Eres el Cerebro de TrueCoin Simids, una IA de nueva generación. Eres profesional, experto en economía y muy servicial. Responde siempre en español." }]
+            },
+            ...history.slice(-4).map(m => ({
+                role: m.role === 'user' ? 'user' : 'model',
+                parts: [{ text: m.content }]
+            })),
+            {
+                role: 'user',
+                parts: [{ text: userMessage }]
             }
+        ];
 
-            // INTENTO 2: v1beta + flash (El canal de desarrollo)
-            const res2 = await callGoogle("v1beta", "gemini-1.5-flash");
-            if (res2.ok) {
-                const data = await res2.json();
-                return data.candidates[0].content.parts[0].text;
+        // Lista de modelos detectados en el escaneo V.I.P.
+        const nextGenModels = [
+            "gemini-2.0-flash",
+            "gemini-flash-latest",
+            "gemini-2.0-flash-lite",
+            "gemini-pro-latest"
+        ];
+
+        for (const modelName of nextGenModels) {
+            try {
+                // Usamos v1beta ya que es donde estos modelos están habilitados según tu consola
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${API_KEY}`;
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents })
+                });
+
+                const data = await response.json();
+                if (response.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
+                    return data.candidates[0].content.parts[0].text;
+                }
+            } catch (e) {
+                // Siguiente modelo...
             }
-
-            // DIAGNÓSTICO: Listar modelos disponibles para esta llave
-            console.log("CEREBRO: Intentando descubrir modelos...");
-            const listUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${API_KEY}`;
-            const listRes = await fetch(listUrl);
-            const listData = await listRes.json();
-
-            const availableModels = listData.models
-                ? listData.models.map((m: any) => m.name.replace("models/", "")).join(", ")
-                : "Ninguno";
-
-            return `🚨 ERROR DE CONFIGURACIÓN: Google conoce esta llave pero no activa el modelo Flash. 
-            
-            VERSIONES ACTIVAS EN TU CUENTA: ${availableModels}.
-            
-            Si la lista anterior está vacía, por favor entra a Google AI Studio y genera una llave que diga 'Free of charge' o 'Pay-as-you-go' específicamente para Gemini API.`;
-
-        } catch (err: any) {
-            return `🚨 ERROR DE RED: ${err.message}`;
         }
+
+        return "🚨 ERROR CRÍTICO: Aunque tienes modelos 2.0 y 3.0 activos, Google bloqueó la generación. Verifica que tu cuenta de Google Cloud no tenga restricciones de facturación.";
     }
 };

@@ -8,6 +8,13 @@ interface GiftMatrixProps {
     referrals?: number;
 }
 
+const RANKS = [
+    "VIP BRONCE", "VIP PLATA", "VIP ORO",
+    "PLATINO I", "PLATINO II", "PLATINO III",
+    "ESMERALDA I", "ESMERALDA II", "ESMERALDA III",
+    "ZAFIRO", "DIAMANTE", "LEYENDA SIMID"
+];
+
 const LEVEL_VALUES: Record<number, number> = {
     1: 50, 2: 100, 3: 200, 4: 400, 5: 800,
     6: 1600, 7: 3200, 8: 6400, 9: 12800,
@@ -35,11 +42,18 @@ export default function GiftMatrix({ currentLevel = 1, referrals = 0 }: GiftMatr
                     </div>
                     <div>
                         <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--color-navy)', marginBottom: 2 }}>
-                            Matriz de Regalos
+                            {RANKS[(currentLevel - 1) % 12]}
                         </h2>
-                        <p style={{ fontSize: 12, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600 }}>
-                            Nivel {currentLevel} · Capitalización
-                        </p>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <div style={{
+                                width: 10, height: 10, borderRadius: '50%',
+                                background: referrals >= 3 ? '#20c997' : referrals >= 1 ? '#fab005' : '#fa5252',
+                                border: '2px solid white', boxShadow: '0 0 0 1px #eee'
+                            }}></div>
+                            <p style={{ fontSize: 11, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 700 }}>
+                                {referrals >= 3 ? 'Pulsación Óptima' : referrals >= 1 ? 'Ritmo Moderado' : 'Sin Actividad'}
+                            </p>
+                        </div>
                     </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>

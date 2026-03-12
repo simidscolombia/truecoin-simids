@@ -90,7 +90,7 @@ export default function Dashboard({ user, balance, onGoToStore, onGoToPOS, onGoT
     const [copied, setCopied] = useState(false);
 
     const copyReferral = () => {
-        navigator.clipboard.writeText(`truecoin.app/ref/${user.referralCode}`);
+        navigator.clipboard.writeText(`shopybrands.com/ref/${user.referralCode}`);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
@@ -133,7 +133,21 @@ export default function Dashboard({ user, balance, onGoToStore, onGoToPOS, onGoT
                     </p>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span className="badge badge-vip">⭐ Socio VIP</span>
+                    <span className="badge" style={{ background: 'var(--color-navy)', color: 'white', border: 'none' }}>
+                        ⭐ VIP BRONCE (L1)
+                    </span>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        background: '#e6fcf5',
+                        padding: '4px 10px',
+                        borderRadius: 20,
+                        border: '1px solid #20c997'
+                    }}>
+                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#20c997' }}></div>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: '#099268' }}>PIONERO VELOZ</span>
+                    </div>
                 </div>
             </div>
 
@@ -165,11 +179,11 @@ export default function Dashboard({ user, balance, onGoToStore, onGoToPOS, onGoT
                         sub="Nivel 1 · 1/4 cupos"
                     />
                     <StatCard
-                        label="Nivel Actual"
-                        value="Nv. 1"
+                        label="Rango Actual"
+                        value="VIP Bronce"
                         icon={<Star size={18} />}
                         color="var(--color-directorio)"
-                        sub="3 referidos para subir"
+                        sub="Siguiente: VIP Plata"
                     />
                 </div>
 
@@ -181,7 +195,7 @@ export default function Dashboard({ user, balance, onGoToStore, onGoToPOS, onGoT
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
                             <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--color-navy)' }}>
                                 <Wallet size={18} style={{ display: 'inline', marginRight: 8, color: 'var(--color-wallet)' }} />
-                                TrueWallet
+                                Shopy Wallet
                             </h2>
                             <span className="badge badge-wallet">Activa</span>
                         </div>
@@ -232,7 +246,7 @@ export default function Dashboard({ user, balance, onGoToStore, onGoToPOS, onGoT
                         </div>
 
                         <p style={{ fontSize: 13, color: 'var(--color-text-muted)', marginBottom: 20, lineHeight: 1.6 }}>
-                            Comparte tu código y acelera tu camino al Nivel 2. Cada referido que se une te acerca a recibir <strong>50,000 TC</strong> libres.
+                            Comparte tu código y acelera tu camino a <strong>VIP PLATA</strong>. Cada ciclo completo te otorga 25% en puntos y te impulsa al siguiente nivel.
                         </p>
 
                         {/* Referral Code */}

@@ -1,49 +1,20 @@
-# 🛡️ TrueCoin-Simids: Estado Actual del Proyecto
-**Fecha de Consolidación:** 11 de Marzo, 2026
-**Líder del Proyecto:** Dani
-**Arquitecto IA:** Antigravity (Gemini/Claude)
-**Fase Actual:** Refinamiento Light Mode & Conexión Supabase (Completado)
+# 🚀 Estado del Proyecto: ShopyBrands (Powered by Simids Tech)
+
+## ✅ Hitos Completados (V1.8.5 - Era Next-Gen)
+- [x] **Motor AI "Cerebro Intelligence":** Integración exitosa con Gemini 2.0 Flash. Coach de marketing y negocios activo.
+- [x] **Branding Global:** Transición completa a **ShopyBrands**. TrueCoin consolidado como la moneda del ecosistema ($1,000 COP = 1 TC).
+- [x] **Bitácora de Negocio:** Documentación total en `LOGICA_NEGOCIO.md` (Redes 2-2-2-4 y 1x4).
+- [x] **Dashboard Evolucionado:**
+    - Implementación de los 12 Rangos VIP/PLATINO/ESMERALDA.
+    - Sistema de **Semáforo de Éxito** (🟢 Pulsación Óptima, 🟡 Moderado, 🔴 Sin Actividad).
+    - Emblema **"Pionero Veloz"** para usuarios que completen nivel 1 en una semana.
+- [x] **Infraestructura Base:** Supabase integrado para gestión de comercios y productos.
+
+## 🏗️ En Desarrollo (Fase "Comunidad")
+- [ ] **Comunidad Shopy (Red Social Interna):** Micro-chats por bloques de 4 para fomentar el apoyo mutuo y celebrar éxitos en privado (Anti-envidia).
+- [ ] **Directorio Geolocalizado:** Refinamiento del buscador de comercios "Cerca de mí" para dinamizar la economía local.
+- [ ] **Automatización de Dispersión:** Integración de APIs de Payouts para retiros automáticos de distribuidores.
+- [ ] **Simulador Interactivo:** Herramienta visual para que el usuario proyecte sus ganancias invitando a sus primeros 4 "Simids".
 
 ---
-
-## 🚀 Resumen de la Visión
-TrueCoin-Simids es un ecosistema financiero y empresarial unificado que combina:
-1. **SaaS POS (Simids):** Herramienta de gestión para negocios.
-2. **Directorio & Marketplace VIP:** Comercio real con redención de puntos TrueCoin.
-3. **Red de Capitalización (Gift Matrix):** Sistema de 12 niveles para crecimiento masivo.
-4. **Seguridad Bancaria:** Delay en transferencias P2P y verificación constante.
-
----
-
-## ✅ Implementado hasta el momento (Fase 2 Completada)
-
-### 1. **Diseño de Interfaz "Light Mode" (Premium)**
-- Todos los 8 módulos clave del ecosistema fueron migrados a un diseño claro, pulido y profesional, eliminando la temática oscura.
-- **Sistema de Variables CSS:** Colores dinámicos integrados en todo el ecosistema (Wallet, Marketplace, Directorio, POS, Admin).
-- Componentes unificados: Tarjetas blancas con `glassmorphism`, sombras suaves (`shadow-lg`), e iconografía estandarizada.
-
-### 2. **Integración con Base de Datos Múltiple (Supabase)**
-- **ThemeCustomizer:** Motor de temas conectado a la tabla `app_settings`.
-- **Comercios y Productos:** Migración exitosa de las tablas `businesses` y `products`.
-- **Datos Reales:** El Marketplace y el Perfil de Negocios ya consiguen datos desde la base de datos central en lugar de Mocks locales estáticos.
-- **Seguridad RLS:** Políticas configuradas para acceso seguro desde el cliente (Anon Key).
-
-### 3. **Módulos Rediseñados**
-- **Dashboard & GiftMatrix:** Visualización brillante, rediseño de barras de progreso y colores de estado.
-- **Transferencias P2P:** Flujo de 3 pasos animados (Selección -> Confirmación -> Éxito).
-- **Marketplace & Directorio:** Filtros vivos, tarjetas de compra inmersivas con colores (Verde Pino / Naranja Coral).
-- **Business Profile:** Perfil detallado del comercio con foto de portada y catálogo integrado.
-- **SalesTerminal (Caja):** Sistema de múltiples pagos (Efectivo, Banco, TrueCoin) y cálculo dinámico.
-- **Admin & CRM:** Vista SuperAdmin ultra limpia, métricas claras, simulación de Agente IA de rastreo de Google Maps.
-- **Soporte IA:** Botón flotante y chat en burbujas minimalistas.
-
----
-
-## 📅 Siguientes Pasos Operativos
-Toda la estructura visual y de base de datos base está lista para presentarse a **inversionistas o clientes piloto**.
-Los siguientes pasos técnicos sugeridos serían:
-1. **Paso a Producción (Vercel/Netlify):** Hospedar la versión web del ecosistema frontend fuera de modo local para demostraciones remotas.
-2. **Integración con Pasarela de Pago (Wompi/Bold):** Conexión oficial de las APIs de recaudo que nutran de Fiat el ecosistema en el backend real.
-3. **Módulo de Publicidad / Pauta:** Para que negocios paguen TrueCoins por estar "Patrocinados" arriba en el Directorio.
----
-**¡Felicidades, el ecosistema TrueCoin Simids está listo en su versión V2 corporativa!**
+**Próxima Gran Meta:** El lanzamiento de la red social interna para eliminar la dependencia de WhatsApp y centralizar la comunicación en ShopyBrands.

@@ -16,7 +16,7 @@ export const aiService = {
             return "Error: API Key no detectada.";
         }
 
-        // Contexto premium
+        // Contexto premium de ShopyBrands
         const contents = [
             ...history.slice(-4).map(m => ({
                 role: m.role === 'user' ? 'user' : 'model',
@@ -24,7 +24,18 @@ export const aiService = {
             })),
             {
                 role: 'user',
-                parts: [{ text: `Actúa como el Cerebro de TrueCoin Simids. Responde en español.\nPregunta: ${userMessage}` }]
+                parts: [{
+                    text: `Actúa como 'Cerebro Intelligence', el Coach Maestro de ShopyBrands.
+                REGLAS DE ORO:
+                1. La moneda son TrueCoins (TC). $1,000 COP = 1 TC.
+                2. Red de Ventas: 2%, 2%, 2% y 4% (hasta nivel 4).
+                3. Red de Regalos: 1x4 hasta nivel 12. Reparto: 25% Puntos, 25% Plataforma, 50% Reinversión.
+                4. Nivel 12 tiene Reinicio Automático (Ciclo Infinito).
+                5. Meta: Completar nivel 1 en 1 semana (Emblema Pionero Veloz).
+                6. Sé motivador, profesional y usa un tono de socio estratégico.
+                
+                Pregunta del usuario: ${userMessage}`
+                }]
             }
         ];
 

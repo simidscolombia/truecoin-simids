@@ -1,6 +1,6 @@
 /**
- * AI Service - v1.8.2
- * Real-time Billing & Quota Diagnostics
+ * AI Service - v1.8.3
+ * Master Key Engine: Dual Support (2.0 Flash & 1.5 Pro)
  */
 
 export interface Message {
@@ -19,40 +19,43 @@ export const aiService = {
         const contents = [
             {
                 role: 'user',
-                parts: [{ text: `Responde en español.\nPregunta: ${userMessage}` }]
+                parts: [{ text: `Responde en español de forma breve.\nPregunta: ${userMessage}` }]
             }
         ];
 
-        // Probamos el modelo más potente que vimos en tu lista
-        const modelName = "gemini-2.0-flash";
+        // Probamos los DOS motores principales de tu cuenta
+        const engineConfigs = [
+            { ver: "v1beta", mod: "gemini-2.0-flash" },
+            { ver: "v1beta", mod: "gemini-1.5-pro" }, // A veces el Pro se activa antes en cuentas con créditos
+            { ver: "v1", mod: "gemini-1.5-flash" }
+        ];
 
-        try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${API_KEY}`;
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents })
-            });
+        let lastError = "";
 
-            const data = await response.json();
+        for (const config of engineConfigs) {
+            try {
+                const url = `https://generativelanguage.googleapis.com/${config.ver}/models/${config.mod}:generateContent?key=${API_KEY}`;
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents })
+                });
 
-            if (response.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
-                return data.candidates[0].content.parts[0].text;
+                const data = await response.json();
+                if (response.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
+                    return data.candidates[0].content.parts[0].text;
+                }
+
+                lastError = data.error?.message || "Error desconocido";
+            } catch (e) {
+                // Siguiente config
             }
-
-            // REPORTE QUIRÚRGICO DEL ERROR
-            const googleError = data.error?.message || "Error desconocido";
-            const reason = data.error?.status || "Sin estado";
-
-            return `🚨 DIAGNÓSTICO GOOGLE:
-            - Mensaje: ${googleError}
-            - Estado: ${reason}
-            - Código: ${response.status}
-            
-            TIP: Si dice 'Quota exceeded' o 'Billing', es que el proyecto en Cloud Console no está vinculado a la cuenta de pagos.`;
-
-        } catch (err: any) {
-            return `🚨 ERROR DE RED: ${err.message}`;
         }
+
+        return `🚨 ERROR CRÍTICO: Google rechazó todas las conexiones. 
+        
+        MOTIVO: ${lastError}. 
+        
+        TIP: Si el motivo dice de los límites o facturación, por favor verifica en Google Cloud que el proyecto 'SIMIDS-IA' esté realmente vinculado a tu cuenta de pagos.`;
     }
 };

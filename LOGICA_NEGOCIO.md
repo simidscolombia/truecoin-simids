@@ -5,7 +5,7 @@ Este documento consolida las reglas, estructuras y el funcionamiento del ecosist
 ## 0. Branding del Proyecto
 *   **Plataforma Central:** **ShopyBrands** (Dominio y Marca comercial).
 *   **Unidad de Valor:** **TrueCoin (TC)** (Puntos internos para compras y premios).
-*   **Tecnología IA:** **Cerebro Intelligence** (Asistente y Coach de Marketing).
+*   **Tecnología IA:** **Shopy** (Tu Coach Maestro de Prosperidad).
 
 ## 1. Red de Mercadeo Shopy (Matriz 2-2-2-4)
 *   **Estructura:** Matriz de 4 niveles de profundidad con anchura infinita.

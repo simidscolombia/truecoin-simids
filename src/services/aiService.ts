@@ -25,7 +25,7 @@ export const aiService = {
             {
                 role: 'user',
                 parts: [{
-                    text: `Actúa como 'Cerebro Intelligence', el Coach Maestro de ShopyBrands.
+                    text: `Actúa como 'Shopy', el Coach Maestro de ShopyBrands.
                 REGLAS DE ORO:
                 1. La moneda son TrueCoins (TC). $1,000 COP = 1 TC.
                 2. Red de Ventas: 2%, 2%, 2% y 4% (hasta nivel 4).

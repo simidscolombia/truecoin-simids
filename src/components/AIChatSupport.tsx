@@ -18,7 +18,7 @@ export default function AIChatSupport() {
     const [isOpen, setIsOpen] = useState(false);
     const [isMinimized, setIsMinimized] = useState(false);
     const [messages, setMessages] = useState<Message[]>([
-        { id: 1, text: '¡Hola! Soy el Cerebro de TrueCoin Simids. Estoy aquí para optimizar tu experiencia en el ecosistema. ¿Qué deseas consultar hoy?', sender: 'ai', time: now() },
+        { id: 1, text: '¡Hola! Soy Shopy, tu Coach Maestro de ShopyBrands. Estoy aquí para acelerar tu crecimiento y optimizar tu red. ¿Qué deseas consultar hoy?', sender: 'ai', time: now() },
     ]);
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
@@ -68,7 +68,7 @@ export default function AIChatSupport() {
                 setIsTyping(false);
             }, 800);
         } catch (error) {
-            console.error('Error en el Cerebro:', error);
+            console.error('Error en Shopy:', error);
             setIsTyping(false);
         }
     };
@@ -128,7 +128,7 @@ export default function AIChatSupport() {
                                     />
                                 </motion.div>
                                 <div>
-                                    <p style={{ fontSize: 15, fontWeight: 700, color: 'white', margin: 0 }}>Cerebro Intelligence</p>
+                                    <p style={{ fontSize: 16, fontWeight: 800, color: 'white', margin: 0, letterSpacing: -0.5 }}>Shopy</p>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                         <motion.span
                                             animate={{ opacity: [1, 0.5, 1], scale: [1, 1.2, 1] }}

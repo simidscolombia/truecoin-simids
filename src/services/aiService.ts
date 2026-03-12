@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 /**
  * AI Service - The "Brain" of TrueCoin Simids
- * Integrated with Google Gemini 1.5 Flash
+ * Integrated with Google Gemini 1.5 Flash / Pro
  */
 
 export interface Message {
@@ -35,7 +35,7 @@ REGLAS DE RESPUESTA:
 
 export const aiService = {
     /**
-     * Generates a response using Google Gemini 1.5 Flash.
+     * Generates a response using Google Gemini models with fallback.
      */
     async getResponse(userMessage: string, history: Message[] = []): Promise<string> {
         const maskedKey = API_KEY ? `${API_KEY.substring(0, 6)}...${API_KEY.substring(API_KEY.length - 4)}` : "MISSING";
@@ -47,30 +47,36 @@ export const aiService = {
         }
 
         try {
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-            const systemPrompt = `[SYSTEM KNOWLEDGE]\n${ECOSYSTEM_KNOWLEDGE}\n\n[CONVERSATION HISTORY]\n`;
+            // Context and History preparation
+            const systemPrompt = `[KNOWLEDGE]\n${ECOSYSTEM_KNOWLEDGE}\n\n[HISTORY]\n`;
             const historyText = history.slice(-6).map(m => `${m.role === 'user' ? 'USER' : 'ASSISTANT'}: ${m.content}`).join('\n');
             const fullPrompt = `${systemPrompt}${historyText}\nUSER: ${userMessage}\nASSISTANT:`;
 
-            const result = await model.generateContent(fullPrompt);
-            const response = await result.response;
-            const text = response.text();
-
-            if (!text) throw new Error("Google devolvió una respuesta vacía.");
-
-            return text.trim();
+            // ATTEMPT 1: Gemini 1.5 Flash
+            try {
+                const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                const result = await model.generateContent(fullPrompt);
+                const response = await result.response;
+                return response.text().trim();
+            } catch (innerError: any) {
+                // FALLBACK: If 1.5 Flash is not found (404), use gemini-pro
+                if (innerError.message?.includes('404') || innerError.message?.includes('not found')) {
+                    console.warn("CEREBRO: gemini-1.5-flash not found. Falling back to gemini-pro...");
+                    const modelPro = genAI.getGenerativeModel({ model: "gemini-pro" });
+                    const resultPro = await modelPro.generateContent(fullPrompt);
+                    const responsePro = await resultPro.response;
+                    return responsePro.text().trim();
+                }
+                throw innerError;
+            }
         } catch (error: any) {
             console.error('CRITICAL ERROR - CEREBRO DETAILED:', error);
 
             let userFriendlyError = "Hipo técnico neuronal.";
-
             if (error.message?.includes('fetch')) {
-                userFriendlyError = "Error de red: Google ha rechazado la conexión. ¿Tienes algún bloqueador de anuncios o VPN activo?";
+                userFriendlyError = "Google ha rechazado la conexión (Error de red).";
             } else if (error.message?.includes('API_KEY_INVALID')) {
-                userFriendlyError = "La API Key configurada en Vercel es inválida.";
-            } else if (error.message?.includes('429')) {
-                userFriendlyError = "Límite de mensajes alcanzado. Espera un momento.";
+                userFriendlyError = "La API Key configurada es inválida.";
             }
 
             return `Lo siento, el Cerebro dice: ${userFriendlyError} (Error: ${error.message || 'Unknown'})`;

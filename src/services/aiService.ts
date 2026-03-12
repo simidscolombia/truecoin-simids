@@ -1,6 +1,6 @@
 /**
- * AI Service - v1.8.1
- * Next-Gen Engine: Gemini 2.0 Flash (Forced Update)
+ * AI Service - v1.8.2
+ * Real-time Billing & Quota Diagnostics
  */
 
 export interface Message {
@@ -16,49 +16,43 @@ export const aiService = {
             return "Error: API Key no detectada.";
         }
 
-        // Contexto premium para el Cerebro 2.0
         const contents = [
             {
                 role: 'user',
-                parts: [{ text: "Eres el Cerebro de TrueCoin Simids. Eres una IA de última generación (Gemini 2.0). Responde en español de forma profesional y servicial." }]
-            },
-            ...history.slice(-4).map(m => ({
-                role: m.role === 'user' ? 'user' : 'model',
-                parts: [{ text: m.content }]
-            })),
-            {
-                role: 'user',
-                parts: [{ text: userMessage }]
+                parts: [{ text: `Responde en español.\nPregunta: ${userMessage}` }]
             }
         ];
 
-        // Modelos detectados en tu cuenta (Prioridad 2.0)
-        const nextGenModels = [
-            "gemini-2.0-flash",
-            "gemini-flash-latest",
-            "gemini-2.0-flash-lite",
-            "gemini-1.5-flash"
-        ];
+        // Probamos el modelo más potente que vimos en tu lista
+        const modelName = "gemini-2.0-flash";
 
-        for (const modelName of nextGenModels) {
-            try {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${API_KEY}`;
+        try {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${API_KEY}`;
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents })
+            });
 
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents })
-                });
+            const data = await response.json();
 
-                const data = await response.json();
-                if (response.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
-                    return data.candidates[0].content.parts[0].text;
-                }
-            } catch (e) {
-                // Siguiente modelo...
+            if (response.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
+                return data.candidates[0].content.parts[0].text;
             }
+
+            // REPORTE QUIRÚRGICO DEL ERROR
+            const googleError = data.error?.message || "Error desconocido";
+            const reason = data.error?.status || "Sin estado";
+
+            return `🚨 DIAGNÓSTICO GOOGLE:
+            - Mensaje: ${googleError}
+            - Estado: ${reason}
+            - Código: ${response.status}
+            
+            TIP: Si dice 'Quota exceeded' o 'Billing', es que el proyecto en Cloud Console no está vinculado a la cuenta de pagos.`;
+
+        } catch (err: any) {
+            return `🚨 ERROR DE RED: ${err.message}`;
         }
-
-        return "🚨 ERROR FINAL: Aunque los modelos 2.0 están habilitados, la conexión fue rechazada. Por favor, verifica en Google Cloud que el proyecto tenga la facturación activa.";
     }
 };

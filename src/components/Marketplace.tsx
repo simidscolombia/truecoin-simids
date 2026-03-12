@@ -242,12 +242,7 @@ export default function Marketplace({ onPurchase, isGuest, onLoginRequired, view
                 padding: '20px 32px', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
                 transition: 'background-color 0.4s ease'
             }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginRight: 20 }}>
-                    <ShoppingBag size={20} color="white" />
-                    <h2 style={{ fontSize: 18, fontWeight: 800, color: 'white', letterSpacing: -0.5, margin: 0 }}>
-                        {viewMode === 'products' ? 'Tienda en Línea' : 'Directorio de Negocios'}
-                    </h2>
-                </div>
+
 
                 <div className="input-with-icon" style={{ flex: '1 1 200px', maxWidth: 300 }}>
                     <Search size={14} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.6)' }} />

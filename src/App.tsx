@@ -185,69 +185,105 @@ function App() {
     <div style={{ minHeight: '100vh', background: 'var(--color-bg)' }}>
       {/* Navbar Unified (Integrated with ShopyBrands) */}
       <nav style={{
-        background: guestViewMode === 'products' ? '#0a3d2e' : 'var(--color-directorio)',
+        background: 'var(--color-surface)',
+        borderBottom: '1px solid var(--color-border)',
         padding: '0 32px',
-        height: 64,
+        height: 72,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         position: 'sticky',
         top: 0,
         zIndex: 100,
-        transition: 'background-color 0.4s ease'
       }}>
         {/* Logo Left */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 36, height: 36, background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: 36, height: 36, background: 'var(--color-navy)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Coins size={20} color="white" />
           </div>
-          <span style={{ fontSize: 20, fontWeight: 800, color: 'white', letterSpacing: -0.5 }}>
-            True<span style={{ color: '#FFD700' }}>Coin</span>
-            <span style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.8)', background: 'rgba(255,255,255,0.1)', padding: '2px 6px', borderRadius: 6, marginLeft: 8, verticalAlign: 'middle' }}>v1.3.0</span>
+          <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--color-navy)', letterSpacing: -0.5 }}>
+            True<span style={{ color: 'var(--color-wallet)' }}>Coin</span>
+            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', background: 'var(--color-surface-2)', padding: '2px 6px', borderRadius: 6, marginLeft: 8, verticalAlign: 'middle' }}>v1.3.1</span>
           </span>
         </div>
 
-        {/* Tabs and Login Right */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-          {/* Navigation Tabs */}
-          <div style={{ display: 'flex', gap: 4, background: 'rgba(0,0,0,0.15)', padding: 4, borderRadius: 12 }}>
-            <button
-              onClick={() => setGuestViewMode('products')}
-              style={{
-                border: 'none', padding: '8px 20px', borderRadius: 10, fontSize: 13, fontWeight: 700,
-                background: guestViewMode === 'products' ? 'white' : 'transparent',
-                color: guestViewMode === 'products' ? '#0a3d2e' : 'white',
-                display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', transition: 'all 0.3s'
-              }}
-            >
-              <ShoppingBag size={14} /> Tienda en Línea
-            </button>
-            <button
-              onClick={() => setGuestViewMode('businesses')}
-              style={{
-                border: 'none', padding: '8px 20px', borderRadius: 10, fontSize: 13, fontWeight: 700,
-                background: guestViewMode === 'businesses' ? 'white' : 'transparent',
-                color: guestViewMode === 'businesses' ? 'var(--color-directorio)' : 'white',
-                display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', transition: 'all 0.3s'
-              }}
-            >
-              <Search size={14} /> Directorio
-            </button>
-          </div>
+        {/* Navigation Tabs - Centered & Integrated */}
+        <div style={{
+          height: '100%',
+          display: 'flex',
+          alignItems: 'flex-end',
+          gap: 12,
+          position: 'absolute',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          bottom: -1
+        }}>
+          <button
+            onClick={() => setGuestViewMode('products')}
+            style={{
+              border: 'none',
+              padding: '12px 24px',
+              borderTopLeftRadius: 12,
+              borderTopRightRadius: 12,
+              fontSize: 14,
+              fontWeight: 800,
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              background: guestViewMode === 'products' ? 'var(--color-marketplace)' : 'transparent',
+              color: guestViewMode === 'products' ? 'white' : 'var(--color-text-muted)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+            }}
+          >
+            <ShoppingBag size={16} /> Tienda en Línea
+          </button>
+          <button
+            onClick={() => setGuestViewMode('businesses')}
+            style={{
+              border: 'none',
+              padding: '12px 24px',
+              borderTopLeftRadius: 12,
+              borderTopRightRadius: 12,
+              fontSize: 14,
+              fontWeight: 800,
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              background: guestViewMode === 'businesses' ? 'var(--color-directorio)' : 'transparent',
+              color: guestViewMode === 'businesses' ? 'white' : 'var(--color-text-muted)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+            }}
+          >
+            <Search size={16} /> Directorio
+          </button>
+        </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <button style={{ background: 'rgba(255,255,255,0.1)', border: 'none', width: 40, height: 40, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', cursor: 'pointer' }}>
-              <ShoppingBag size={20} />
-            </button>
+        {/* Right Side Actions */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <button style={{
+            background: 'var(--color-surface-2)',
+            border: 'none',
+            width: 40,
+            height: 40,
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'var(--color-text-muted)',
+            cursor: 'pointer'
+          }}>
+            <ShoppingBag size={20} />
+          </button>
 
-            <button
-              onClick={() => setShowAuth(true)}
-              className="btn btn-navy"
-              style={{ background: 'white', color: 'var(--color-navy)', borderRadius: 10, padding: '8px 20px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-            >
-              Ingresar
-            </button>
-          </div>
+          <button
+            onClick={() => setShowAuth(true)}
+            className="btn btn-navy"
+            style={{ borderRadius: 12, padding: '10px 24px' }}
+          >
+            Ingresar
+          </button>
         </div>
       </nav>
 

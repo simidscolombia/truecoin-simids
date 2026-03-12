@@ -237,7 +237,7 @@ export default function Marketplace({ onPurchase, isGuest, onLoginRequired, view
 
             {/* Dynamic Color Filter Bar */}
             <div style={{
-                background: viewMode === 'products' ? '#0a3d2e' : 'var(--color-directorio)',
+                background: viewMode === 'products' ? 'var(--color-marketplace)' : 'var(--color-directorio)',
                 borderBottom: '1px solid rgba(255,255,255,0.1)',
                 padding: '20px 32px', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
                 transition: 'background-color 0.4s ease'

@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 /**
  * AI Service - The "Brain" of TrueCoin Simids
- * Integrated with Google Gemini 1.5 Flash / Pro
+ * v1.5.1 - Compatibility Patch for Google API v1
  */
 
 export interface Message {
@@ -10,7 +10,9 @@ export interface Message {
     content: string;
 }
 
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "";
+// Clean the API Key to avoid hidden spaces
+const API_KEY = (import.meta.env.VITE_GEMINI_API_KEY || "").trim();
+// Force v1 API version for better stability in Latin America
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 const ECOSYSTEM_KNOWLEDGE = `
@@ -34,52 +36,36 @@ REGLAS DE RESPUESTA:
 `;
 
 export const aiService = {
-    /**
-     * Generates a response using Google Gemini models with fallback.
-     */
     async getResponse(userMessage: string, history: Message[] = []): Promise<string> {
-        const maskedKey = API_KEY ? `${API_KEY.substring(0, 6)}...${API_KEY.substring(API_KEY.length - 4)}` : "MISSING";
-        console.log(`CEREBRO: Intentando conexión con API Key: ${maskedKey}`);
-
         if (!API_KEY || API_KEY.length < 10) {
-            console.error('CEREBRO ERROR: API Key no válida o ausente.');
-            return "Error: No se ha detectado la llave de acceso (API Key) correctamente. Revisa los Environment Variables en Vercel.";
+            return "Error: No se ha detectado la llave de acceso (API Key) correctamente en Vercel.";
         }
 
-        try {
-            // Context and History preparation
-            const systemPrompt = `[KNOWLEDGE]\n${ECOSYSTEM_KNOWLEDGE}\n\n[HISTORY]\n`;
-            const historyText = history.slice(-6).map(m => `${m.role === 'user' ? 'USER' : 'ASSISTANT'}: ${m.content}`).join('\n');
-            const fullPrompt = `${systemPrompt}${historyText}\nUSER: ${userMessage}\nASSISTANT:`;
+        const systemPrompt = `[KNOWLEDGE]\n${ECOSYSTEM_KNOWLEDGE}\n\n[HISTORY]\n`;
+        const historyText = history.slice(-6).map(m => `${m.role === 'user' ? 'USER' : 'ASSISTANT'}: ${m.content}`).join('\n');
+        const fullPrompt = `${systemPrompt}${historyText}\nUSER: ${userMessage}\nASSISTANT:`;
 
-            // ATTEMPT 1: Gemini 1.5 Flash
+        // Attempt chain: Flash v1 -> Pro v1 -> Pro v1beta
+        const modelAttempts = [
+            { name: "gemini-1.5-flash", version: "v1" },
+            { name: "gemini-1.5-pro", version: "v1" },
+            { name: "gemini-pro", version: "v1" }
+        ];
+
+        for (const attempt of modelAttempts) {
             try {
-                const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                console.log(`CEREBRO: Intentando con ${attempt.name} (${attempt.version})...`);
+                const model = genAI.getGenerativeModel({ model: attempt.name }, { apiVersion: attempt.version as any });
                 const result = await model.generateContent(fullPrompt);
                 const response = await result.response;
-                return response.text().trim();
-            } catch (innerError: any) {
-                // FALLBACK: If 1.5 Flash is not found (404), use gemini-pro
-                if (innerError.message?.includes('404') || innerError.message?.includes('not found')) {
-                    console.warn("CEREBRO: gemini-1.5-flash not found. Falling back to gemini-pro...");
-                    const modelPro = genAI.getGenerativeModel({ model: "gemini-pro" });
-                    const resultPro = await modelPro.generateContent(fullPrompt);
-                    const responsePro = await resultPro.response;
-                    return responsePro.text().trim();
-                }
-                throw innerError;
+                const text = response.text();
+                if (text) return text.trim();
+            } catch (err: any) {
+                console.warn(`CEREBRO: Falló ${attempt.name}: ${err.message}`);
+                // Continue to next attempt
             }
-        } catch (error: any) {
-            console.error('CRITICAL ERROR - CEREBRO DETAILED:', error);
-
-            let userFriendlyError = "Hipo técnico neuronal.";
-            if (error.message?.includes('fetch')) {
-                userFriendlyError = "Google ha rechazado la conexión (Error de red).";
-            } else if (error.message?.includes('API_KEY_INVALID')) {
-                userFriendlyError = "La API Key configurada es inválida.";
-            }
-
-            return `Lo siento, el Cerebro dice: ${userFriendlyError} (Error: ${error.message || 'Unknown'})`;
         }
+
+        return "Lo siento, el Cerebro no puede conectar con los servidores de Google ahora mismo. Por favor, verifica que tu API Key en Vercel esté activa y tenga saldo/cuota disponible en Google AI Studio.";
     }
 };

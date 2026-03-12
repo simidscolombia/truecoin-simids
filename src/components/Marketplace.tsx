@@ -88,8 +88,8 @@ function ProductCard({ product, onBuy, isGuest, layout = 'grid' }: { product: Pr
                     justifyContent: 'center'
                 }}>
                     <div style={{ marginBottom: isList ? 12 : 12 }}>
-                        <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', textDecoration: 'line-through', marginBottom: 2 }}>
-                            Precio Público: {formatCurrency(fiatPublic)}
+                        <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', marginBottom: 2 }}>
+                            Precio Estándar: {formatCurrency(fiatPublic)}
                         </p>
                         <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
                             <p style={{ fontSize: isList ? 20 : 20, fontWeight: 800, color: 'var(--color-navy)', margin: 0 }}>
@@ -235,10 +235,12 @@ export default function Marketplace({ onPurchase, isGuest, onLoginRequired, view
         <div className="module-page animate-in">
 
 
-            {/* Pine Green Filter Bar */}
+            {/* Dynamic Color Filter Bar */}
             <div style={{
-                background: '#0a3d2e', borderBottom: '1px solid rgba(255,255,255,0.1)',
+                background: viewMode === 'products' ? '#0a3d2e' : 'var(--color-directorio)',
+                borderBottom: '1px solid rgba(255,255,255,0.1)',
                 padding: '20px 32px', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
+                transition: 'background-color 0.4s ease'
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginRight: 20 }}>
                     <ShoppingBag size={20} color="white" />

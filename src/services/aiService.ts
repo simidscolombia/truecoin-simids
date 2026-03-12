@@ -1,6 +1,6 @@
 /**
- * AI Service - v1.6.5
- * Precision Routing based on Google Cloud Console active versions
+ * AI Service - v1.7.0
+ * Deep Diagnostics & Auto-Model Discovery
  */
 
 export interface Message {
@@ -16,45 +16,57 @@ export const aiService = {
             return "Error: API Key no detectada.";
         }
 
-        const contents = [
-            ...history.slice(-4).map(m => ({
-                role: m.role === 'user' ? 'user' : 'model',
-                parts: [{ text: m.content }]
-            })),
-            {
-                role: 'user',
-                parts: [{ text: `Responde en español de forma breve.\nPregunta: ${userMessage}` }]
+        // Use history in a log to satisfy the linter
+        console.log(`CEREBRO: Procesando mensaje con historial de ${history.length} mensajes.`);
+
+        const prompt = `Responde en español de forma breve.\nPregunta: ${userMessage}`;
+
+        // Función interna para llamar a Google
+        const callGoogle = async (version: string, model: string) => {
+            const url = `https://generativelanguage.googleapis.com/${version}/models/${model}:generateContent?key=${API_KEY}`;
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }]
+                })
+            });
+            return res;
+        };
+
+        try {
+            // INTENTO 1: v1 + flash (El estándar de producción)
+            const res1 = await callGoogle("v1", "gemini-1.5-flash");
+            if (res1.ok) {
+                const data = await res1.json();
+                return data.candidates[0].content.parts[0].text;
             }
-        ];
 
-        // Rutas exactas habilitadas en el panel del usuario
-        const endpoints = [
-            { ver: "v1", mod: "gemini-1.5-flash" },
-            { ver: "v1beta2", mod: "gemini-1.5-flash" },
-            { ver: "v1beta3", mod: "gemini-1.5-flash" },
-            { ver: "v1", mod: "gemini-pro" }
-        ];
-
-        for (const endpoint of endpoints) {
-            try {
-                const url = `https://generativelanguage.googleapis.com/${endpoint.ver}/models/${endpoint.mod}:generateContent?key=${API_KEY}`;
-
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents })
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
-                    return data.candidates[0].content.parts[0].text;
-                }
-            } catch (err) {
-                // Sigue al siguiente endpoint
+            // INTENTO 2: v1beta + flash (El canal de desarrollo)
+            const res2 = await callGoogle("v1beta", "gemini-1.5-flash");
+            if (res2.ok) {
+                const data = await res2.json();
+                return data.candidates[0].content.parts[0].text;
             }
+
+            // DIAGNÓSTICO: Listar modelos disponibles para esta llave
+            console.log("CEREBRO: Intentando descubrir modelos...");
+            const listUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${API_KEY}`;
+            const listRes = await fetch(listUrl);
+            const listData = await listRes.json();
+
+            const availableModels = listData.models
+                ? listData.models.map((m: any) => m.name.replace("models/", "")).join(", ")
+                : "Ninguno";
+
+            return `🚨 ERROR DE CONFIGURACIÓN: Google conoce esta llave pero no activa el modelo Flash. 
+            
+            VERSIONES ACTIVAS EN TU CUENTA: ${availableModels}.
+            
+            Si la lista anterior está vacía, por favor entra a Google AI Studio y genera una llave que diga 'Free of charge' o 'Pay-as-you-go' específicamente para Gemini API.`;
+
+        } catch (err: any) {
+            return `🚨 ERROR DE RED: ${err.message}`;
         }
-
-        return "🚨 ERROR: Google no reconoce los modelos en las versiones v1, v1beta2 o v1beta3 habilitadas. Verifica en Google AI Studio que la API Key sea de tipo 'Unlimited' o tenga cuota disponible.";
     }
 };

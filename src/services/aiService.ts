@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 /**
  * AI Service - The "Brain" of TrueCoin Simids
- * v1.5.2 - Ultra Debug Mode
+ * v1.5.3 - Fixed Build Errors & Detailed Diagnostics
  */
 
 export interface Message {
@@ -18,32 +18,33 @@ const ECOSYSTEM_KNOWLEDGE = `Eres el Cerebro de TrueCoin Simids. Responde breve 
 export const aiService = {
     async getResponse(userMessage: string, history: Message[] = []): Promise<string> {
         if (!API_KEY || API_KEY.length < 10) {
-            return "DEBUG: No hay API Key cargada. Verifica las variables de Vercel.";
+            return "DEBUG: No hay API Key cargada correctamente. Verifica Vercel Settings.";
         }
 
-        const fullPrompt = `${ECOSYSTEM_KNOWLEDGE}\n\nUsuario: ${userMessage}\nCerebro:`;
+        // Use history to avoid TS unused variable error
+        const historyText = history.slice(-3).map(m => `${m.role}: ${m.content}`).join('\n');
+        const fullPrompt = `${ECOSYSTEM_KNOWLEDGE}\n\n[CONTEXTO RECIENTE]\n${historyText}\n\nUsuario: ${userMessage}\nCerebro:`;
 
-        // We will try ONLY the most stable model and catch the RAW error
         try {
-            console.log("CEREBRO: Iniciando intento final...");
-            const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+            // Intentamos con 1.5-flash que es el más moderno
+            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
             const result = await model.generateContent(fullPrompt);
             const response = await result.response;
-            return response.text() || "El modelo devolvió vacío.";
+            return response.text() || "Respuesta vacía.";
         } catch (err: any) {
-            console.error("CEREBRO FATAL:", err);
+            console.error("CEREBRO ERROR 1:", err);
 
-            // Si falla el "pro", intentamos el "1.5-flash" como último recurso antes de rendirnos
             try {
-                const modelFlash = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-                const result = await modelFlash.generateContent(fullPrompt);
-                const response = await result.response;
-                return response.text();
+                // Fallback a gemini-pro (clásico)
+                const modelPro = genAI.getGenerativeModel({ model: "gemini-pro" });
+                const resultPro = await modelPro.generateContent(fullPrompt);
+                const responsePro = await resultPro.response;
+                return responsePro.text();
             } catch (err2: any) {
-                // DEVOLVEMOS EL ERROR CRUDO PARA DIAGNÓSTICO
-                return `ERROR DE GOOGLE: ${err2.message || 'Error Desconocido'}. 
-                Confirmación de Llave: Empieza por ${API_KEY.substring(0, 6)} y termina en ${API_KEY.substring(API_KEY.length - 4)}.
-                Por favor, verifica en Google AI Studio si esta llave está activa y no tiene restricciones de IP.`;
+                console.error("CEREBRO ERROR 2:", err2);
+                return `DETALLE TÉCNICO GOOGLE: ${err2.message || 'Error Desconocido'}. 
+                Llave configurada: ${API_KEY.substring(0, 6)}...${API_KEY.substring(API_KEY.length - 4)}.
+                Por favor, verifica en Google AI Studio si esta llave tiene habilitado el 'Generative Language API'.`;
             }
         }
     }

@@ -89,18 +89,18 @@ function ProductCard({ product, onBuy, isGuest }: { product: Product; onBuy: (p:
                             </p>
                         </div>
                         <div style={{
-                            background: 'color-mix(in srgb, var(--color-marketplace) 10%, white)',
-                            border: '1px solid color-mix(in srgb, var(--color-marketplace) 20%, white)',
+                            background: '#F0FDF4',
+                            border: '1px solid #A2C523',
                             borderRadius: 8, padding: '4px 10px', textAlign: 'right',
                         }}>
-                            <p style={{ fontSize: 10, color: 'var(--color-marketplace)', fontWeight: 700, textTransform: 'uppercase' }}>Aporte Red</p>
-                            <p style={{ fontSize: 13, color: 'var(--color-marketplace)', fontWeight: 800 }}>{aporte} TC</p>
+                            <p style={{ fontSize: 10, color: '#166534', fontWeight: 700, textTransform: 'uppercase' }}>Aporte Red</p>
+                            <p style={{ fontSize: 13, color: '#A2C523', fontWeight: 800 }}>{aporte} TC</p>
                         </div>
                     </div>
 
                     <button
                         onClick={() => onBuy(product)}
-                        className={`btn ${isGuest ? 'btn-navy' : 'btn-marketplace'} btn-full`}
+                        className={`btn ${isGuest ? 'btn-gold' : 'btn-marketplace'} btn-full`}
                         style={{ borderRadius: 10, gap: 8 }}
                     >
                         {isGuest ? <><Zap size={15} /> Obtener Precio VIP</> : <><ShoppingBag size={15} /> Comprar Ahora</>}
@@ -124,7 +124,13 @@ function BusinessCard({ business, isGuest, onLoginRequired }: { business: Busine
                     <Building2 size={20} color="white" />
                 </div>
                 {business.membership_tier === 'vip' && (
-                    <span style={{ position: 'absolute', top: 12, right: 12, background: 'var(--color-wallet)', color: 'white', fontSize: 10, fontWeight: 800, padding: '4px 10px', borderRadius: 6, textTransform: 'uppercase' }}>VIP</span>
+                    <span style={{
+                        position: 'absolute', top: 12, right: 12,
+                        background: 'linear-gradient(135deg, #FFD700, #D4AF37)',
+                        color: '#422006', fontSize: 10, fontWeight: 800,
+                        padding: '4px 10px', borderRadius: 6, textTransform: 'uppercase',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+                    }}>VIP</span>
                 )}
             </div>
             <div style={{ padding: '28px 20px 20px' }}>

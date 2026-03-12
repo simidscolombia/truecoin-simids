@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Search, Star, Zap, CheckCircle2, Filter, Tag } from 'lucide-react';
-import { businessService, Product } from '../services/businessService';
+import { ShoppingBag, Search, Star, Zap, CheckCircle2, Filter, Tag, Building2, MapPin, Phone } from 'lucide-react';
+import { businessService, Product, Business } from '../services/businessService';
 
 const CATEGORIES = ['Todos', 'Alimentos', 'Electrónica', 'Hogar', 'Moda', 'Salud'];
 const CITIES = ['Todas', 'Bogotá', 'Medellín', 'Cali', 'Barranquilla', 'Bucaramanga'];
@@ -111,6 +111,49 @@ function ProductCard({ product, onBuy, isGuest }: { product: Product; onBuy: (p:
     );
 }
 
+function BusinessCard({ business, isGuest, onLoginRequired }: { business: Business; isGuest?: boolean; onLoginRequired?: () => void }) {
+    return (
+        <motion.div
+            whileHover={{ y: -4 }}
+            className="card"
+            style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: 0 }}
+        >
+            <div style={{ height: 120, background: 'var(--color-navy)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                <Building2 size={40} color="white" style={{ opacity: 0.2 }} />
+                <div style={{ position: 'absolute', bottom: -20, left: 20, width: 40, height: 40, background: 'var(--color-wallet)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '3px solid white', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
+                    <Building2 size={20} color="white" />
+                </div>
+                {business.membership_tier === 'vip' && (
+                    <span style={{ position: 'absolute', top: 12, right: 12, background: 'var(--color-wallet)', color: 'white', fontSize: 10, fontWeight: 800, padding: '4px 10px', borderRadius: 6, textTransform: 'uppercase' }}>VIP</span>
+                )}
+            </div>
+            <div style={{ padding: '28px 20px 20px' }}>
+                <h3 style={{ fontSize: 16, fontWeight: 800, color: 'var(--color-navy)', marginBottom: 4 }}>{business.name}</h3>
+                <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-wallet)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{business.category}</span>
+                <p style={{ fontSize: 13, color: 'var(--color-text-muted)', marginTop: 12, lineHeight: 1.5, height: 40, overflow: 'hidden' }}>{business.description}</p>
+
+                <div style={{ marginTop: 20, borderTop: '1px solid var(--color-border)', paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--color-text-muted)', fontSize: 12 }}>
+                        <MapPin size={14} /> {business.address}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--color-text-muted)', fontSize: 12 }}>
+                        <Phone size={14} /> {business.phone}
+                    </div>
+                </div>
+
+                <div style={{ marginTop: 24 }}>
+                    <button
+                        onClick={() => isGuest ? onLoginRequired?.() : null}
+                        className="btn btn-outline btn-full btn-sm"
+                    >
+                        Ver Catálogo
+                    </button>
+                </div>
+            </div>
+        </motion.div>
+    );
+}
+
 export default function Marketplace({ onBack, userBalance, onPurchase, isGuest, onLoginRequired }: {
     onBack?: () => void;
     userBalance?: string;
@@ -118,10 +161,12 @@ export default function Marketplace({ onBack, userBalance, onPurchase, isGuest, 
     isGuest?: boolean;
     onLoginRequired?: () => void;
 }) {
+    const [viewMode, setViewMode] = useState<'products' | 'businesses'>('products');
     const [activeCategory, setActiveCategory] = useState('Todos');
     const [activeCity, setActiveCity] = useState('Todas');
     const [searchTerm, setSearchTerm] = useState('');
     const [products, setProducts] = useState<Product[]>([]);
+    const [businesses, setBusinesses] = useState<Business[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [isSuccess, setIsSuccess] = useState(false);
@@ -130,8 +175,12 @@ export default function Marketplace({ onBack, userBalance, onPurchase, isGuest, 
     useEffect(() => {
         const fetch = async () => {
             try {
-                const data = await businessService.getMarketplaceProducts();
-                setProducts(data.length > 0 ? data : MOCK_FALLBACK);
+                const [pData, bData] = await Promise.all([
+                    businessService.getMarketplaceProducts(),
+                    businessService.getBusinesses()
+                ]);
+                setProducts(pData.length > 0 ? pData : MOCK_FALLBACK);
+                setBusinesses(bData);
             } catch {
                 setProducts(MOCK_FALLBACK);
             } finally {
@@ -141,12 +190,18 @@ export default function Marketplace({ onBack, userBalance, onPurchase, isGuest, 
         fetch();
     }, []);
 
-    const filtered = products.filter(p => {
+    const filteredProducts = products.filter(p => {
         const matchCat = activeCategory === 'Todos' || p.category === activeCategory;
         const matchSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
-        // Simulación: Algunos productos pertenecen a ciudades específicas (Bogotá/Medellín)
         const mockCity = p.id === '1' || p.id === '3' ? 'Bogotá' : 'Medellín';
         const matchCity = activeCity === 'Todas' || mockCity === activeCity;
+        return matchCat && matchSearch && matchCity;
+    });
+
+    const filteredBusinesses = businesses.filter(b => {
+        const matchCat = activeCategory === 'Todos' || b.category === activeCategory;
+        const matchSearch = b.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchCity = activeCity === 'Todas' || b.address.includes(activeCity);
         return matchCat && matchSearch && matchCity;
     });
 
@@ -178,9 +233,22 @@ export default function Marketplace({ onBack, userBalance, onPurchase, isGuest, 
                                 Marketplace <span style={{ opacity: 0.8 }}>VIP</span>
                             </h1>
                         </div>
-                        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', marginTop: 4 }}>
-                            {isGuest ? 'Precios de mayorista exclusivos para Miembros.' : 'Paga con su saldo TrueCoin'}
-                        </p>
+                        <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                            <button
+                                onClick={() => setViewMode('products')}
+                                className={`pill pill-sm ${viewMode === 'products' ? 'active-marketplace' : ''}`}
+                                style={{ background: viewMode === 'products' ? 'white' : 'rgba(255,255,255,0.1)', color: viewMode === 'products' ? 'var(--color-marketplace)' : 'white', border: 'none' }}
+                            >
+                                <ShoppingBag size={14} /> Productos
+                            </button>
+                            <button
+                                onClick={() => setViewMode('businesses')}
+                                className={`pill pill-sm ${viewMode === 'businesses' ? 'active-marketplace' : ''}`}
+                                style={{ background: viewMode === 'businesses' ? 'white' : 'rgba(255,255,255,0.1)', color: viewMode === 'businesses' ? 'var(--color-marketplace)' : 'white', border: 'none' }}
+                            >
+                                <Building2 size={14} /> Directorio de Negocios
+                            </button>
+                        </div>
                     </div>
                     {!isGuest && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -207,7 +275,7 @@ export default function Marketplace({ onBack, userBalance, onPurchase, isGuest, 
                     <Search size={14} className="input-icon" />
                     <input
                         type="text"
-                        placeholder="Buscar productos..."
+                        placeholder={viewMode === 'products' ? "Buscar productos..." : "Buscar negocios..."}
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                         className="input input-sm"
@@ -240,22 +308,27 @@ export default function Marketplace({ onBack, userBalance, onPurchase, isGuest, 
                 </div>
             </div>
 
-            {/* Products Grid */}
+            {/* Content Grid */}
             <div style={{ padding: '24px 32px' }}>
                 {loading ? (
                     <div style={{ display: 'flex', justifyContent: 'center', padding: 80 }}>
                         <div style={{ width: 40, height: 40, border: '3px solid var(--color-border)', borderTopColor: 'var(--color-marketplace)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
                     </div>
-                ) : filtered.length === 0 ? (
+                ) : (viewMode === 'products' ? filteredProducts : filteredBusinesses).length === 0 ? (
                     <div style={{ textAlign: 'center', padding: 80, color: 'var(--color-text-muted)' }}>
-                        <ShoppingBag size={48} style={{ opacity: 0.3, marginBottom: 16 }} />
-                        <p style={{ fontWeight: 600 }}>No se encontraron productos</p>
+                        {viewMode === 'products' ? <ShoppingBag size={48} style={{ opacity: 0.3, marginBottom: 16 }} /> : <Building2 size={48} style={{ opacity: 0.3, marginBottom: 16 }} />}
+                        <p style={{ fontWeight: 600 }}>{viewMode === 'products' ? 'No se encontraron productos' : 'No se encontraron negocios'}</p>
                     </div>
                 ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: 20 }}>
-                        {filtered.map(p => (
-                            <ProductCard key={p.id} product={p} onBuy={handleProductAction} isGuest={isGuest} />
-                        ))}
+                        {viewMode === 'products'
+                            ? filteredProducts.map(p => (
+                                <ProductCard key={p.id} product={p} onBuy={handleProductAction} isGuest={isGuest} />
+                            ))
+                            : filteredBusinesses.map(b => (
+                                <BusinessCard key={b.id} business={b} isGuest={isGuest} onLoginRequired={onLoginRequired} />
+                            ))
+                        }
                     </div>
                 )}
             </div>

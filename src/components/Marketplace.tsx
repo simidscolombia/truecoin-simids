@@ -22,8 +22,9 @@ const CATEGORY_EMOJIS: Record<string, string> = {
     Alimentos: '🥗', Electrónica: '📱', Hogar: '🏠', Moda: '👕', Salud: '💊', Todos: '✨',
 };
 
-function ProductCard({ product, onBuy }: { product: Product; onBuy: (p: Product) => void }) {
+function ProductCard({ product, onBuy, isGuest }: { product: Product; onBuy: (p: Product) => void; isGuest?: boolean }) {
     const netPrice = product.price_tc;
+    const publicPrice = netPrice * 1.3; // 30% más para público general
     const aporte = (product.mlm_utility * 0.1).toFixed(2);
 
     return (
@@ -76,10 +77,13 @@ function ProductCard({ product, onBuy }: { product: Product; onBuy: (p: Product)
                 <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 14 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 12 }}>
                         <div>
-                            <p style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--color-text-muted)', marginBottom: 2 }}>
-                                Precio VIP
+                            <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', color: 'var(--color-text-muted)', textDecoration: 'line-through', marginBottom: 2 }}>
+                                Precio Público: {publicPrice.toFixed(2)} TC
                             </p>
-                            <p style={{ fontSize: 22, fontWeight: 800, color: 'var(--color-marketplace)', lineHeight: 1 }}>
+                            <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-marketplace)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                                <Star size={12} fill="var(--color-marketplace)" /> Precio VIP
+                            </p>
+                            <p style={{ fontSize: 24, fontWeight: 800, color: 'var(--color-navy)', lineHeight: 1 }}>
                                 {netPrice.toFixed(2)} <span style={{ fontSize: 13, fontWeight: 600, opacity: 0.7 }}>TC</span>
                             </p>
                         </div>
@@ -95,10 +99,10 @@ function ProductCard({ product, onBuy }: { product: Product; onBuy: (p: Product)
 
                     <button
                         onClick={() => onBuy(product)}
-                        className="btn btn-marketplace btn-full"
-                        style={{ borderRadius: 10 }}
+                        className={`btn ${isGuest ? 'btn-navy' : 'btn-marketplace'} btn-full`}
+                        style={{ borderRadius: 10, gap: 8 }}
                     >
-                        <Zap size={15} /> Comprar con TC
+                        {isGuest ? <><Zap size={15} /> Obtener Precio VIP</> : <><ShoppingBag size={15} /> Comprar Ahora</>}
                     </button>
                 </div>
             </div>
@@ -106,10 +110,12 @@ function ProductCard({ product, onBuy }: { product: Product; onBuy: (p: Product)
     );
 }
 
-export default function Marketplace({ onBack, userBalance, onPurchase }: {
-    onBack: () => void;
-    userBalance: string;
-    onPurchase: (amount: number) => void;
+export default function Marketplace({ onBack, userBalance, onPurchase, isGuest, onLoginRequired }: {
+    onBack?: () => void;
+    userBalance?: string;
+    onPurchase?: (amount: number) => void;
+    isGuest?: boolean;
+    onLoginRequired?: () => void;
 }) {
     const [activeCategory, setActiveCategory] = useState('Todos');
     const [searchTerm, setSearchTerm] = useState('');
@@ -139,8 +145,16 @@ export default function Marketplace({ onBack, userBalance, onPurchase }: {
         return matchCat && matchSearch;
     });
 
+    const handleProductAction = (p: Product) => {
+        if (isGuest) {
+            onLoginRequired?.();
+            return;
+        }
+        setSelectedProduct(p);
+    };
+
     const confirmPurchase = () => {
-        if (!selectedProduct) return;
+        if (!selectedProduct || !onPurchase) return;
         onPurchase(selectedProduct.price_tc);
         setIsSuccess(true);
         setTimeout(() => { setIsSuccess(false); setSelectedProduct(null); }, 3000);
@@ -160,20 +174,22 @@ export default function Marketplace({ onBack, userBalance, onPurchase }: {
                             </h1>
                         </div>
                         <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', marginTop: 4 }}>
-                            Precios de mayorista · Paga con TrueCoin
+                            {isGuest ? 'Únete al Club VIP para obtener descuentos exclusivos' : 'Precios de mayorista · Paga con TrueCoin'}
                         </p>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <div style={{
-                            background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)',
-                            borderRadius: 12, padding: '8px 18px', border: '1px solid rgba(255,255,255,0.2)',
-                            display: 'flex', alignItems: 'center', gap: 10,
-                        }}>
-                            <Tag size={16} color="white" />
-                            <span style={{ color: 'white', fontWeight: 700, fontSize: 16 }}>{Number(userBalance).toFixed(2)}</span>
-                            <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12, fontWeight: 600 }}>TC disponibles</span>
+                    {!isGuest && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            <div style={{
+                                background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)',
+                                borderRadius: 12, padding: '8px 18px', border: '1px solid rgba(255,255,255,0.2)',
+                                display: 'flex', alignItems: 'center', gap: 10,
+                            }}>
+                                <Tag size={16} color="white" />
+                                <span style={{ color: 'white', fontWeight: 700, fontSize: 16 }}>{Number(userBalance || 0).toFixed(2)}</span>
+                                <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12, fontWeight: 600 }}>TC disponibles</span>
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
 
@@ -223,7 +239,7 @@ export default function Marketplace({ onBack, userBalance, onPurchase }: {
                 ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: 20 }}>
                         {filtered.map(p => (
-                            <ProductCard key={p.id} product={p} onBuy={setSelectedProduct} />
+                            <ProductCard key={p.id} product={p} onBuy={handleProductAction} isGuest={isGuest} />
                         ))}
                     </div>
                 )}

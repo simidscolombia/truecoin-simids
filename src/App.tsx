@@ -202,7 +202,7 @@ function App() {
           </div>
           <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--color-navy)', letterSpacing: -0.5 }}>
             True<span style={{ color: 'var(--color-wallet)' }}>Coin</span>
-            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', background: 'var(--color-surface-2)', padding: '2px 6px', borderRadius: 6, marginLeft: 8, verticalAlign: 'middle' }}>v1.0.3</span>
+            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', background: 'var(--color-surface-2)', padding: '2px 6px', borderRadius: 6, marginLeft: 8, verticalAlign: 'middle' }}>v1.0.4</span>
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
@@ -311,6 +311,17 @@ function App() {
         </motion.div>
 
       </section>
+
+      {/* Landing Marketplace Section (Motivation) */}
+      <div style={{ background: 'var(--color-bg)', borderTop: '1px solid var(--color-border)', paddingBottom: 60 }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto' }}>
+          <div style={{ padding: '40px 32px 0', textAlign: 'center' }}>
+            <h2 style={{ fontSize: 28, fontWeight: 800, color: 'var(--color-navy)', marginBottom: 8 }}>Nuestro Marketplace VIP</h2>
+            <p style={{ color: 'var(--color-text-muted)', fontSize: 16 }}>Accede a estos y más productos con descuentos exclusivos al unirte a nuestra red.</p>
+          </div>
+          <Marketplace isGuest={true} onLoginRequired={() => setShowAuth(true)} />
+        </div>
+      </div>
 
       {/* Footer */}
       <footer style={{ padding: '32px', textAlign: 'center', color: 'var(--color-text-muted)', fontSize: 13, borderTop: '1px solid var(--color-border)' }}>

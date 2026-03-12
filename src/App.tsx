@@ -204,7 +204,7 @@ function App() {
           </div>
           <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--color-navy)', letterSpacing: -0.5 }}>
             True<span style={{ color: 'var(--color-wallet)' }}>Coin</span>
-            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', background: 'var(--color-surface-2)', padding: '2px 6px', borderRadius: 6, marginLeft: 8, verticalAlign: 'middle' }}>v1.0.9</span>
+            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', background: 'var(--color-surface-2)', padding: '2px 6px', borderRadius: 6, marginLeft: 8, verticalAlign: 'middle' }}>v1.1.0</span>
           </span>
         </div>
 
@@ -243,22 +243,24 @@ function App() {
             Ingresar
           </button>
         </div>
-      </nav>
+      </nav >
 
       {/* Auth Overlay */}
-      {showAuth && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            onClick={() => setShowAuth(false)}
-            style={{ position: 'absolute', inset: 0, background: 'rgba(11,31,75,0.6)', backdropFilter: 'blur(8px)' }}
-          />
-          <div style={{ position: 'relative', zIndex: 110, width: '100%', maxWidth: 440 }}>
-            <RegistrationForm onSuccess={handleRegisterSuccess} />
+      {
+        showAuth && (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              onClick={() => setShowAuth(false)}
+              style={{ position: 'absolute', inset: 0, background: 'rgba(11,31,75,0.6)', backdropFilter: 'blur(8px)' }}
+            />
+            <div style={{ position: 'relative', zIndex: 110, width: '100%', maxWidth: 440 }}>
+              <RegistrationForm onSuccess={handleRegisterSuccess} />
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* 1. Marketplace Top (Main focus - Integrated as ShopyBrands) */}
       <Marketplace
@@ -312,7 +314,7 @@ function App() {
         <p>© 2026 TrueCoin Simids. Todos los derechos reservados.</p>
         <p style={{ marginTop: 4, fontSize: 11 }}>SIMIDS TECHNOLOGY · COLOMBIA</p>
       </footer>
-    </div>
+    </div >
   );
 }
 

@@ -223,27 +223,31 @@ export default function Marketplace({ onPurchase, isGuest, onLoginRequired, view
     return (
         <div className="module-page animate-in">
 
-            {/* Renamed Section Title (Optional/Small) */}
-            <div style={{ padding: '20px 32px 0', display: 'flex', alignItems: 'center', gap: 10 }}>
-                <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    ShopyBrands <span style={{ opacity: 0.5 }}>/</span> {viewMode === 'products' ? 'Tienda en Línea' : 'Directorio'}
-                </p>
-            </div>
 
-            {/* Filters Bar (Freely below as it was) */}
+            {/* Pine Green Filter Bar */}
             <div style={{
-                background: 'var(--color-surface)', borderBottom: '1px solid var(--color-border)',
-                padding: '12px 32px', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
+                background: '#0a3d2e', borderBottom: '1px solid rgba(255,255,255,0.1)',
+                padding: '20px 32px', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
             }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginRight: 20 }}>
+                    <ShoppingBag size={20} color="white" />
+                    <h2 style={{ fontSize: 18, fontWeight: 800, color: 'white', letterSpacing: -0.5, margin: 0 }}>
+                        {viewMode === 'products' ? 'Tienda en Línea' : 'Directorio de Negocios'}
+                    </h2>
+                </div>
+
                 <div className="input-with-icon" style={{ flex: '1 1 200px', maxWidth: 300 }}>
-                    <Search size={14} className="input-icon" />
+                    <Search size={14} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.6)' }} />
                     <input
                         type="text"
                         placeholder={viewMode === 'products' ? "Buscar productos..." : "Buscar negocios..."}
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
-                        className="input input-sm"
-                        style={{ paddingLeft: 36 }}
+                        style={{
+                            width: '100%', height: 38, padding: '0 16px 0 44px', borderRadius: 10,
+                            background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)',
+                            color: 'white', fontSize: 14, outline: 'none'
+                        }}
                     />
                 </div>
 
@@ -251,23 +255,32 @@ export default function Marketplace({ onPurchase, isGuest, onLoginRequired, view
                     <select
                         value={activeCity}
                         onChange={(e) => setActiveCity(e.target.value)}
-                        className="input input-sm"
-                        style={{ width: 'auto', minWidth: 140 }}
+                        style={{
+                            height: 38, padding: '0 12px', borderRadius: 10,
+                            background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)',
+                            color: 'white', fontSize: 14, outline: 'none', minWidth: 140
+                        }}
                     >
-                        {CITIES.map(c => <option key={c} value={c}>{c === 'Todas' ? 'Toda Colombia' : c}</option>)}
+                        {CITIES.map(c => <option key={c} value={c} style={{ color: 'var(--color-navy)' }}>{c === 'Todas' ? '📍 Toda Colombia' : c}</option>)}
                     </select>
                 </div>
 
-                <div className="category-pills" style={{ flex: 1 }}>
-                    {CATEGORIES.map(cat => (
-                        <button
-                            key={cat}
-                            onClick={() => setActiveCategory(cat)}
-                            className={`pill pill-sm ${activeCategory === cat ? 'active-marketplace' : ''}`}
-                        >
-                            {CATEGORY_EMOJIS[cat]} {cat}
-                        </button>
-                    ))}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <select
+                        value={activeCategory}
+                        onChange={(e) => setActiveCategory(e.target.value)}
+                        style={{
+                            height: 38, padding: '0 12px', borderRadius: 10,
+                            background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)',
+                            color: 'white', fontSize: 14, outline: 'none', minWidth: 160
+                        }}
+                    >
+                        {CATEGORIES.map(cat => (
+                            <option key={cat} value={cat} style={{ color: 'var(--color-navy)' }}>
+                                {CATEGORY_EMOJIS[cat]} {cat === 'Todos' ? 'Todas las Categorías' : cat}
+                            </option>
+                        ))}
+                    </select>
                 </div>
             </div>
             {loading ? (

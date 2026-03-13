@@ -13,6 +13,7 @@ import ApiSettings from './ApiSettings';
 
 export default function AdminDashboard({ onBack }: { onBack: () => void }) {
     const [activeTab, setActiveTab] = useState<'stats' | 'users' | 'directory' | 'expansion' | 'themes' | 'banks'>('stats');
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [stats, setStats] = useState<any>(null);
     const [users, setUsers] = useState<any[]>([]);
     const [businesses, setBusinesses] = useState<any[]>([]);
@@ -198,9 +199,21 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
     };
 
     return (
-        <div style={{ minHeight: '100vh', display: 'flex', background: 'var(--color-bg)' }}>
+        <div className="admin-container" style={{ minHeight: '100vh', display: 'flex', background: 'var(--color-bg)', position: 'relative' }}>
+            {/* ── MOBILE TOGGLE ── */}
+            <button
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                style={{ position: 'fixed', bottom: 20, right: 20, zIndex: 1100, width: 56, height: 56, borderRadius: '50%', background: 'var(--color-admin)', color: 'white', display: 'none', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 25px rgba(0,0,0,0.2)', border: 'none' }}
+                className="admin-mobile-toggle"
+            >
+                {isSidebarOpen ? <ArrowLeft /> : <LayoutDashboard />}
+            </button>
+
             {/* ── SIDEBAR ── */}
-            <aside style={{ width: 280, background: 'var(--color-surface)', borderRight: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+            <aside
+                className={`admin-sidebar ${isSidebarOpen ? 'open' : ''}`}
+                style={{ width: 280, background: 'var(--color-surface)', borderRight: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', flexShrink: 0 }}
+            >
                 {/* Header */}
                 <div style={{ padding: '24px 20px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid var(--color-border)' }}>
                     <div style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--color-admin)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -233,8 +246,11 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                 </div>
             </aside>
 
+            {/* Overlay for mobile */}
+            {isSidebarOpen && <div onClick={() => setIsSidebarOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 900 }} className="admin-overlay" />}
+
             {/* ── MAIN CONTENT ── */}
-            <main style={{ flex: 1, padding: 40, overflowY: 'auto', height: '100vh' }}>
+            <main className="admin-main" style={{ flex: 1, padding: 40, overflowY: 'auto', height: '100vh' }}>
                 <AnimatePresence mode="wait">
 
                     {/* ────── TABS: STATS ────── */}
@@ -245,13 +261,13 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                                 <p style={{ fontSize: 14, color: 'var(--color-text-muted)' }}>El ecosistema está operando correctamente.</p>
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginBottom: 24 }}>
+                            <div className="admin-stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginBottom: 24 }}>
                                 <AdminStatCard label="Socios Totales" value={stats?.userCount || 0} icon={Users} trend="+12% mensual" />
                                 <AdminStatCard label="Liquidez Total (TC)" value={Math.floor(stats?.totalTC || 0).toLocaleString()} icon={Wallet} trend="Respaldado 1:1" />
                                 <AdminStatCard label="Negocios Aliados" value={stats?.businessCount || 0} icon={Database} />
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+                            <div className="admin-stat-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                                 {/* Level Chart */}
                                 <div className="card-lg" style={{ padding: 28 }}>
                                     <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--color-navy)', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -311,72 +327,74 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                                 </div>
                             </div>
 
-                            <div className="card-lg" style={{ overflow: 'hidden' }}>
-                                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                                    <thead style={{ background: 'var(--color-surface-2)', borderBottom: '1px solid var(--color-border)' }}>
-                                        <tr>
-                                            <th style={{ padding: '16px 24px', fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Socio</th>
-                                            <th style={{ padding: '16px 24px', fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Contacto</th>
-                                            <th style={{ padding: '16px 24px', fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Nivel</th>
-                                            <th style={{ padding: '16px 24px', fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Equipo</th>
-                                            <th style={{ padding: '16px 24px', fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', textAlign: 'right' }}>Balance</th>
-                                            <th style={{ padding: '16px 24px', fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', textAlign: 'center' }}>Ax</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {filteredUsers.map((u, i) => (
-                                            <tr key={u.id} style={{ borderBottom: i === filteredUsers.length - 1 ? 'none' : '1px solid var(--color-border)' }}>
-                                                <td style={{ padding: '16px 24px' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                                        <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'color-mix(in srgb, var(--color-admin) 15%, white)', color: 'var(--color-admin)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14 }}>
-                                                            {u.full_name?.charAt(0).toUpperCase()}
-                                                        </div>
-                                                        <div>
-                                                            <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-navy)' }}>{u.full_name}</p>
-                                                            <p style={{ fontSize: 11, color: 'var(--color-text-muted)', fontFamily: 'monospace' }}>{u.referral_code}</p>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td style={{ padding: '16px 24px' }}>
-                                                    <p style={{ fontSize: 13, color: 'var(--color-navy)', fontWeight: 500 }}>{u.email}</p>
-                                                    {u.phone && <p style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>{u.phone}</p>}
-                                                </td>
-                                                <td style={{ padding: '16px 24px' }}>
-                                                    <span style={{ padding: '4px 10px', borderRadius: 999, background: 'var(--color-surface-2)', fontSize: 11, fontWeight: 700, color: 'var(--color-navy)' }}>
-                                                        Lvl {u.current_level}
-                                                    </span>
-                                                </td>
-                                                <td style={{ padding: '16px 24px' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                                        <Users size={14} style={{ color: 'var(--color-text-muted)' }} />
-                                                        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-navy)' }}>{u.team_size || 0}</span>
-                                                    </div>
-                                                </td>
-                                                <td style={{ padding: '16px 24px', textAlign: 'right' }}>
-                                                    <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--color-admin)' }}>
-                                                        {u.wallets?.[0]?.balance_tc || "0.00"} <span style={{ fontSize: 10 }}>TC</span>
-                                                    </span>
-                                                </td>
-                                                <td style={{ padding: '16px 24px', textAlign: 'center' }}>
-                                                    <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-                                                        <button
-                                                            onClick={() => handleEditUser(u)}
-                                                            style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--color-surface-2)', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-muted)' }}
-                                                        >
-                                                            <Edit3 size={14} />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleDeleteUser(u.id, u.full_name)}
-                                                            style={{ width: 32, height: 32, borderRadius: 8, background: '#FEF2F2', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: '#DC2626' }}
-                                                        >
-                                                            <Trash2 size={14} />
-                                                        </button>
-                                                    </div>
-                                                </td>
+                            <div className="admin-table-container">
+                                <div className="card-lg" style={{ overflow: 'hidden' }}>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                                        <thead style={{ background: 'var(--color-surface-2)', borderBottom: '1px solid var(--color-border)' }}>
+                                            <tr>
+                                                <th style={{ padding: '16px 24px', fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Socio</th>
+                                                <th style={{ padding: '16px 24px', fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Contacto</th>
+                                                <th style={{ padding: '16px 24px', fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Nivel</th>
+                                                <th style={{ padding: '16px 24px', fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Equipo</th>
+                                                <th style={{ padding: '16px 24px', fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', textAlign: 'right' }}>Balance</th>
+                                                <th style={{ padding: '16px 24px', fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', textAlign: 'center' }}>Ax</th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody>
+                                            {filteredUsers.map((u, i) => (
+                                                <tr key={u.id} style={{ borderBottom: i === filteredUsers.length - 1 ? 'none' : '1px solid var(--color-border)' }}>
+                                                    <td style={{ padding: '16px 24px' }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                                            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'color-mix(in srgb, var(--color-admin) 15%, white)', color: 'var(--color-admin)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14 }}>
+                                                                {u.full_name?.charAt(0).toUpperCase()}
+                                                            </div>
+                                                            <div>
+                                                                <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-navy)' }}>{u.full_name}</p>
+                                                                <p style={{ fontSize: 11, color: 'var(--color-text-muted)', fontFamily: 'monospace' }}>{u.referral_code}</p>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td style={{ padding: '16px 24px' }}>
+                                                        <p style={{ fontSize: 13, color: 'var(--color-navy)', fontWeight: 500 }}>{u.email}</p>
+                                                        {u.phone && <p style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>{u.phone}</p>}
+                                                    </td>
+                                                    <td style={{ padding: '16px 24px' }}>
+                                                        <span style={{ padding: '4px 10px', borderRadius: 999, background: 'var(--color-surface-2)', fontSize: 11, fontWeight: 700, color: 'var(--color-navy)' }}>
+                                                            Lvl {u.current_level}
+                                                        </span>
+                                                    </td>
+                                                    <td style={{ padding: '16px 24px' }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                            <Users size={14} style={{ color: 'var(--color-text-muted)' }} />
+                                                            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-navy)' }}>{u.team_size || 0}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td style={{ padding: '16px 24px', textAlign: 'right' }}>
+                                                        <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--color-admin)' }}>
+                                                            {u.wallets?.[0]?.balance_tc || "0.00"} <span style={{ fontSize: 10 }}>TC</span>
+                                                        </span>
+                                                    </td>
+                                                    <td style={{ padding: '16px 24px', textAlign: 'center' }}>
+                                                        <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                                                            <button
+                                                                onClick={() => handleEditUser(u)}
+                                                                style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--color-surface-2)', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-muted)' }}
+                                                            >
+                                                                <Edit3 size={14} />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleDeleteUser(u.id, u.full_name)}
+                                                                style={{ width: 32, height: 32, borderRadius: 8, background: '#FEF2F2', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: '#DC2626' }}
+                                                            >
+                                                                <Trash2 size={14} />
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </motion.div>
                     )}
@@ -395,7 +413,7 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                                 </div>
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
+                            <div className="admin-stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
                                 {filteredBusinesses.map(bus => (
                                     <div key={bus.id} className="card" style={{ padding: 24 }}>
                                         <div style={{ display: 'flex', gap: 14, marginBottom: 16 }}>

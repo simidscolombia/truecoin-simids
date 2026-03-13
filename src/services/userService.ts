@@ -16,7 +16,7 @@ export const userService = {
         const { data, error } = await supabase
             .from('profiles')
             .select('*, wallets(*)')
-            .eq('email', email.trim())
+            .ilike('email', email.trim())
             .limit(1);
 
         if (error) {

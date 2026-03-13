@@ -819,6 +819,37 @@ h6 {
     display: none;
   }
 
+  /* Admin Dashboard Mobile */
+  .admin-sidebar {
+    position: fixed !important;
+    left: -280px;
+    top: 0;
+    bottom: 0;
+    z-index: 1000;
+    transition: left 0.3s ease !important;
+    box-shadow: 20px 0 50px rgba(0, 0, 0, 0.2) !important;
+  }
+
+  .admin-sidebar.open {
+    left: 0 !important;
+  }
+
+  .admin-main {
+    padding: 20px 16px !important;
+  }
+
+  .admin-mobile-toggle {
+    display: flex !important;
+  }
+
+  .admin-stat-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .admin-table-container {
+    overflow-x: auto !important;
+  }
+
   .sidebar-logo {
     padding: 8px 12px;
     border-bottom: none;

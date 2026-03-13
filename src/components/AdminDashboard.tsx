@@ -117,11 +117,11 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
         setLoading(true);
         try {
             await adminService.deleteUser(userId);
-            alert("Socio eliminado del mapa.");
-            fetchData();
+            alert("✅ Proceso completado: El usuario y su rastro han sido eliminados.");
         } catch (error) {
-            alert("No se pudo eliminar: " + (error as any).message);
+            alert("❌ No se pudo eliminar: " + (error as any).message + "\n\nTip: Verifica que la política RLS de Supabase permita el borrado manual.");
         } finally {
+            fetchData(); // Sincronizar UI pase lo que pase
             setLoading(false);
         }
     };

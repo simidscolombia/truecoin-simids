@@ -19,7 +19,15 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [editingUser, setEditingUser] = useState<any>(null);
-    const [newBalance, setNewBalance] = useState<string>("");
+    const [editData, setEditData] = useState({
+        fullName: '',
+        phone: '',
+        referralCode: '',
+        referredBy: '',
+        currentLevel: 1,
+        balance: '0',
+        email: ''
+    });
 
     // Expansion Scanner States
     const [scanQuery, setScanQuery] = useState('');
@@ -55,15 +63,42 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
         }
     };
 
-    const handleSaveBalance = async () => {
+    const handleEditUser = (u: any) => {
+        setEditingUser(u);
+        setEditData({
+            fullName: u.full_name || '',
+            email: u.email || '',
+            phone: u.phone || '',
+            referralCode: u.referral_code || '',
+            referredBy: u.referred_by || '',
+            currentLevel: u.current_level || 1,
+            balance: u.wallets?.[0]?.balance_tc?.toString() || '0'
+        });
+    };
+
+    const handleSaveUser = async () => {
         if (!editingUser) return;
+        setLoading(true);
         try {
-            await adminService.adjustUserBalance(editingUser.id, parseFloat(newBalance));
-            alert("Saldo ajustado con éxito, Jefe.");
+            // 1. Actualizar Perfil
+            await adminService.updateUserProfile(editingUser.id, {
+                full_name: editData.fullName,
+                phone: editData.phone,
+                referral_code: editData.referralCode,
+                referred_by: editData.referredBy || null,
+                current_level: editData.currentLevel
+            });
+
+            // 2. Ajustar Saldo si cambió
+            await adminService.adjustUserBalance(editingUser.id, parseFloat(editData.balance));
+
+            alert("Socio actualizado con éxito, Jefe.");
             setEditingUser(null);
             fetchData();
         } catch (error) {
-            alert("Error al ajustar saldo.");
+            alert("Error al actualizar socio: " + (error as any).message);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -301,7 +336,7 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                                                 </td>
                                                 <td style={{ padding: '16px 24px', textAlign: 'center' }}>
                                                     <button
-                                                        onClick={() => { setEditingUser(u); setNewBalance(u.wallets?.[0]?.balance_tc?.toString() || "0"); }}
+                                                        onClick={() => handleEditUser(u)}
                                                         style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--color-surface-2)', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-muted)' }}
                                                     >
                                                         <Edit3 size={14} />
@@ -420,32 +455,64 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                 </AnimatePresence>
             </main>
 
-            {/* ── MODALS ── */}
+            {/* ── MODAL DE EDICIÓN DE USUARIO ── */}
             <AnimatePresence>
                 {editingUser && (
                     <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingUser(null)} style={{ position: 'absolute', inset: 0, background: 'rgba(11,31,75,0.6)', backdropFilter: 'blur(8px)' }} />
-                        <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9 }} className="card-lg" style={{ position: 'relative', zIndex: 1010, maxWidth: 400, width: '100%', padding: 36, textAlign: 'center' }}>
-                            <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'color-mix(in srgb, var(--color-admin) 12%, white)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: 'var(--color-admin)' }}>
-                                <Edit3 size={24} />
-                            </div>
-                            <h3 style={{ fontSize: 22, fontWeight: 800, color: 'var(--color-navy)', marginBottom: 6 }}>Ajustar Saldo</h3>
-                            <p style={{ fontSize: 13, color: 'var(--color-text-muted)', marginBottom: 24 }}>Modificando la cuenta de <strong>{editingUser.full_name}</strong></p>
-
-                            <div style={{ textAlign: 'left', marginBottom: 24 }}>
-                                <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8, paddingLeft: 4 }}>Nuevo Balance (TC)</label>
-                                <input
-                                    type="number"
-                                    value={newBalance}
-                                    onChange={e => setNewBalance(e.target.value)}
-                                    className="input"
-                                    style={{ fontSize: 24, fontWeight: 800, padding: 20, textAlign: 'center', color: 'var(--color-admin)', borderColor: 'var(--color-admin)' }}
-                                />
+                        <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9 }} className="card-lg" style={{ position: 'relative', zIndex: 1010, maxWidth: 650, width: '100%', padding: 40, overflowY: 'auto', maxHeight: '90vh' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                    <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--color-admin)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+                                        <Edit3 size={20} />
+                                    </div>
+                                    <div style={{ textAlign: 'left' }}>
+                                        <h3 style={{ fontSize: 20, fontWeight: 800, color: 'var(--color-navy)' }}>Editar Registro</h3>
+                                        <p style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>ID: {editingUser.id}</p>
+                                    </div>
+                                </div>
+                                <button onClick={() => setEditingUser(null)} className="btn btn-ghost" style={{ padding: 8 }}>×</button>
                             </div>
 
-                            <div style={{ display: 'flex', gap: 12 }}>
-                                <button onClick={() => setEditingUser(null)} className="btn btn-ghost" style={{ flex: 1, justifyContent: 'center' }}>Cancelar</button>
-                                <button onClick={handleSaveBalance} className="btn btn-admin" style={{ flex: 1, justifyContent: 'center' }}><Save size={16} /> Guardar</button>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, textAlign: 'left' }}>
+                                {/* Personal Info */}
+                                <div>
+                                    <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', marginBottom: 8 }}>Nombre Completo</label>
+                                    <input type="text" value={editData.fullName} onChange={e => setEditData({ ...editData, fullName: e.target.value })} className="input" />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', marginBottom: 8 }}>Teléfono / WhatsApp</label>
+                                    <input type="text" value={editData.phone} onChange={e => setEditData({ ...editData, phone: e.target.value })} className="input" />
+                                </div>
+
+                                {/* Network Data */}
+                                <div>
+                                    <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', marginBottom: 8 }}>Código Referido (Propio)</label>
+                                    <input type="text" value={editData.referralCode} onChange={e => setEditData({ ...editData, referralCode: e.target.value })} className="input" style={{ fontFamily: 'monospace', fontWeight: 700 }} />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', marginBottom: 8 }}>Referido Por (ID)</label>
+                                    <input type="text" value={editData.referredBy} onChange={e => setEditData({ ...editData, referredBy: e.target.value })} className="input" placeholder="Opcional" />
+                                </div>
+
+                                {/* Levels & Finance */}
+                                <div>
+                                    <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', marginBottom: 8 }}>Nivel VIP (L1-L12)</label>
+                                    <select value={editData.currentLevel} onChange={e => setEditData({ ...editData, currentLevel: parseInt(e.target.value) })} className="input">
+                                        {[...Array(12)].map((_, i) => <option key={i + 1} value={i + 1}>Nivel {i + 1}</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', marginBottom: 8 }}>Saldo TrueCoin (TC)</label>
+                                    <input type="number" value={editData.balance} onChange={e => setEditData({ ...editData, balance: e.target.value })} className="input" style={{ fontWeight: 800, color: 'var(--color-admin)' }} />
+                                </div>
+                            </div>
+
+                            <div style={{ marginTop: 32, display: 'flex', gap: 12 }}>
+                                <button onClick={() => setEditingUser(null)} className="btn btn-outline" style={{ flex: 1 }}>Cancelar</button>
+                                <button onClick={handleSaveUser} className="btn btn-admin" style={{ flex: 2, background: 'var(--color-admin)', color: 'white' }}>
+                                    <Save size={18} style={{ marginRight: 8 }} /> Guardar Cambios en la Nube
+                                </button>
                             </div>
                         </motion.div>
                     </div>

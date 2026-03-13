@@ -137,6 +137,7 @@ export const adminService = {
     },
 
     // CRM: Ajuste manual de saldo (Poder de Dios Admin)
+    // CRM: Ajuste manual de saldo (Poder de Dios Admin)
     async adjustUserBalance(userId: string, newBalance: number) {
         const { error } = await supabase
             .from('wallets')
@@ -145,5 +146,22 @@ export const adminService = {
 
         if (error) throw error;
         return true;
+    },
+
+    // SISTEMA DE NOTIFICACIONES (WhatsApp Bridge)
+    async notifyUser(phone: string, message: string) {
+        try {
+            // Nota: En producción, BRIDGE_URL debe ser la IP pública/URL del servidor donde corre shopy_bridge.cjs
+            const BRIDGE_URL = 'http://localhost:3001';
+            await fetch(`${BRIDGE_URL}/api/send-notice`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone, message })
+            });
+            return true;
+        } catch (err) {
+            console.error("No se pudo enviar notificación WhatsApp:", err);
+            return false;
+        }
     }
 };

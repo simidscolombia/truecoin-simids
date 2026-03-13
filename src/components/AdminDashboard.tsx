@@ -92,10 +92,16 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                 password: editData.password
             });
 
-            // 2. Ajustar Saldo si cambió
+            // 2. Ajustar Saldo
             await adminService.adjustUserBalance(editingUser.id, parseFloat(editData.balance));
 
-            alert("Socio actualizado con éxito, Jefe.");
+            // 3. Notificar por WhatsApp (Opcional, no bloqueante)
+            if (editData.phone) {
+                const message = `🔔 *ShopyBrands Hola!* Tus datos han sido actualizados por administración.\n\n👤 *Nombre:* ${editData.fullName}\n📈 *Nivel:* ${editData.currentLevel}\n💰 *Saldo:* ${editData.balance} TC\n🔑 *Referral:* ${editData.referralCode}\n\nSi no reconoces este cambio, contacta a soporte.`;
+                adminService.notifyUser(editData.phone, message);
+            }
+
+            alert("Socio actualizado con éxito y notificado por WhatsApp.");
             setEditingUser(null);
             fetchData();
         } catch (error) {

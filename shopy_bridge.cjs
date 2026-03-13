@@ -73,6 +73,32 @@ app.post('/whatsapp/webhook', async (req, res) => {
     }
 });
 
+// NUEVO: Endpoint para notificaciones de administración
+app.post('/api/send-notice', async (req, res) => {
+    const { phone, message } = req.body;
+
+    if (!phone || !message) {
+        return res.status(400).json({ error: "Faltan datos (phone o message)" });
+    }
+
+    // Normalizar formato de teléfono para WAHA (ej: 57300... -> 57300...@c.us)
+    const chatId = phone.includes('@') ? phone : `${phone.replace('+', '')}@c.us`;
+
+    console.log(`📢 Enviando notificación a ${chatId}...`);
+
+    try {
+        await axios.post(`${WAHA_URL}/api/sendText`, {
+            chatId: chatId,
+            text: message,
+            session: 'default'
+        });
+        res.status(200).json({ success: true });
+    } catch (error) {
+        console.error("❌ Error enviando notificación:", error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 app.get('/', (req, res) => {
     res.send('ShopyBridge está en línea 🚀');
 });

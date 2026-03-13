@@ -137,14 +137,14 @@ export default function Dashboard({
             {/* Page Header */}
             <div className="module-page-header">
                 <div>
-                    <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--color-navy)', marginBottom: 2 }}>
+                    <h1 style={{ fontSize: 'clamp(20px, 5vw, 24px)', fontWeight: 800, color: 'var(--color-navy)', marginBottom: 2 }}>
                         Hola, <span style={{ color: 'var(--color-cloud-blue)' }}>{user.fullName.split(' ')[0]}</span> 👋
                     </h1>
-                    <p style={{ fontSize: 14, color: 'var(--color-text-muted)' }}>
+                    <p style={{ fontSize: 'clamp(12px, 3.5vw, 14px)', color: 'var(--color-text-muted)' }}>
                         Bienvenido a tu ecosistema ShopyBrands · 12 Mar 2026
                     </p>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
                     <span className="badge" style={{ background: 'var(--color-navy)', color: 'white', border: 'none' }}>
                         ⭐ VIP BRONCE (L1)
                     </span>
@@ -200,7 +200,7 @@ export default function Dashboard({
                 </div>
 
                 {/* Wallet + Referral */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 28 }}>
+                <div className="dashboard-grid-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20, marginBottom: 28 }}>
 
                     {/* Wallet Card */}
                     <div className="card-lg" style={{ padding: 28 }}>

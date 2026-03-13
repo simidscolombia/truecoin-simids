@@ -260,6 +260,7 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                                             <th style={{ padding: '16px 24px', fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Socio</th>
                                             <th style={{ padding: '16px 24px', fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Contacto</th>
                                             <th style={{ padding: '16px 24px', fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Nivel</th>
+                                            <th style={{ padding: '16px 24px', fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Equipo</th>
                                             <th style={{ padding: '16px 24px', fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', textAlign: 'right' }}>Balance</th>
                                             <th style={{ padding: '16px 24px', fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', textAlign: 'center' }}>Ax</th>
                                         </tr>
@@ -286,6 +287,12 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                                                     <span style={{ padding: '4px 10px', borderRadius: 999, background: 'var(--color-surface-2)', fontSize: 11, fontWeight: 700, color: 'var(--color-navy)' }}>
                                                         Lvl {u.current_level}
                                                     </span>
+                                                </td>
+                                                <td style={{ padding: '16px 24px' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                        <Users size={14} style={{ color: 'var(--color-text-muted)' }} />
+                                                        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-navy)' }}>{u.team_size || 0}</span>
+                                                    </div>
                                                 </td>
                                                 <td style={{ padding: '16px 24px', textAlign: 'right' }}>
                                                     <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--color-admin)' }}>

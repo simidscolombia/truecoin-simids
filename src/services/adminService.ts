@@ -111,7 +111,18 @@ export const adminService = {
             .order('created_at', { ascending: false });
 
         if (error) throw error;
-        return data;
+
+        // Obtenemos todos los registros para contar referidos en memoria (si no es red masiva)
+        const { data: allRefs } = await supabase.from('profiles').select('referred_by');
+        const refCounts = (allRefs || []).reduce((acc: any, r) => {
+            if (r.referred_by) acc[r.referred_by] = (acc[r.referred_by] || 0) + 1;
+            return acc;
+        }, {});
+
+        return data.map(u => ({
+            ...u,
+            team_size: refCounts[u.id] || 0
+        }));
     },
 
     // CRM: Actualizar perfil de usuario

@@ -1,5 +1,5 @@
 /**
- * AI Service - v1.8.5
+ * AI Service - v1.9.0
  * Engine: Next-Gen Only (Gemini 2.0 & Latest Flash)
  */
 
@@ -68,5 +68,35 @@ export const aiService = {
         }
 
         return `🚨 ERROR: Tu cuenta tiene modelos 2.0 pero Google rechaza la petición. MOTIVO: ${detail}.`;
+    },
+
+    async getProspectCoaching(prospect: any): Promise<string> {
+        if (!API_KEY) return "Error: API Key faltante.";
+
+        const prompt = `Actúa como 'Shopy', Coach de Ventas de ShopyBrands.
+        Tengo un prospecto con los siguientes detalles:
+        - Nombre: ${prospect.full_name}
+        - Interés: ${prospect.interest}
+        - Estado actual: ${prospect.status}
+        - Notas: ${prospect.notes || 'Sin notas'}
+
+        Dame una estrategia de cierre de 2 líneas muy potente y personalizada para enviarle por WhatsApp. 
+        Enfócate en los TrueCoins y el crecimiento 1x4.`;
+
+        try {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ role: 'user', parts: [{ text: prompt }] }]
+                })
+            });
+            const data = await response.json();
+            return data.candidates?.[0]?.content?.parts?.[0]?.text || "¡No te detengas! Este prospecto tiene gran potencial.";
+        } catch {
+            return "¡Enfócate en los beneficios VIP y cierra la inscripción!";
+        }
     }
 };
+

@@ -12,26 +12,35 @@ export const userService = {
         return data;
     },
 
-    async login(email: string) {
+    async login(email: string, password?: string) {
         const { data, error } = await supabase
             .from('profiles')
             .select('*, wallets(*)')
-            .eq('email', email)
+            .eq('email', email.trim())
             .limit(1);
 
         if (error) {
             console.error("Login Supabase Error:", error);
-            throw new Error("Ocurrió un error al conectar con la base de datos.");
+            throw new Error('Error al conectar con la base de datos.');
         }
 
         if (!data || data.length === 0) {
-            throw new Error("No encontramos una cuenta con ese correo.");
+            throw new Error('Usuario no encontrado.');
         }
 
-        return data[0];
+        const profile = data[0];
+
+        // Si el usuario tiene contraseña en la DB, validarla
+        if (profile.password && password && profile.password !== password) {
+            throw new Error('Contraseña incorrecta.');
+        }
+
+        // Si el usuario NO tiene contraseña aún (caso migración) y mandó una,
+        // podríamos intentar guardarla, pero por ahora permitimos entrar.
+        return profile;
     },
 
-    async register(userData: { fullName: string, email: string, phone: string, referralCode: string }) {
+    async register(userData: { fullName: string, email: string, phone: string, referralCode: string, password?: string }) {
         // 1. Buscar al referente por su código
         let referredById = null;
         if (userData.referralCode) {
@@ -64,6 +73,7 @@ export const userService = {
                 phone: userData.phone,
                 referral_code: newCode,
                 referred_by: referredById,
+                password: userData.password, // Nota: En producción usar Supabase Auth
                 current_level: 1 // Inicia en nivel 1
             }])
             .select()
@@ -103,5 +113,44 @@ export const userService = {
 
         if (error) throw error;
         return newBalance;
+    },
+
+    // ── Gestión de Prospectos ─────────────────────────────────
+    async getProspects(userId: string) {
+        const { data, error } = await supabase
+            .from('prospects')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return data;
+    },
+
+    async addProspect(userId: string, prospect: { full_name: string, phone: string, interest: string, notes?: string }) {
+        const { data, error } = await supabase
+            .from('prospects')
+            .insert([{
+                user_id: userId,
+                full_name: prospect.full_name,
+                phone: prospect.phone,
+                interest: prospect.interest,
+                notes: prospect.notes,
+                status: 'nuevo'
+            }])
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    },
+
+    async updateProspectStatus(prospectId: string, status: string) {
+        const { error } = await supabase
+            .from('prospects')
+            .update({ status })
+            .eq('id', prospectId);
+
+        if (error) throw error;
     }
 };

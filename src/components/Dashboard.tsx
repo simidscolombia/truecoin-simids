@@ -4,11 +4,12 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
     Wallet, Users, Copy, Share2, ArrowUpRight,
-    Clock, Send, TrendingUp, Star, ChevronRight, CheckCircle2
+    Clock, Send, TrendingUp, Star, ChevronRight, CheckCircle2, Zap
 } from 'lucide-react';
 import GiftMatrix from './GiftMatrix';
 import TransferModal from './TransferModal';
 import RechargeModal from './RechargeModal';
+import RevenueSimulator from './RevenueSimulator';
 
 interface DashboardProps {
     user: { fullName: string; referralCode: string; id?: string };
@@ -16,7 +17,9 @@ interface DashboardProps {
     onGoToStore: () => void;
     onGoToPOS: () => void;
     onGoToDirectory: () => void;
+    onGoToFam: () => void;
     onGoToAdmin: () => void;
+    onGoToProspects: () => void;
 }
 
 function StatCard({
@@ -83,7 +86,16 @@ function QuickAccessCard({
     );
 }
 
-export default function Dashboard({ user, balance, onGoToStore, onGoToPOS, onGoToDirectory }: Omit<DashboardProps, 'onGoToAdmin'>) {
+export default function Dashboard({
+    user,
+    balance,
+    onGoToStore,
+    onGoToPOS,
+    onGoToDirectory,
+    onGoToFam,
+    onGoToAdmin,
+    onGoToProspects
+}: DashboardProps) {
     const [showTransfer, setShowTransfer] = useState(false);
     const [showRecharge, setShowRecharge] = useState(false);
     const [localBalance, setLocalBalance] = useState(balance);
@@ -129,7 +141,7 @@ export default function Dashboard({ user, balance, onGoToStore, onGoToPOS, onGoT
                         Hola, <span style={{ color: 'var(--color-cloud-blue)' }}>{user.fullName.split(' ')[0]}</span> 👋
                     </h1>
                     <p style={{ fontSize: 14, color: 'var(--color-text-muted)' }}>
-                        Bienvenido a tu ecosistema TrueCoin · 11 Mar 2026
+                        Bienvenido a tu ecosistema ShopyBrands · 12 Mar 2026
                     </p>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -286,6 +298,11 @@ export default function Dashboard({ user, balance, onGoToStore, onGoToPOS, onGoT
                 </div>
 
                 {/* Quick Access */}
+                {/* Simulador de Ingresos */}
+                <div style={{ marginBottom: 28 }}>
+                    <RevenueSimulator />
+                </div>
+
                 <div>
                     <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--color-navy)', marginBottom: 14 }}>
                         Accesos Rápidos
@@ -314,6 +331,30 @@ export default function Dashboard({ user, balance, onGoToStore, onGoToPOS, onGoT
                             icon={<Users size={22} />}
                             onClick={onGoToDirectory}
                             cta="Explorar"
+                        />
+                        <QuickAccessCard
+                            title="Fábrica de Socios"
+                            description="Gestiona tus prospectos y acelera tu crecimiento."
+                            accent="var(--color-wallet)"
+                            icon={<Zap size={22} />}
+                            onClick={onGoToProspects}
+                            cta="Ver Prospectos"
+                        />
+                        <QuickAccessCard
+                            title="ShopyFam"
+                            description="Conecta con tu bloque y celebra tus logros en equipo."
+                            accent="var(--color-cloud-blue)"
+                            icon={<Users size={22} />}
+                            onClick={onGoToFam}
+                            cta="Entrar Social"
+                        />
+                        <QuickAccessCard
+                            title="Panel Maestro"
+                            description="Control total del ecosistema y configuración IA."
+                            accent="var(--color-navy)"
+                            icon={<Star size={22} />}
+                            onClick={onGoToAdmin}
+                            cta="Administrar"
                         />
                     </div>
                 </div>

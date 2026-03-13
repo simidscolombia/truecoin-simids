@@ -89,26 +89,54 @@ export default function SalesTerminal() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        style={{ position: 'absolute', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(11,31,75,0.6)', backdropFilter: 'blur(8px)', borderRadius: 16 }}
+                        style={{ position: 'absolute', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(11,31,75,0.7)', backdropFilter: 'blur(10px)', borderRadius: 16 }}
                     >
                         <motion.div
-                            initial={{ scale: 0.85, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
                             className="card-lg"
-                            style={{ padding: 40, textAlign: 'center', maxWidth: 340 }}
+                            style={{ padding: 32, textAlign: 'center', maxWidth: 400, background: 'white', boxShadow: '0 25px 50px rgba(0,0,0,0.3)' }}
                         >
-                            <div style={{ width: 72, height: 72, borderRadius: '50%', background: '#F0FDF4', color: '#16A34A', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
-                                <CheckCircle2 size={44} />
+                            <div style={{ width: 80, height: 80, borderRadius: '50%', background: '#F0FDF4', color: '#16A34A', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', boxShadow: '0 0 20px rgba(22,163,74,0.2)' }}>
+                                <CheckCircle2 size={48} />
                             </div>
-                            <h2 style={{ fontSize: 24, fontWeight: 800, color: 'var(--color-navy)', marginBottom: 8 }}>¡Venta Registrada!</h2>
-                            <p style={{ fontSize: 14, color: 'var(--color-text-muted)' }}>Total cobrado: <strong style={{ color: 'var(--color-pos)' }}>${total.toLocaleString('es-CO', { minimumFractionDigits: 0 })}</strong></p>
-                            {paymentMethod === 'truecoin' && (
-                                <p style={{ marginTop: 8, fontSize: 13, color: 'var(--color-wallet)' }}>✨ +{(Number(tcEquivalent) * 0.1).toFixed(2)} TC distribuidos a la red</p>
-                            )}
+                            <h2 style={{ fontSize: 26, fontWeight: 900, color: 'var(--color-navy)', marginBottom: 8, letterSpacing: '-0.5px' }}>¡Venta Exitosa!</h2>
+                            <p style={{ fontSize: 16, color: 'var(--color-text-muted)', marginBottom: 24 }}>Total cobrado: <strong style={{ color: 'var(--color-pos)' }}>${total.toLocaleString('es-CO')}</strong></p>
+
+                            {/* MLM Distribution Preview */}
+                            <div style={{ background: 'var(--color-surface-2)', borderRadius: 16, padding: 20, textAlign: 'left', border: '1px solid var(--color-border)' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                                    <Coins size={16} color="var(--color-wallet)" />
+                                    <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--color-navy)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Distribución de Ecosistema (10%)</span>
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+                                        <span style={{ color: 'var(--color-text-muted)' }}>Cashback al Cliente</span>
+                                        <span style={{ fontWeight: 700, color: '#16A34A' }}>+{(Number(tcEquivalent) * 0.02).toFixed(2)} TC</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+                                        <span style={{ color: 'var(--color-text-muted)' }}>Comisión Red (Nivel 1-4)</span>
+                                        <span style={{ fontWeight: 700, color: 'var(--color-wallet)' }}>+{(Number(tcEquivalent) * 0.05).toFixed(2)} TC</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+                                        <span style={{ color: 'var(--color-text-muted)' }}>Fondo Social / Tech</span>
+                                        <span style={{ fontWeight: 700, color: 'var(--color-navy)' }}>+{(Number(tcEquivalent) * 0.03).toFixed(2)} TC</span>
+                                    </div>
+                                    <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', fontSize: 14, fontWeight: 800 }}>
+                                        <span style={{ color: 'var(--color-navy)' }}>Total Shopy Points</span>
+                                        <span style={{ color: 'var(--color-wallet)' }}>{(Number(tcEquivalent) * 0.1).toFixed(2)} TC</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p style={{ marginTop: 20, fontSize: 12, color: 'var(--color-text-muted)', fontWeight: 500 }}>
+                                Transacción procesada por Shopy Engine v1.9
+                            </p>
                         </motion.div>
                     </motion.div>
                 )}
             </AnimatePresence>
+
 
             {/* LEFT — Product Catalog */}
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 14, minWidth: 0 }}>

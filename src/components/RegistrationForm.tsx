@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Phone, Mail, Ticket, ArrowRight, CheckCircle2, Eye, EyeOff, Zap } from 'lucide-react';
+import { User, Phone, Mail, Ticket, ArrowRight, CheckCircle2, Zap } from 'lucide-react';
 import { userService } from '../services/userService';
 
 interface RegistrationFormProps {
@@ -16,8 +16,8 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
     const [isValidating, setIsValidating] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [emailLogin, setEmailLogin] = useState('');
-    const [showPhone, setShowPhone] = useState(false);
-    const [formData, setFormData] = useState({ fullName: '', email: '', phone: '' });
+    const [passwordLogin, setPasswordLogin] = useState('');
+    const [formData, setFormData] = useState({ fullName: '', email: '', phone: '', password: '', confirmPassword: '' });
     const [error, setError] = useState('');
 
     const handleValidateReferral = async () => {
@@ -28,6 +28,15 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
     };
 
     const handleRegister = async (e: React.FormEvent) => {
+        if (formData.password !== formData.confirmPassword) {
+            setError('Las contraseñas no coinciden.');
+            return;
+        }
+        if (formData.password.length < 6) {
+            setError('La contraseña debe tener al menos 6 caracteres.');
+            return;
+        }
+
         e.preventDefault();
         setIsLoading(true);
         setError('');
@@ -46,7 +55,7 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
         setIsLoading(true);
         setError('');
         try {
-            const profile = await userService.login(emailLogin);
+            const profile = await userService.login(emailLogin, passwordLogin);
             onSuccess(profile);
         } catch (err: any) {
             setError(err.message || 'Usuario no encontrado.');
@@ -97,6 +106,18 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
                                         placeholder="tu@correo.com"
                                         value={emailLogin}
                                         onChange={e => setEmailLogin(e.target.value)}
+                                        required
+                                        className="input"
+                                        style={{ paddingLeft: 40 }}
+                                    />
+                                </div>
+                                <div className="input-with-icon">
+                                    <Ticket size={16} className="input-icon" />
+                                    <input
+                                        type="password"
+                                        placeholder="Tu contraseña"
+                                        value={passwordLogin}
+                                        onChange={e => setPasswordLogin(e.target.value)}
                                         required
                                         className="input"
                                         style={{ paddingLeft: 40 }}
@@ -180,13 +201,13 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
                                 </div>
                                 <div>
                                     <p style={{ fontSize: 12, fontWeight: 700, color: '#16A34A', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                                        Código válido
+                                        Paso 2: Perfil
                                     </p>
-                                    <p style={{ fontSize: 13, color: 'var(--color-text-muted)' }}>Ahora crea tu cuenta.</p>
+                                    <p style={{ fontSize: 13, color: 'var(--color-text-muted)' }}>Tus datos para la red.</p>
                                 </div>
                             </div>
 
-                            <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                                 <div className="input-with-icon">
                                     <User size={16} className="input-icon" />
                                     <input
@@ -214,49 +235,144 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
                                 <div className="input-with-icon">
                                     <Phone size={16} className="input-icon" />
                                     <input
-                                        type={showPhone ? 'text' : 'tel'}
+                                        type="tel"
                                         placeholder="WhatsApp (opcional)"
                                         value={formData.phone}
                                         onChange={e => setFormData({ ...formData, phone: e.target.value })}
                                         className="input"
                                         style={{ paddingLeft: 40, paddingRight: 40 }}
                                     />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPhone(!showPhone)}
-                                        style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)' }}
-                                    >
-                                        {showPhone ? <EyeOff size={16} /> : <Eye size={16} />}
-                                    </button>
+                                </div>
+                                <div className="input-with-icon">
+                                    <Ticket size={16} className="input-icon" />
+                                    <input
+                                        type="password"
+                                        placeholder="Crea tu contraseña"
+                                        value={formData.password}
+                                        onChange={e => setFormData({ ...formData, password: e.target.value })}
+                                        required
+                                        className="input"
+                                        style={{ paddingLeft: 40 }}
+                                    />
+                                </div>
+                                <div className="input-with-icon">
+                                    <Ticket size={16} className="input-icon" />
+                                    <input
+                                        type="password"
+                                        placeholder="Confirma tu contraseña"
+                                        value={formData.confirmPassword}
+                                        onChange={e => setFormData({ ...formData, confirmPassword: e.target.value })}
+                                        required
+                                        className="input"
+                                        style={{ paddingLeft: 40 }}
+                                    />
                                 </div>
 
-                                {error && <p style={{ fontSize: 12, color: '#DC2626', textAlign: 'center', padding: '6px 10px', background: '#FEF2F2', borderRadius: 8 }}>{error}</p>}
-
                                 <button
-                                    type="submit"
-                                    disabled={isLoading || !formData.fullName || !formData.email}
+                                    onClick={() => {
+                                        if (formData.password !== formData.confirmPassword) {
+                                            setError('Las contraseñas no coinciden.');
+                                        } else if (formData.password.length < 6) {
+                                            setError('Mínimo 6 caracteres.');
+                                        } else {
+                                            setError('');
+                                            setStep(3);
+                                        }
+                                    }}
+                                    disabled={!formData.fullName || !formData.email || !formData.password}
                                     className="btn btn-navy btn-full btn-lg"
-                                    style={{ justifyContent: 'center', marginTop: 6 }}
+                                    style={{ justifyContent: 'center', marginTop: 10 }}
                                 >
-                                    {isLoading ? (
-                                        <div style={{ width: 18, height: 18, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                                    ) : (
-                                        <>Crear mi Cuenta <Zap size={16} /></>
-                                    )}
+                                    Continuar al Pago <ArrowRight size={16} />
                                 </button>
-                            </form>
+                                {error && <p style={{ fontSize: 12, color: '#DC2626', textAlign: 'center' }}>{error}</p>}
+                            </div>
 
                             <button
                                 onClick={() => setStep(1)}
-                                style={{ width: '100%', marginTop: 12, fontSize: 13, color: 'var(--color-text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}
+                                style={{ width: '100%', marginTop: 20, fontSize: 13, color: 'var(--color-text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}
                             >
                                 ← Cambiar código de invitación
                             </button>
                         </motion.div>
                     )}
 
+                    {/* ── STEP 3 — Pago de Membresía ── */}
+                    {!isLoginMode && step === 3 && (
+                        <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                            <div style={{ textAlign: 'center', marginBottom: 24 }}>
+                                <div style={{ width: 60, height: 60, borderRadius: '50%', background: 'color-mix(in srgb, var(--color-wallet) 10%, white)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: 'var(--color-wallet)' }}>
+                                    <Zap size={32} />
+                                </div>
+                                <h2 style={{ fontSize: 22, fontWeight: 800, color: 'var(--color-navy)', marginBottom: 4 }}>
+                                    Activación VIP
+                                </h2>
+                                <p style={{ fontSize: 14, color: 'var(--color-text-muted)' }}>
+                                    Paga tu membresía anual para activar tu red.
+                                </p>
+                            </div>
+
+                            <div style={{
+                                background: 'var(--color-surface-2)',
+                                borderRadius: 16,
+                                padding: 20,
+                                border: '1px solid var(--color-border)',
+                                marginBottom: 20,
+                                textAlign: 'center'
+                            }}>
+                                <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', marginBottom: 4 }}>
+                                    Total a Pagar
+                                </p>
+                                <p style={{ fontSize: 32, fontWeight: 800, color: 'var(--color-navy)' }}>
+                                    $50,000 <span style={{ fontSize: 14, opacity: 0.6 }}>COP</span>
+                                </p>
+                                <div style={{ height: 1, background: 'var(--color-border)', margin: '14px 0' }}></div>
+                                <p style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>
+                                    Recibirás <strong>50 TC</strong> para participar en la Red de Regalos.
+                                </p>
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                <div style={{
+                                    padding: '12px 16px',
+                                    borderRadius: 12,
+                                    border: '2px solid var(--color-wallet)',
+                                    background: 'color-mix(in srgb, var(--color-wallet) 5%, white)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 12
+                                }}>
+                                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--color-wallet)' }}></div>
+                                    <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-navy)' }}>Pago Seguro (Wompi/TRX)</span>
+                                </div>
+
+                                {error && <p style={{ fontSize: 12, color: '#DC2626', textAlign: 'center', marginTop: 10 }}>{error}</p>}
+
+                                <button
+                                    onClick={handleRegister}
+                                    disabled={isLoading}
+                                    className="btn btn-wallet btn-full btn-lg"
+                                    style={{ justifyContent: 'center', marginTop: 10 }}
+                                >
+                                    {isLoading ? (
+                                        <div style={{ width: 18, height: 18, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                                    ) : (
+                                        <>Pagar y Activar mi Cuenta <CheckCircle2 size={18} /></>
+                                    )}
+                                </button>
+                            </div>
+
+                            <button
+                                onClick={() => setStep(2)}
+                                style={{ width: '100%', marginTop: 20, fontSize: 13, color: 'var(--color-text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}
+                            >
+                                ← Regresar a mis datos
+                            </button>
+                        </motion.div>
+                    )}
+
                 </AnimatePresence>
-            </motion.div>
-        </div>
+            </motion.div >
+        </div >
     );
 }

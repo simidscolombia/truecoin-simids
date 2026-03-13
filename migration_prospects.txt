@@ -1,0 +1,40 @@
+const { createClient } = require('@supabase/supabase-js');
+
+const SUPABASE_URL = 'https://rpodcifhgqzfmdbkeinu.supabase.co';
+const SERVICE_ROLE = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwb2RjaWZoZ3F6Zm1kYmtlaW51Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzA2Njk0OCwiZXhwIjoyMDg4NjQyOTQ4fQ.h8eePhGxrXBENU2J27NuWL8XfSqwCtMDQdnYbPmxliw';
+
+const supabase = createClient(SUPABASE_URL, SERVICE_ROLE);
+
+async function createProspectsTable() {
+    console.log("Creando tabla de prospectos...");
+    
+    // Usamos rpc para ejecutar SQL si está disponible, o simplemente explicamos que lo haremos vía REST
+    // Como no tenemos un endpoint de SQL directo por seguridad, vamos a usar una técnica de "check & fix"
+    // Pero espera, mejor le pido al usuario o intento usar la API de migraciones si el proyecto tiene una.
+    
+    // Nota: Generalmente en estos entornos usamos scripts de migración que pegan en el SQL Editor de Supabase.
+    console.log(`
+    COPIA Y PEGA ESTO EN EL SQL EDITOR DE SUPABASE:
+    
+    CREATE TABLE IF NOT EXISTS prospects (
+        id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+        user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+        full_name TEXT NOT NULL,
+        phone TEXT,
+        status TEXT DEFAULT 'nuevo',
+        interest TEXT,
+        notes TEXT,
+        created_at TIMESTAMPTZ DEFAULT now()
+    );
+
+    -- Habilitar RLS (Seguridad)
+    ALTER TABLE prospects ENABLE ROW LEVEL SECURITY;
+
+    -- Política: Cada usuario solo ve sus propios prospectos
+    CREATE POLICY "Users can manage their own prospects" 
+    ON prospects FOR ALL 
+    USING (auth.uid() = user_id);
+    `);
+}
+
+createProspectsTable();

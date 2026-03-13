@@ -150,13 +150,19 @@ export const adminService = {
 
     // CRM: Eliminar Socio (Temporal para limpieza de datos)
     async deleteUser(userId: string) {
-        // 1. Eliminar billetera primero (por integridad referencial si no hay CASCADE)
+        // 1. Limpiar referencias en 'profiles.referred_by' para evitar FK violations
+        await supabase
+            .from('profiles')
+            .update({ referred_by: null })
+            .eq('referred_by', userId);
+
+        // 2. Eliminar billetera (por integridad referencial si no hay CASCADE)
         await supabase
             .from('wallets')
             .delete()
             .eq('user_id', userId);
 
-        // 2. Eliminar perfil
+        // 3. Eliminar perfil
         const { error } = await supabase
             .from('profiles')
             .delete()

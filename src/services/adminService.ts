@@ -148,6 +148,24 @@ export const adminService = {
         return true;
     },
 
+    // CRM: Eliminar Socio (Temporal para limpieza de datos)
+    async deleteUser(userId: string) {
+        // 1. Eliminar billetera primero (por integridad referencial si no hay CASCADE)
+        await supabase
+            .from('wallets')
+            .delete()
+            .eq('user_id', userId);
+
+        // 2. Eliminar perfil
+        const { error } = await supabase
+            .from('profiles')
+            .delete()
+            .eq('id', userId);
+
+        if (error) throw error;
+        return true;
+    },
+
     // SISTEMA DE NOTIFICACIONES (WhatsApp Bridge)
     async notifyUser(phone: string, message: string) {
         try {

@@ -3,7 +3,7 @@
 import {
     Users, Wallet, TrendingUp, ArrowLeft, Search, Edit3, ShieldAlert,
     Database, LayoutDashboard, Save, BarChart3, SearchCode,
-    Globe, Sparkles, Palette
+    Globe, Sparkles, Palette, Trash2
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -106,6 +106,20 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
             fetchData();
         } catch (error) {
             alert("Error al actualizar socio: " + (error as any).message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDeleteUser = async (userId: string, name: string) => {
+        if (!confirm(`🚨 ¿Estás SEGURO de eliminar a ${name}? Esta acción no se puede deshacer y borrará su billetera y red.`)) return;
+        setLoading(true);
+        try {
+            await adminService.deleteUser(userId);
+            alert("Socio eliminado del mapa.");
+            fetchData();
+        } catch (error) {
+            alert("No se pudo eliminar: " + (error as any).message);
         } finally {
             setLoading(false);
         }
@@ -344,12 +358,20 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                                                     </span>
                                                 </td>
                                                 <td style={{ padding: '16px 24px', textAlign: 'center' }}>
-                                                    <button
-                                                        onClick={() => handleEditUser(u)}
-                                                        style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--color-surface-2)', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-muted)' }}
-                                                    >
-                                                        <Edit3 size={14} />
-                                                    </button>
+                                                    <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                                                        <button
+                                                            onClick={() => handleEditUser(u)}
+                                                            style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--color-surface-2)', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-muted)' }}
+                                                        >
+                                                            <Edit3 size={14} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeleteUser(u.id, u.full_name)}
+                                                            style={{ width: 32, height: 32, borderRadius: 8, background: '#FEF2F2', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: '#DC2626' }}
+                                                        >
+                                                            <Trash2 size={14} />
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}

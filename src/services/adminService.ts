@@ -156,13 +156,25 @@ export const adminService = {
             .update({ referred_by: null })
             .eq('referred_by', userId);
 
-        // 2. Eliminar billetera (por integridad referencial si no hay CASCADE)
+        // 2. Eliminar prospectos
+        await supabase
+            .from('prospects')
+            .delete()
+            .eq('user_id', userId);
+
+        // 3. Eliminar transacciones donde sea emisor o receptor
+        await supabase
+            .from('transactions')
+            .delete()
+            .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`);
+
+        // 4. Eliminar billetera
         await supabase
             .from('wallets')
             .delete()
             .eq('user_id', userId);
 
-        // 3. Eliminar perfil
+        // 5. Eliminar perfil
         const { error } = await supabase
             .from('profiles')
             .delete()

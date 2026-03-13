@@ -26,7 +26,8 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
         referredBy: '',
         currentLevel: 1,
         balance: '0',
-        email: ''
+        email: '',
+        password: ''
     });
 
     // Expansion Scanner States
@@ -72,7 +73,8 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
             referralCode: u.referral_code || '',
             referredBy: u.referred_by || '',
             currentLevel: u.current_level || 1,
-            balance: u.wallets?.[0]?.balance_tc?.toString() || '0'
+            balance: u.wallets?.[0]?.balance_tc?.toString() || '0',
+            password: u.password || ''
         });
     };
 
@@ -86,7 +88,8 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                 phone: editData.phone,
                 referral_code: editData.referralCode,
                 referred_by: editData.referredBy || null,
-                current_level: editData.currentLevel
+                current_level: editData.currentLevel,
+                password: editData.password
             });
 
             // 2. Ajustar Saldo si cambió
@@ -493,6 +496,11 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                                 <div>
                                     <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', marginBottom: 8 }}>Referido Por (ID)</label>
                                     <input type="text" value={editData.referredBy} onChange={e => setEditData({ ...editData, referredBy: e.target.value })} className="input" placeholder="Opcional" />
+                                </div>
+
+                                <div style={{ gridColumn: 'span 2' }}>
+                                    <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', marginBottom: 8 }}>Nueva Contraseña</label>
+                                    <input type="text" value={editData.password} onChange={e => setEditData({ ...editData, password: e.target.value })} className="input" placeholder="Escribe la nueva contraseña aquí" />
                                 </div>
 
                                 {/* Levels & Finance */}

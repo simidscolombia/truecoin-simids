@@ -148,40 +148,43 @@ export const adminService = {
         return true;
     },
 
-    // CRM: Eliminar Socio (Temporal para limpieza de datos)
+    // CRM: Eliminar Socio (Limpieza Total Extreme)
     async deleteUser(userId: string) {
-        // 1. Limpiar referencias en 'profiles.referred_by' para evitar FK violations
-        await supabase
-            .from('profiles')
-            .update({ referred_by: null })
-            .eq('referred_by', userId);
+        try {
+            // 1. Limpiar referencias de patrocinio (Hijos de este usuario)
+            await supabase.from('profiles').update({ referred_by: null }).eq('referred_by', userId);
 
-        // 2. Eliminar prospectos
-        await supabase
-            .from('prospects')
-            .delete()
-            .eq('user_id', userId);
+            // 2. Limpiar Prospectos
+            await supabase.from('prospects').delete().eq('user_id', userId);
 
-        // 3. Eliminar transacciones donde sea emisor o receptor
-        await supabase
-            .from('transactions')
-            .delete()
-            .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`);
+            // 3. Limpiar Transacciones (Espejos de dinero)
+            await supabase.from('transactions').delete().or(`sender_id.eq.${userId},receiver_id.eq.${userId}`);
 
-        // 4. Eliminar billetera
-        await supabase
-            .from('wallets')
-            .delete()
-            .eq('user_id', userId);
+            // 4. Limpiar Negocios y sus Productos
+            const { data: bus } = await supabase.from('businesses').select('id').eq('owner_id', userId);
+            if (bus && bus.length > 0) {
+                const busIds = bus.map(b => b.id);
+                await supabase.from('products').delete().in('business_id', busIds);
+                await supabase.from('businesses').delete().in('id', busIds);
+            }
 
-        // 5. Eliminar perfil
-        const { error } = await supabase
-            .from('profiles')
-            .delete()
-            .eq('id', userId);
+            // 5. Limpiar Billetera
+            await supabase.from('wallets').delete().eq('user_id', userId);
 
-        if (error) throw error;
-        return true;
+            // 6. ELIMINACIÓN FINAL DEL PERFIL
+            const { error, count } = await supabase
+                .from('profiles')
+                .delete({ count: 'exact' })
+                .eq('id', userId);
+
+            if (error) throw error;
+            if (count === 0) throw new Error("El usuario no existe o ya fue borrado.");
+
+            return true;
+        } catch (err: any) {
+            console.error("DEBUG DELETE ERROR:", err);
+            throw new Error(err.message || "Fallo en la eliminación atómica.");
+        }
     },
 
     // SISTEMA DE NOTIFICACIONES (WhatsApp Bridge)

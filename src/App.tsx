@@ -44,7 +44,7 @@ function Header({
   balance?: string;
 }) {
   return (
-    <nav style={{
+    <nav className="app-header" style={{
       background: 'var(--color-surface)',
       borderBottom: '1px solid var(--color-border)',
       padding: '0 32px',
@@ -61,14 +61,14 @@ function Header({
         <div style={{ width: 36, height: 36, background: 'var(--color-navy)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Coins size={20} color="white" />
         </div>
-        <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--color-navy)', letterSpacing: -0.5 }}>
+        <span className="header-logo-text" style={{ fontSize: 20, fontWeight: 800, color: 'var(--color-navy)', letterSpacing: -0.5 }}>
           Shopy<span style={{ color: 'var(--color-wallet)' }}>Brands</span>
-          <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', background: 'var(--color-surface-2)', padding: '2px 6px', borderRadius: 6, marginLeft: 8, verticalAlign: 'middle' }}>V1.9.0 - COMUNIDAD</span>
+          <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', background: 'var(--color-surface-2)', padding: '2px 6px', borderRadius: 6, marginLeft: 8, verticalAlign: 'middle', display: 'inline-block' }}>V1.9.0</span>
         </span>
       </div>
 
       {/* Navigation Tabs - Centered & Integrated */}
-      <div style={{
+      <div className="header-nav" style={{
         height: '100%',
         display: 'flex',
         alignItems: 'flex-end',
@@ -176,9 +176,9 @@ function Header({
       </div>
 
       {/* Right Side Actions */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+      <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
         {isLoggedIn && balance && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginRight: 8 }}>
+          <div className="header-balance" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginRight: 8 }}>
             <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>Tu Saldo</span>
             <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--color-wallet)' }}>{balance} TC</span>
           </div>
@@ -428,7 +428,7 @@ function App() {
       {/* Landing Features Section (Only show on marketplace or dashboard as context) */}
       {(currentView === 'marketplace' || currentView === 'dashboard') && (
         <section style={{ background: 'var(--color-bg)', borderTop: '1px solid var(--color-border)', padding: '80px 32px' }}>
-          <div style={{ maxWidth: 1280, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 60, alignItems: 'center' }}>
+          <div className="landing-grid" style={{ maxWidth: 1280, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 60, alignItems: 'center' }}>
             {/* Video Left */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -449,7 +449,7 @@ function App() {
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 16px', borderRadius: 999, background: 'color-mix(in srgb, var(--color-wallet) 12%, white)', color: 'var(--color-wallet)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', marginBottom: 20 }}>
                 <Zap size={13} /> Club VIP ShopyBrands
               </div>
-              <h2 style={{ fontSize: 36, fontWeight: 800, color: 'var(--color-navy)', marginBottom: 20, lineHeight: 1.2 }}>
+              <h2 className="landing-title" style={{ fontSize: 36, fontWeight: 800, color: 'var(--color-navy)', marginBottom: 20, lineHeight: 1.2 }}>
                 Bienvenido al primer Club VIP <br /> <span style={{ color: 'var(--color-cloud-blue)' }}>impulsado por IA.</span>
               </h2>
               <p style={{ fontSize: 14, color: 'var(--color-text-muted)' }}>

@@ -516,7 +516,20 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                                         <Edit3 size={20} />
                                     </div>
                                     <div style={{ textAlign: 'left' }}>
-                                        <h3 style={{ fontSize: 20, fontWeight: 800, color: 'var(--color-navy)' }}>Editar Registro</h3>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                            <h3 style={{ fontSize: 20, fontWeight: 800, color: 'var(--color-navy)' }}>Editar Registro</h3>
+                                            <span style={{
+                                                fontSize: 9,
+                                                padding: '2px 6px',
+                                                borderRadius: 4,
+                                                background: import.meta.env.VITE_SUPABASE_SERVICE_ROLE ? '#DCFCE7' : '#FEE2E2',
+                                                color: import.meta.env.VITE_SUPABASE_SERVICE_ROLE ? '#166534' : '#991B1B',
+                                                fontWeight: 800,
+                                                textTransform: 'uppercase'
+                                            }}>
+                                                {import.meta.env.VITE_SUPABASE_SERVICE_ROLE ? 'Master Key Active' : 'Standard Access (RLS Locked)'}
+                                            </span>
+                                        </div>
                                         <p style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>ID: {editingUser.id}</p>
                                     </div>
                                 </div>

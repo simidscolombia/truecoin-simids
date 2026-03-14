@@ -127,22 +127,26 @@ export const adminService = {
 
     // CRM: Actualizar perfil de usuario
     async updateUserProfile(userId: string, updates: any) {
+        // Asegurar que si referred_by viene vacío lo mandemos como null
+        if (updates.referred_by === '') updates.referred_by = null;
+
         const { data, error } = await supabase
             .from('profiles')
             .update(updates)
-            .eq('id', userId);
+            .eq('id', userId)
+            .select();
 
         if (error) throw error;
         return data;
     },
 
     // CRM: Ajuste manual de saldo (Poder de Dios Admin)
-    // CRM: Ajuste manual de saldo (Poder de Dios Admin)
     async adjustUserBalance(userId: string, newBalance: number) {
         const { error } = await supabase
             .from('wallets')
             .update({ balance_tc: newBalance })
-            .eq('user_id', userId);
+            .eq('user_id', userId)
+            .select();
 
         if (error) throw error;
         return true;

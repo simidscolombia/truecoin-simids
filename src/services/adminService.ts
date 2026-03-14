@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase';
+import { supabase, supabaseAdmin } from '../lib/supabase';
 
 export const adminService = {
     // Métricas Globales para el Dashboard de SuperAdmin
@@ -59,7 +59,7 @@ export const adminService = {
 
     // CRM: Aprobar/Desaprobar Negocio
     async updateBusinessStatus(businessId: string, isVip: boolean) {
-        const { error } = await supabase
+        const { error } = await supabaseAdmin
             .from('businesses')
             .update({ is_vip: isVip })
             .eq('id', businessId);
@@ -70,7 +70,7 @@ export const adminService = {
 
     // CRM: Actualizar Tier de Negocio (Free -> VIP)
     async updateBusinessTier(businessId: string, tier: 'free' | 'vip') {
-        const { error } = await supabase
+        const { error } = await supabaseAdmin
             .from('businesses')
             .update({
                 membership_tier: tier,
@@ -127,28 +127,35 @@ export const adminService = {
 
     // CRM: Actualizar perfil de usuario
     async updateUserProfile(userId: string, updates: any) {
-        // Asegurar que si referred_by viene vacío lo mandemos como null
-        if (updates.referred_by === '') updates.referred_by = null;
+        if (!updates.referred_by || updates.referred_by.trim() === '') {
+            updates.referred_by = null;
+        }
 
-        const { data, error } = await supabase
+        const { data, error } = await supabaseAdmin
             .from('profiles')
             .update(updates)
             .eq('id', userId)
             .select();
 
         if (error) throw error;
+        if (!data || data.length === 0) {
+            throw new Error("No se pudo actualizar el perfil. Usuario no existe o restricción crítica.");
+        }
         return data;
     },
 
     // CRM: Ajuste manual de saldo (Poder de Dios Admin)
     async adjustUserBalance(userId: string, newBalance: number) {
-        const { error } = await supabase
+        const { data, error } = await supabaseAdmin
             .from('wallets')
             .update({ balance_tc: newBalance })
             .eq('user_id', userId)
             .select();
 
         if (error) throw error;
+        if (!data || data.length === 0) {
+            throw new Error("No se pudo ajustar el saldo en la nube.");
+        }
         return true;
     },
 
@@ -173,10 +180,10 @@ export const adminService = {
             }
 
             // 5. Limpiar Billetera
-            await supabase.from('wallets').delete().eq('user_id', userId);
+            await supabaseAdmin.from('wallets').delete().eq('user_id', userId);
 
             // 6. ELIMINACIÓN FINAL DEL PERFIL
-            const { error, count } = await supabase
+            const { error, count } = await supabaseAdmin
                 .from('profiles')
                 .delete({ count: 'exact' })
                 .eq('id', userId);

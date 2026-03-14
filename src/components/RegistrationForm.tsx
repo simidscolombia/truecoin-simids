@@ -55,7 +55,7 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
 
         try {
             const profile = await userService.register({ ...formData, referralCode });
-            const paymentUrl = `https://checkout.wompi.co/p/?public_key=pub_test_Q5yS9pmev6W9kzE0v6X2pY123&currency=COP&amount_in_cents=5000000&reference=SHPY-${profile.id.slice(0, 8)}`;
+            const paymentUrl = `https://checkout.wompi.co/p?public_key=pub_test_Q5yS9pmev6W9kzE0v6X2pY123&currency=COP&amount_in_cents=5000000&reference=SHPY-${profile.id.slice(0, 8)}`;
 
             // Redirigir al pago
             window.open(paymentUrl, '_blank');

@@ -19,9 +19,9 @@ import ShoppingCart from './components/ShoppingCart';
 import { useState } from 'react';
 type AppView = 'dashboard' | 'marketplace' | 'pos' | 'admin' | 'shopyfam' | 'prospects';
 
-// ── Header Navigation ─────────────────────────────────────
 function Header({
   isLoggedIn,
+  isAdmin,
   onLogout,
   onLogin,
   currentView,
@@ -33,6 +33,7 @@ function Header({
   balance
 }: {
   isLoggedIn: boolean;
+  isAdmin: boolean;
   onLogout: () => void;
   onLogin: () => void;
   currentView: AppView;
@@ -63,7 +64,7 @@ function Header({
         </div>
         <span className="header-logo-text" style={{ fontSize: 20, fontWeight: 800, color: 'var(--color-navy)', letterSpacing: -0.5 }}>
           Shopy<span style={{ color: 'var(--color-wallet)' }}>Brands</span>
-          <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', background: 'var(--color-surface-2)', padding: '2px 6px', borderRadius: 6, marginLeft: 8, verticalAlign: 'middle', display: 'inline-block' }}>V2.4.8 — CLOUD SYNC</span>
+          <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', background: 'var(--color-surface-2)', padding: '2px 6px', borderRadius: 6, marginLeft: 8, verticalAlign: 'middle', display: 'inline-block' }}>V2.5.0 — GOLDEN SHIELD</span>
         </span>
       </div>
 
@@ -118,7 +119,7 @@ function Header({
             fontWeight: 800,
             cursor: 'pointer',
             transition: 'all 0.3s ease',
-            background: (currentView === 'marketplace' && viewMode === 'businesses') ? 'var(--color-directorio)' : 'transparent',
+            background: (currentView === 'marketplace' && viewMode === 'businesses') ? 'var(--color-pos)' : 'transparent',
             color: (currentView === 'marketplace' && viewMode === 'businesses') ? 'white' : 'var(--color-text-muted)',
             display: 'flex',
             alignItems: 'center',
@@ -128,7 +129,7 @@ function Header({
           <Search size={16} /> Directorio
         </button>
 
-        {isLoggedIn && (
+        {isLoggedIn && !isAdmin && (
           <button
             onClick={() => onNavigate('dashboard')}
             style={{
@@ -151,7 +152,7 @@ function Header({
           </button>
         )}
 
-        {isLoggedIn && (
+        {isLoggedIn && !isAdmin && (
           <button
             onClick={() => onNavigate('shopyfam')}
             style={{
@@ -173,11 +174,34 @@ function Header({
             <Users size={16} /> ShopyFam
           </button>
         )}
+
+        {isLoggedIn && isAdmin && (
+          <button
+            onClick={() => onNavigate('admin')}
+            style={{
+              border: 'none',
+              padding: '12px 24px',
+              borderTopLeftRadius: 12,
+              borderTopRightRadius: 12,
+              fontSize: 14,
+              fontWeight: 800,
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              background: currentView === 'admin' ? 'var(--color-admin)' : 'transparent',
+              color: currentView === 'admin' ? 'white' : 'var(--color-text-muted)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+            }}
+          >
+            <Settings size={16} /> Admin Cerebro
+          </button>
+        )}
       </div>
 
       {/* Right Side Actions */}
       <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-        {isLoggedIn && balance && (
+        {isLoggedIn && balance && !isAdmin && (
           <div className="header-balance" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginRight: 8 }}>
             <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>Tu Saldo</span>
             <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--color-wallet)' }}>{balance} TC</span>
@@ -225,14 +249,11 @@ function Header({
 
         {isLoggedIn ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div
-              onClick={() => onNavigate('admin')}
-              style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--color-surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: currentView === 'admin' ? '2px solid var(--color-admin)' : 'none' }}>
-              <Settings size={18} color="var(--color-text-muted)" />
-            </div>
             <button
               onClick={onLogout}
-              style={{ background: 'none', border: 'none', color: 'var(--color-text-muted)', cursor: 'pointer' }}>
+              style={{ background: 'none', border: 'none', color: 'var(--color-text-muted)', cursor: 'pointer' }}
+              title="Cerrar Sesión"
+            >
               <LogOut size={20} />
             </button>
           </div>
@@ -254,8 +275,9 @@ function Header({
 function App() {
   const [showAuth, setShowAuth] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [user, setUser] = useState<any>(null);
-  const [currentView, setCurrentView] = useState<AppView>('dashboard');
+  const [currentView, setCurrentView] = useState<AppView>('marketplace');
   const [balance, setBalance] = useState('0.00');
   const [guestViewMode, setGuestViewMode] = useState<'products' | 'businesses'>('products');
   const [cart, setCart] = useState<{ product: Product; quantity: number }[]>([]);
@@ -291,7 +313,18 @@ function App() {
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
   const handleRegisterSuccess = async (profile: any) => {
-    setUser({ fullName: profile.full_name, referralCode: profile.referral_code, id: profile.id });
+    // Definimos quién es Admin
+    const isSuperAdmin = profile.email?.toLowerCase() === 'elkindanielcastillo@gmail.com' || profile.referral_code === 'TCMASTER';
+
+    setUser({
+      fullName: profile.full_name,
+      referralCode: profile.referral_code,
+      id: profile.id,
+      email: profile.email
+    });
+
+    setIsAdmin(isSuperAdmin);
+
     try {
       const fullProfile = await userService.getProfile(profile.id);
       if (fullProfile.wallets?.length > 0) {
@@ -300,8 +333,16 @@ function App() {
     } catch (err) {
       console.error('Error cargando perfil:', err);
     }
+
     setShowAuth(false);
     setIsLoggedIn(true);
+
+    // Redirigir según rol
+    if (isSuperAdmin) {
+      setCurrentView('admin');
+    } else {
+      setCurrentView('dashboard');
+    }
   };
 
   const handlePurchase = async (amount: number) => {
@@ -316,15 +357,17 @@ function App() {
 
   const handleLogout = () => {
     setIsLoggedIn(false);
+    setIsAdmin(false);
     setUser(null);
     setBalance('0.00');
-    setCurrentView('dashboard');
+    setCurrentView('marketplace');
   };
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-bg)' }}>
       <Header
         isLoggedIn={isLoggedIn}
+        isAdmin={isAdmin}
         onLogout={handleLogout}
         onLogin={() => setShowAuth(true)}
         currentView={currentView}
@@ -400,13 +443,13 @@ function App() {
           </div>
         )}
 
-        {currentView === 'pos' && isLoggedIn && (
+        {currentView === 'pos' && isLoggedIn && isAdmin && (
           <div className="animate-in">
             <POSSystem onBack={() => setCurrentView('dashboard')} />
           </div>
         )}
 
-        {currentView === 'admin' && isLoggedIn && (
+        {currentView === 'admin' && isLoggedIn && isAdmin && (
           <div className="animate-in">
             <AdminDashboard onBack={() => setCurrentView('dashboard')} />
           </div>

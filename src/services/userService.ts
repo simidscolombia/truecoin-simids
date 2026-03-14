@@ -30,13 +30,11 @@ export const userService = {
 
         const profile = data[0];
 
-        // Si el usuario tiene contraseña en la DB, validarla
-        if (profile.password && password && profile.password !== password) {
+        // Validar contraseña estrictamente
+        if (!profile.password || profile.password !== (password || '').trim()) {
             throw new Error('Contraseña incorrecta.');
         }
 
-        // Si el usuario NO tiene contraseña aún (caso migración) y mandó una,
-        // podríamos intentar guardarla, pero por ahora permitimos entrar.
         return profile;
     },
 

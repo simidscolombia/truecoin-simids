@@ -38,20 +38,18 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
         setError('');
 
         try {
-            // 1. Primero registramos en la DB (Estado pendiente o básico)
             const profile = await userService.register({ ...formData, referralCode });
-
-            // 2. Redirigir al link de pago real (Wompi/TRX)
-            // En producción aquí iría el link generado para este usuario específico
             const paymentUrl = `https://checkout.wompi.co/p/?public_key=pub_test_Q5yS9pmev6W9kzE0v6X2pY123&currency=COP&amount_in_cents=5000000&reference=SHPY-${profile.id.slice(0, 8)}`;
 
-            alert("Paso 1 completado: Registro exitoso. Ahora te redirigiremos a la pasarela de pago seguro para activar tu membresía.");
-
-            // Redirigir
+            // Redirigir al pago
             window.open(paymentUrl, '_blank');
 
-            // 3. Informar al App que el registro fue exitoso (esto lo lleva al dashboard)
-            onSuccess(profile);
+            // En lugar de loguear de inmediato, informamos que debe pagar para activar
+            alert("¡Registro Base Exitoso! \n\nSe ha abierto la pasarela de Wompi. Por seguridad, tu cuenta de Socio se activará automáticamente una vez confirmado el pago. \n\nCuando completes el pago, regresa aquí e inicia sesión.");
+
+            // Cambiar a modo login para que el usuario pueda entrar después
+            setIsLoginMode(true);
+            setEmailLogin(formData.email);
 
         } catch (err: any) {
             setError(err.message || 'Error al registrar. Intenta de nuevo.');

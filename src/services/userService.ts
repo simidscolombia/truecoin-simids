@@ -150,5 +150,17 @@ export const userService = {
             .eq('id', prospectId);
 
         if (error) throw error;
+    },
+
+    async validateReferralCode(code: string) {
+        if (!code) return null;
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('id, full_name')
+            .eq('referral_code', code.toUpperCase())
+            .single();
+
+        if (error || !data) return null;
+        return data;
     }
 };

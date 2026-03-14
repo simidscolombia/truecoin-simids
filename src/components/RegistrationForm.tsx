@@ -21,10 +21,26 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
     const [error, setError] = useState('');
 
     const handleValidateReferral = async () => {
-        if (referralCode.length < 4) { setError('El código debe tener al menos 4 caracteres.'); return; }
+        if (referralCode.length < 4) {
+            setError('El código debe tener al menos 4 caracteres.');
+            return;
+        }
+
         setError('');
         setIsValidating(true);
-        setTimeout(() => { setStep(2); setIsValidating(false); }, 1000);
+
+        try {
+            const referrer = await userService.validateReferralCode(referralCode);
+            if (referrer) {
+                setStep(2);
+            } else {
+                setError('Código de invitación inválido. Por favor verifica con quien te invitó.');
+            }
+        } catch (err) {
+            setError('Error al validar el código. Intenta de nuevo.');
+        } finally {
+            setIsValidating(false);
+        }
     };
 
     const handleRegister = async (e: React.FormEvent) => {

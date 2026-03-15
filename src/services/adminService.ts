@@ -102,26 +102,40 @@ export const adminService = {
         return data;
     },
 
-    // CRM: Gestionar Usuarios
     async getAllUsers() {
-        const { data, error } = await supabaseAdmin
+        // 1. Traer todos los perfiles
+        const { data: profiles, error: pError } = await supabaseAdmin
             .from('profiles')
-            .select('*, wallets(balance_tc)')
+            .select('*')
             .order('created_at', { ascending: false });
 
-        if (error) throw error;
+        if (pError) throw pError;
 
-        // Obtenemos todos los registros para contar referidos en memoria (si no es red masiva)
+        // 2. Traer todas las billeteras (para el cruce manual)
+        const { data: wallets, error: wError } = await supabaseAdmin
+            .from('wallets')
+            .select('user_id, balance_tc');
+
+        if (wError) throw wError;
+
+        // 3. Traer todos los perfiles para el conteo de referidos
         const { data: allRefs } = await supabaseAdmin.from('profiles').select('referred_by');
         const refCounts = (allRefs || []).reduce((acc: any, r) => {
             if (r.referred_by) acc[r.referred_by] = (acc[r.referred_by] || 0) + 1;
             return acc;
         }, {});
 
-        return data.map(u => ({
+        // 4. Mapeo de saldos para búsqueda rápida
+        const walletMap = (wallets || []).reduce((acc: any, w) => {
+            acc[w.user_id] = w.balance_tc;
+            return acc;
+        }, {});
+
+        // 5. Unir toda la información
+        return (profiles || []).map(u => ({
             ...u,
             team_size: refCounts[u.id] || 0,
-            balance_tc: u.wallets?.[0]?.balance_tc || 0
+            balance_tc: walletMap[u.id] || 0
         }));
     },
 

@@ -56,23 +56,26 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
         setError('');
 
         try {
-            const profile = await userService.register({ ...formData, referralCode });
+            // GENERAMOS REFERENCIA ÚNICA PARA EL PAGO (SIN CREAR USUARIO TODAVÍA)
+            const tempRef = `POS-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
 
-            // Link de Pago Wompi (Parámetros con guión según error de Wompi)
-            const paymentUrl = `https://checkout.wompi.co/p?public-key=pub_test_Q5yS9pmev6W9kzE0v6X2pY123&currency=COP&amount-in-cents=5000000&reference=SHPY-${profile.id.slice(0, 8)}`;
+            // Link de Pago Wompi - FORMATO ESTRICTO (Underscores y "/" final)
+            // Nota: Se debe usar la llave real en Producción
+            const paymentUrl = `https://checkout.wompi.co/p/?public_key=pub_test_Q5yS9pmev6W9kzE0v6X2pY123&currency=COP&amount_in_cents=5000000&reference=${tempRef}`;
 
-            // Redirigir al pago
+            // Abrir pasarela
             window.open(paymentUrl, '_blank');
 
-            // En lugar de loguear de inmediato, informamos que debe pagar para activar
-            alert("¡Registro Base Exitoso! \n\nSe ha abierto la pasarela de Wompi. Por seguridad, tu cuenta de Socio se activará automáticamente una vez confirmado el pago. \n\nCuando completes el pago, regresa aquí e inicia sesión.");
+            // Notificamos al usuario
+            alert("🚀 PASARELA INICIADA\n\nPor seguridad, tu cuenta NO se creará en el sistema hasta que realices el pago y el administrador lo valide.\n\nCompleta el pago en la otra pestaña y guarda tu comprobante.");
 
-            // Cambiar a modo login para que el usuario pueda entrar después
+            // Resetear flujo para evitar registros accidentales
+            setStep(1);
+            setReferralCode('');
             setIsLoginMode(true);
-            setEmailLogin(formData.email);
 
         } catch (err: any) {
-            setError(err.message || 'Error al registrar. Intenta de nuevo.');
+            setError('Error al conectar con Wompi.');
         } finally {
             setIsLoading(false);
         }

@@ -4,31 +4,31 @@ export const adminService = {
     // Métricas Globales para el Dashboard de SuperAdmin
     async getGlobalStats() {
         // 1. Total Usuarios
-        const { count: userCount } = await supabase
+        const { count: userCount } = await supabaseAdmin
             .from('profiles')
             .select('*', { count: 'exact', head: true });
 
         // 2. Saldo Total en Circulación
-        const { data: wallets } = await supabase
+        const { data: wallets } = await supabaseAdmin
             .from('wallets')
             .select('balance_tc');
 
         const totalTC = wallets?.reduce((sum, w) => sum + Number(w.balance_tc), 0) || 0;
 
         // 3. Total Negocios
-        const { count: businessCount } = await supabase
+        const { count: businessCount } = await supabaseAdmin
             .from('businesses')
             .select('*', { count: 'exact', head: true });
 
         // 4. Últimas Transacciones
-        const { data: recentTransactions } = await supabase
+        const { data: recentTransactions } = await supabaseAdmin
             .from('transactions')
             .select('*, sender:profiles!transactions_sender_id_fkey(full_name), receiver:profiles!transactions_receiver_id_fkey(full_name)')
             .order('created_at', { ascending: false })
             .limit(10);
 
         // 5. Distribución por Niveles
-        const { data: levelDist } = await supabase
+        const { data: levelDist } = await supabaseAdmin
             .from('profiles')
             .select('current_level');
 
@@ -48,7 +48,7 @@ export const adminService = {
 
     // CRM: Gestionar Todos los Negocios
     async getAllBusinesses() {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseAdmin
             .from('businesses')
             .select('*, owner:profiles(full_name)')
             .order('membership_tier', { ascending: false }); // VIP primero
@@ -105,7 +105,7 @@ export const adminService = {
 
     // CRM: Gestionar Usuarios
     async getAllUsers() {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseAdmin
             .from('profiles')
             .select('*, wallets(balance_tc)')
             .order('created_at', { ascending: false });
@@ -113,7 +113,7 @@ export const adminService = {
         if (error) throw error;
 
         // Obtenemos todos los registros para contar referidos en memoria (si no es red masiva)
-        const { data: allRefs } = await supabase.from('profiles').select('referred_by');
+        const { data: allRefs } = await supabaseAdmin.from('profiles').select('referred_by');
         const refCounts = (allRefs || []).reduce((acc: any, r) => {
             if (r.referred_by) acc[r.referred_by] = (acc[r.referred_by] || 0) + 1;
             return acc;

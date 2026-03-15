@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, Phone, Mail, Ticket, ArrowRight, CheckCircle2, Zap } from 'lucide-react';
 import { userService } from '../services/userService';
@@ -19,7 +19,31 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
     const [passwordLogin, setPasswordLogin] = useState('');
     const [formData, setFormData] = useState({ fullName: '', email: '', phone: '', password: '', confirmPassword: '' });
     const [referrerName, setReferrerName] = useState('');
+    const [wompiPublicKey, setWompiPublicKey] = useState('pub_test_Q5yS9pmev6W9kzE0v6X2pY123'); // Fallback
+    const [regIp, setRegIp] = useState('');
+    const [regLoc, setRegLoc] = useState('');
     const [error, setError] = useState('');
+
+    useEffect(() => {
+        const loadSettings = async () => {
+            try {
+                const { data } = await userService.getPaymentSettings();
+                if (data?.wompi_public) {
+                    setWompiPublicKey(data.wompi_public.trim());
+                }
+
+                // Track IP Info (Opcional pero útil)
+                const ipRes = await fetch('https://ipapi.co/json/').then(r => r.json()).catch(() => null);
+                if (ipRes) {
+                    setRegIp(ipRes.ip || '');
+                    setRegLoc(`${ipRes.city}, ${ipRes.country_name}`);
+                }
+            } catch (e) {
+                console.error("Error loading keys:", e);
+            }
+        };
+        loadSettings();
+    }, []);
 
     const handleValidateReferral = async () => {
         if (referralCode.length < 4) {
@@ -59,15 +83,14 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
             // GENERAMOS REFERENCIA ÚNICA PARA EL PAGO (SIN CREAR USUARIO TODAVÍA)
             const tempRef = `POS-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
 
-            // Link de Pago Wompi - FORMATO ESTRICTO (Underscores y "/" final)
-            // Nota: Se debe usar la llave real en Producción
-            const paymentUrl = `https://checkout.wompi.co/p/?public_key=pub_test_Q5yS9pmev6W9kzE0v6X2pY123&currency=COP&amount_in_cents=5000000&reference=${tempRef}`;
+            // Link de Pago Wompi - USANDO LLAVE DEL ADMIN
+            const paymentUrl = `https://checkout.wompi.co/p/?public_key=${wompiPublicKey}&currency=COP&amount_in_cents=5000000&reference=${tempRef}`;
 
             // Abrir pasarela
             window.open(paymentUrl, '_blank');
 
             // Notificamos al usuario
-            alert("🚀 PASARELA INICIADA\n\nPor seguridad, tu cuenta NO se creará en el sistema hasta que realices el pago y el administrador lo valide.\n\nCompleta el pago en la otra pestaña y guarda tu comprobante.");
+            alert(`🚀 PASARELA INICIADA\n\nPor seguridad, tu cuenta NO se creará en el sistema hasta que realices el pago.\n\n📍 Registro detectado desde: ${regIp || 'Desconocido'} (${regLoc || 'Buscando...'})\n\nCompleta el pago en la otra pestaña.`);
 
             // Resetear flujo para evitar registros accidentales
             setStep(1);

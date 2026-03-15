@@ -162,5 +162,10 @@ export const userService = {
 
         if (error || !data) return null;
         return data;
+    },
+
+    async getPaymentSettings() {
+        const { data } = await supabase.from('app_settings').select('value').eq('key', 'payment_api_keys').single();
+        return { data: data ? JSON.parse(data.value) : null };
     }
 };

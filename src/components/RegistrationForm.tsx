@@ -18,6 +18,7 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
     const [emailLogin, setEmailLogin] = useState('');
     const [passwordLogin, setPasswordLogin] = useState('');
     const [formData, setFormData] = useState({ fullName: '', email: '', phone: '', password: '', confirmPassword: '' });
+    const [referrerName, setReferrerName] = useState('');
     const [error, setError] = useState('');
 
     const handleValidateReferral = async () => {
@@ -32,6 +33,7 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
         try {
             const referrer = await userService.validateReferralCode(referralCode);
             if (referrer) {
+                setReferrerName(referrer.full_name);
                 setStep(2);
             } else {
                 setError('Código de invitación inválido. Por favor verifica con quien te invitó.');
@@ -55,7 +57,9 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
 
         try {
             const profile = await userService.register({ ...formData, referralCode });
-            const paymentUrl = `https://checkout.wompi.co/p?public_key=pub_test_Q5yS9pmev6W9kzE0v6X2pY123&currency=COP&amount_in_cents=5000000&reference=SHPY-${profile.id.slice(0, 8)}`;
+
+            // Link de Pago Wompi (Formato Estándar Bancolombia)
+            const paymentUrl = `https://checkout.wompi.co/p/?public_key=pub_test_Q5yS9pmev6W9kzE0v6X2pY123&currency=COP&amount_in_cents=5000000&reference=SHPY-${profile.id.slice(0, 8)}`;
 
             // Redirigir al pago
             window.open(paymentUrl, '_blank');
@@ -159,8 +163,8 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
 
                             <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--color-text-muted)', marginTop: 20 }}>
                                 ¿No tienes cuenta?{' '}
-                                <button onClick={() => { setIsLoginMode(false); setError(''); }} style={{ color: 'var(--color-wallet)', fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer' }}>
-                                    Regístrate gratis
+                                <button onClick={() => { setIsLoginMode(false); setStep(1); setError(''); }} style={{ color: 'var(--color-wallet)', fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer' }}>
+                                    Regístrate ahora
                                 </button>
                             </p>
                         </motion.div>
@@ -227,7 +231,9 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
                                     <p style={{ fontSize: 12, fontWeight: 700, color: '#16A34A', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                                         Paso 2: Perfil
                                     </p>
-                                    <p style={{ fontSize: 13, color: 'var(--color-text-muted)' }}>Tus datos para la red.</p>
+                                    <p style={{ fontSize: 13, color: 'var(--color-text-muted)' }}>
+                                        Invitado por: <strong style={{ color: 'var(--color-navy)' }}>{referrerName}</strong>
+                                    </p>
                                 </div>
                             </div>
 

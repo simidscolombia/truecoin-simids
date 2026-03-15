@@ -19,6 +19,7 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
     const [businesses, setBusinesses] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedMetric, setSelectedMetric] = useState<'users' | 'liquidez' | 'levels' | null>(null);
     const [editingUser, setEditingUser] = useState<any>(null);
     const [editData, setEditData] = useState({
         fullName: '',
@@ -74,7 +75,7 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
             referralCode: u.referral_code || '',
             referredBy: u.referred_by || '',
             currentLevel: u.current_level || 1,
-            balance: u.wallets?.[0]?.balance_tc?.toString() || '0',
+            balance: u.balance_tc?.toString() || '0',
             password: u.password || ''
         });
     };
@@ -220,8 +221,8 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                         <ShieldAlert size={20} color="white" />
                     </div>
                     <div>
-                        <span style={{ fontSize: 20, fontWeight: 900, color: 'var(--color-navy)', letterSpacing: -0.5 }}>Super<span style={{ color: 'var(--color-admin)' }}>Admin</span></span>
-                        <p style={{ fontSize: 10, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700 }}>Panel de Control</p>
+                        <span style={{ fontSize: 20, fontWeight: 900, color: 'var(--color-navy)', letterSpacing: -0.5 }}>Shopy<span style={{ color: 'var(--color-wallet)' }}>Brands</span></span>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', background: 'var(--color-surface-2)', padding: '2px 6px', borderRadius: 6, marginLeft: 8, verticalAlign: 'middle', display: 'inline-block' }}>V2.5.6 — ANALYTICS PRO</span>
                     </div>
                 </div>
 
@@ -261,10 +262,16 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                                 <p style={{ fontSize: 14, color: 'var(--color-text-muted)' }}>El ecosistema está operando correctamente.</p>
                             </div>
 
-                            <div className="admin-stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginBottom: 24 }}>
-                                <AdminStatCard label="Socios Totales" value={stats?.userCount || 0} icon={Users} trend="+12% mensual" />
-                                <AdminStatCard label="Liquidez Total (TC)" value={Math.floor(stats?.totalTC || 0).toLocaleString()} icon={Wallet} trend="Respaldado 1:1" />
-                                <AdminStatCard label="Negocios Aliados" value={stats?.businessCount || 0} icon={Database} />
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24, marginBottom: 32 }}>
+                                <div onClick={() => setSelectedMetric('users')} style={{ cursor: 'pointer' }}>
+                                    <AdminStatCard label="SOCIOS TOTALES" value={stats?.userCount || 0} icon={Users} trend="+12% mensual" />
+                                </div>
+                                <div onClick={() => setSelectedMetric('liquidez')} style={{ cursor: 'pointer' }}>
+                                    <AdminStatCard label="LIQUIDEZ TOTAL (TC)" value={stats?.totalTC || 0} icon={Wallet} trend="Respaldado 1:1" />
+                                </div>
+                                <div onClick={() => setSelectedMetric('levels')} style={{ cursor: 'pointer' }}>
+                                    <AdminStatCard label="REPARTO POR NIVELES" value={Object.values(stats?.levelDistribution || {}).length + " Rangos"} icon={TrendingUp} trend="Crecimiento Activo" />
+                                </div>
                             </div>
 
                             <div className="admin-stat-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
@@ -371,7 +378,7 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                                                     </td>
                                                     <td style={{ padding: '16px 24px', textAlign: 'right' }}>
                                                         <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--color-admin)' }}>
-                                                            {u.wallets?.[0]?.balance_tc || "0.00"} <span style={{ fontSize: 10 }}>TC</span>
+                                                            {Number(u.balance_tc || 0).toFixed(2)} <span style={{ fontSize: 10 }}>TC</span>
                                                         </span>
                                                     </td>
                                                     <td style={{ padding: '16px 24px', textAlign: 'center' }}>
@@ -503,6 +510,63 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
 
                 </AnimatePresence>
             </main>
+
+            {/* ── MODAL DE MÉTRICAS DETALLADAS ── */}
+            <AnimatePresence>
+                {selectedMetric && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedMetric(null)} style={{ position: 'absolute', inset: 0, background: 'rgba(11,31,75,0.7)', backdropFilter: 'blur(10px)' }} />
+                        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="card-lg" style={{ position: 'relative', zIndex: 1110, maxWidth: 500, width: '100%', padding: 40, textAlign: 'center' }}>
+                            <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--color-surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', color: 'var(--color-admin)' }}>
+                                {selectedMetric === 'users' && <Users size={32} />}
+                                {selectedMetric === 'liquidez' && <Wallet size={32} />}
+                                {selectedMetric === 'levels' && <TrendingUp size={32} />}
+                            </div>
+
+                            <h3 style={{ fontSize: 24, fontWeight: 900, color: 'var(--color-navy)', marginBottom: 12 }}>
+                                {selectedMetric === 'users' && "Desglose de Socios"}
+                                {selectedMetric === 'liquidez' && "Auditoría de Liquidez"}
+                                {selectedMetric === 'levels' && "Concentración de Red"}
+                            </h3>
+
+                            <p style={{ fontSize: 14, color: 'var(--color-text-muted)', lineHeight: 1.6, marginBottom: 24 }}>
+                                {selectedMetric === 'users' && "Control total sobre la base de usuarios. Cada socio representa un nodo activo de crecimiento en el ecosistema ShopyBrands."}
+                                {selectedMetric === 'liquidez' && "Representa el total de TrueCoins (TC) emitidos y respaldados en las billeteras de todos los socios y negocios."}
+                                {selectedMetric === 'levels' && "Visualiza cómo se distribuye la fuerza comercial a través de los diversos rangos VIP de la plataforma."}
+                            </p>
+
+                            <div style={{ background: 'var(--color-surface-2)', borderRadius: 20, padding: 20, textAlign: 'left' }}>
+                                {selectedMetric === 'levels' && stats?.levelDistribution && Object.entries(stats.levelDistribution).map(([lvl, count]: any) => (
+                                    <div key={lvl} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--color-border)' }}>
+                                        <span style={{ fontWeight: 700, fontSize: 13 }}>Nivel {lvl}</span>
+                                        <span style={{ fontWeight: 800, color: 'var(--color-admin)' }}>{count} Socios</span>
+                                    </div>
+                                ))}
+                                {selectedMetric === 'liquidez' && (
+                                    <>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0' }}>
+                                            <span>Emisión Total</span>
+                                            <span style={{ fontWeight: 800 }}>{stats?.totalTC} TC</span>
+                                        </div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', color: 'var(--color-directorio)' }}>
+                                            <span>Respaldo Real (COP)</span>
+                                            <span style={{ fontWeight: 800 }}>$ {(stats?.totalTC * 1000).toLocaleString()}</span>
+                                        </div>
+                                    </>
+                                )}
+                                {selectedMetric === 'users' && (
+                                    <div style={{ textAlign: 'center', padding: '10px' }}>
+                                        <div style={{ fontSize: 32, fontWeight: 900, color: 'var(--color-admin)' }}>{stats?.userCount}</div>
+                                        <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--color-text-muted)' }}>SOCIOS ACTIVOS</div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <button onClick={() => setSelectedMetric(null)} className="btn btn-admin" style={{ width: '100%', marginTop: 24, padding: 14 }}>Entendido</button>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
 
             {/* ── MODAL DE EDICIÓN DE USUARIO ── */}
             <AnimatePresence>

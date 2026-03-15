@@ -8,12 +8,11 @@ export const adminService = {
             .from('profiles')
             .select('*', { count: 'exact', head: true });
 
-        // 2. Saldo Total en Circulación
         const { data: wallets } = await supabaseAdmin
             .from('wallets')
             .select('balance_tc');
 
-        const totalTC = wallets?.reduce((sum, w) => sum + Number(w.balance_tc), 0) || 0;
+        const totalTC = wallets?.reduce((sum, w) => sum + Number(w.balance_tc || 0), 0) || 0;
 
         // 3. Total Negocios
         const { count: businessCount } = await supabaseAdmin
@@ -121,7 +120,8 @@ export const adminService = {
 
         return data.map(u => ({
             ...u,
-            team_size: refCounts[u.id] || 0
+            team_size: refCounts[u.id] || 0,
+            balance_tc: u.wallets?.[0]?.balance_tc || 0
         }));
     },
 

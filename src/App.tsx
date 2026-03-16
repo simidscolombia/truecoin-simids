@@ -64,7 +64,7 @@ function Header({
         </div>
         <span className="header-logo-text" style={{ fontSize: 20, fontWeight: 800, color: 'var(--color-navy)', letterSpacing: -0.5 }}>
           Shopy<span style={{ color: 'var(--color-wallet)' }}>Brands</span>
-          <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', background: 'var(--color-surface-2)', padding: '2px 6px', borderRadius: 6, marginLeft: 8, verticalAlign: 'middle', display: 'inline-block' }}>V2.9.2 — DYNAMIC FEE SYNC FIX</span>
+          <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', background: 'var(--color-surface-2)', padding: '2px 6px', borderRadius: 6, marginLeft: 8, verticalAlign: 'middle', display: 'inline-block' }}>V2.9.5 — FULL DYNAMIC FEE (UI + PAY)</span>
         </span>
       </div>
 

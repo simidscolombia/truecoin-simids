@@ -418,11 +418,11 @@ export default function RegistrationForm({ onSuccess, initialReferralCode }: Reg
                                     Total a Pagar
                                 </p>
                                 <p style={{ fontSize: 32, fontWeight: 800, color: 'var(--color-navy)' }}>
-                                    $50,000 <span style={{ fontSize: 14, opacity: 0.6 }}>COP</span>
+                                    ${(regFee || 0).toLocaleString()} <span style={{ fontSize: 14, opacity: 0.6 }}>COP</span>
                                 </p>
                                 <div style={{ height: 1, background: 'var(--color-border)', margin: '14px 0' }}></div>
                                 <p style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>
-                                    Recibirás <strong>50 TC</strong> para participar en la Red de Regalos.
+                                    Recibirás <strong>{Math.floor(regFee / 1000)} TC</strong> para participar en la Red de Regalos.
                                 </p>
                             </div>
 

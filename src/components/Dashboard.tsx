@@ -340,7 +340,15 @@ export default function Dashboard({
                                 exit={{ opacity: 0, y: -10 }}
                                 transition={{ duration: 0.2 }}
                             >
-                                <GiftMatrix currentLevel={stats.currentLevel} referrals={stats.directReferrals} />
+                                <GiftMatrix
+                                    currentLevel={stats.currentLevel}
+                                    slots={Array.from({ length: stats.directReferrals }).map((_, i) => ({
+                                        position: i + 1,
+                                        occupant_id: `mock-${i}`,
+                                        occupant_name: `Socio ${i + 1}`,
+                                        recruiter_id: user.id || null // Asumiendo que son directos para la visual
+                                    }))}
+                                />
                             </motion.div>
                         )}
                         {view === 'network' && (

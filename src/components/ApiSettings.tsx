@@ -3,12 +3,13 @@ import { supabase } from '../lib/supabase';
 import { Save } from 'lucide-react';
 
 export default function ApiSettings() {
-    const [apiKeys, setApiKeys] = useState<{ wompi_public: string, wompi_private: string, wompi_integrity: string, wompi_events: string, bold_public: string }>({
+    const [apiKeys, setApiKeys] = useState<{ wompi_public: string, wompi_private: string, wompi_integrity: string, wompi_events: string, bold_public: string, reg_fee: number }>({
         wompi_public: '',
         wompi_private: '',
         wompi_integrity: '',
         wompi_events: '',
-        bold_public: ''
+        bold_public: '',
+        reg_fee: 50000 // Default value
     });
     const [saving, setSaving] = useState(false);
 
@@ -22,7 +23,7 @@ export default function ApiSettings() {
         load();
     }, []);
 
-    const handleChange = (field: string, value: string) => {
+    const handleChange = (field: string, value: any) => {
         setApiKeys(prev => ({ ...prev, [field]: value }));
     };
 
@@ -86,6 +87,31 @@ export default function ApiSettings() {
 
                 {/* Bold */}
                 <div className="card-lg" style={{ padding: 24, borderTop: '4px solid #E11D48' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+                        <h3 style={{ fontSize: 18, fontWeight: 800, color: 'var(--color-navy)' }}>Costo de Inscripción</h3>
+                        <span style={{ fontSize: 11, fontWeight: 800, background: '#FFE4E6', color: '#E11D48', padding: '4px 10px', borderRadius: 999 }}>MODALIDAD VIP</span>
+                    </div>
+
+                    <div>
+                        <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--color-text-muted)', marginBottom: 6 }}>Valor de Inscripción (COP)</label>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--color-navy)' }}>$</span>
+                            <input
+                                type="number"
+                                value={apiKeys.reg_fee}
+                                onChange={e => handleChange('reg_fee', parseInt(e.target.value) || 0)}
+                                className="input"
+                                style={{ fontSize: 20, fontWeight: 800 }}
+                            />
+                        </div>
+                        <p style={{ fontSize: 12, color: 'var(--color-text-muted)', marginTop: 8 }}>
+                            Este es el valor que se le cobrará a los nuevos socios en Wompi al momento del registro. Actualmente: <strong>${(apiKeys.reg_fee || 0).toLocaleString()} COP</strong>.
+                        </p>
+                    </div>
+                </div>
+
+                {/* Bold */}
+                <div className="card-lg" style={{ padding: 24, borderTop: '4px solid #94a3b8' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
                         <h3 style={{ fontSize: 18, fontWeight: 800, color: 'var(--color-navy)' }}>Bold </h3>
                         <span style={{ fontSize: 11, fontWeight: 800, background: 'var(--color-surface-2)', color: 'var(--color-text-muted)', padding: '4px 10px', borderRadius: 999 }}>SECUNDARIO</span>

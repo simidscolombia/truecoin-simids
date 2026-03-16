@@ -4,26 +4,20 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Wallet, Users, Copy, Share2, ArrowUpRight,
-    Clock, Send, TrendingUp, Star, ChevronRight, CheckCircle2, Zap, Award
+    Clock, Send, CheckCircle2, Award, Zap
 } from 'lucide-react';
 import GiftMatrix from './GiftMatrix';
 import NetworkTree from './NetworkTree';
 import TransferModal from './TransferModal';
 import RechargeModal from './RechargeModal';
-import RevenueSimulator from './RevenueSimulator';
 import { userService } from '../services/userService';
 
-interface DashboardProps {
-    user: { fullName: string; referralCode: string; id?: string };
-    balance: string;
-    onUpdateBalance: (balance: string) => void;
-    onGoToStore: () => void;
-    onGoToPOS: () => void;
-    onGoToDirectory: () => void;
-    onGoToFam: () => void;
-    onGoToAdmin: () => void;
-    onGoToProspects: () => void;
-}
+const RANKS = [
+    "VIP BRONCE", "VIP COBRE", "VIP PLATA", "VIP ORO",
+    "PLATINO", "ZAFIRO", "ESMERALDA",
+    "DIAMANTE", "DIAMANTE AZUL", "CORONA",
+    "EMBAJADOR", "EMBAJADOR REAL", "LEYENDA"
+];
 
 function StatCard({
     label, value, unit, icon, color, sub,
@@ -33,73 +27,47 @@ function StatCard({
 }) {
     return (
         <motion.div
-            whileHover={{ y: -3 }}
+            whileHover={{ y: -4, boxShadow: '0 12px 30px rgba(0,0,0,0.08)' }}
             className="stat-card"
-            style={{ borderTop: `3px solid ${color}` }}
+            style={{
+                borderTop: `4px solid ${color}`,
+                background: 'rgba(255,255,255,0.9)',
+                backdropFilter: 'blur(10px)',
+                borderRadius: '24px',
+                padding: '24px',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.03)'
+            }}
         >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                <span className="stat-card-label">{label}</span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</span>
                 <div style={{
-                    width: 36, height: 36, borderRadius: 10,
-                    background: `color-mix(in srgb, ${color} 12%, white)`,
+                    width: 40, height: 40, borderRadius: 12,
+                    background: `color-mix(in srgb, ${color} 10%, white)`,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     color,
                 }}>
                     {icon}
                 </div>
             </div>
-            <div className="stat-card-value" style={{ color }}>
+            <div style={{ fontSize: 32, fontWeight: 900, color: 'var(--color-navy)', letterSpacing: -1 }}>
                 {value}
-                {unit && <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-text-muted)', marginLeft: 6 }}>{unit}</span>}
+                {unit && <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--color-text-muted)', marginLeft: 6 }}>{unit}</span>}
             </div>
-            {sub && <p style={{ fontSize: 12, color: 'var(--color-text-muted)', marginTop: 6 }}>{sub}</p>}
+            {sub && <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-text-muted)', marginTop: 8, opacity: 0.8 }}>{sub}</p>}
         </motion.div>
     );
 }
 
-function QuickAccessCard({
-    title, description, accent, icon, onClick, cta,
-}: {
-    title: string; description: string; accent: string;
-    icon: React.ReactNode; onClick: () => void; cta: string;
-}) {
-    return (
-        <motion.div
-            whileHover={{ y: -2 }}
-            className="card"
-            style={{ padding: '20px 24px', display: 'flex', alignItems: 'center', gap: 16, cursor: 'pointer' }}
-            onClick={onClick}
-        >
-            <div style={{
-                width: 52, height: 52, borderRadius: 14, flexShrink: 0,
-                background: `color-mix(in srgb, ${accent} 12%, white)`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: accent,
-            }}>
-                {icon}
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontWeight: 700, color: 'var(--color-navy)', fontSize: 15, marginBottom: 2 }}>{title}</p>
-                <p style={{ fontSize: 13, color: 'var(--color-text-muted)' }}>{description}</p>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: accent, fontWeight: 600, fontSize: 13, flexShrink: 0 }}>
-                {cta} <ChevronRight size={16} />
-            </div>
-        </motion.div>
-    );
-}
 
 export default function Dashboard({
     user,
     balance,
-    onUpdateBalance,
-    onGoToStore,
-    onGoToPOS,
-    onGoToDirectory,
-    onGoToFam,
-    onGoToAdmin,
-    onGoToProspects
-}: DashboardProps) {
+    onUpdateBalance
+}: {
+    user: { fullName: string; referralCode: string; id?: string };
+    balance: string;
+    onUpdateBalance: (balance: string) => void;
+}) {
     const [showTransfer, setShowTransfer] = useState(false);
     const [showRecharge, setShowRecharge] = useState(false);
     const [localBalance, setLocalBalance] = useState(balance);
@@ -278,7 +246,7 @@ export default function Dashboard({
                                 Tu Red
                             </h2>
                             <span className="badge badge-navy">
-                                <TrendingUp size={10} /> Nivel {stats.currentLevel}
+                                <Zap size={10} /> {RANKS[(stats.currentLevel - 1) % 12]}
                             </span>
                         </div>
 
@@ -317,16 +285,22 @@ export default function Dashboard({
 
                 </div>
 
-                {/* View Toggle */}
-                <div style={{ display: 'flex', gap: 8, marginBottom: 20, background: 'var(--color-surface-2)', padding: 6, borderRadius: 12, border: '1px solid var(--color-border)', width: 'fit-content' }}>
+                {/* View Toggle (Glassmorphism) */}
+                <div style={{
+                    display: 'flex', gap: 6, marginBottom: 32,
+                    background: 'rgba(255,255,255,0.5)',
+                    backdropFilter: 'blur(10px)',
+                    padding: 6, borderRadius: 16, border: '1px solid rgba(255,255,255,0.8)',
+                    width: 'fit-content',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
+                }}>
                     <button
                         onClick={() => setView('ascension')}
                         style={{
-                            padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 700,
-                            background: view === 'ascension' ? 'white' : 'transparent',
-                            color: view === 'ascension' ? 'var(--color-navy)' : 'var(--color-text-muted)',
-                            boxShadow: view === 'ascension' ? 'var(--shadow-sm)' : 'none',
-                            border: 'none', cursor: 'pointer', transition: 'all 0.2s'
+                            padding: '10px 24px', borderRadius: 12, fontSize: 13, fontWeight: 800,
+                            background: view === 'ascension' ? 'var(--color-navy)' : 'transparent',
+                            color: view === 'ascension' ? 'white' : 'var(--color-text-muted)',
+                            border: 'none', cursor: 'pointer', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                         }}
                     >
                         Mi Ascensión
@@ -334,11 +308,10 @@ export default function Dashboard({
                     <button
                         onClick={() => setView('network')}
                         style={{
-                            padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 700,
-                            background: view === 'network' ? 'white' : 'transparent',
-                            color: view === 'network' ? 'var(--color-navy)' : 'var(--color-text-muted)',
-                            boxShadow: view === 'network' ? 'var(--shadow-sm)' : 'none',
-                            border: 'none', cursor: 'pointer', transition: 'all 0.2s'
+                            padding: '10px 24px', borderRadius: 12, fontSize: 13, fontWeight: 800,
+                            background: view === 'network' ? 'var(--color-navy)' : 'transparent',
+                            color: view === 'network' ? 'white' : 'var(--color-text-muted)',
+                            border: 'none', cursor: 'pointer', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                         }}
                     >
                         Mi Red (4 Niveles)
@@ -371,67 +344,6 @@ export default function Dashboard({
                     </AnimatePresence>
                 </div>
 
-                {/* Quick Access */}
-                {/* Simulador de Ingresos */}
-                <div style={{ marginBottom: 28 }}>
-                    <RevenueSimulator />
-                </div>
-
-                <div>
-                    <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--color-navy)', marginBottom: 14 }}>
-                        Accesos Rápidos
-                    </h2>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 12 }}>
-                        <QuickAccessCard
-                            title="Marketplace VIP"
-                            description="Compra con tus puntos a precios de mayorista."
-                            accent="var(--color-marketplace)"
-                            icon={<TrendingUp size={22} />}
-                            onClick={onGoToStore}
-                            cta="Ir a la tienda"
-                        />
-                        <QuickAccessCard
-                            title="POS Simids"
-                            description="Terminal de ventas y control de tu negocio."
-                            accent="var(--color-pos)"
-                            icon={<Wallet size={22} />}
-                            onClick={onGoToPOS}
-                            cta="Abrir POS"
-                        />
-                        <QuickAccessCard
-                            title="Directorio"
-                            description="Busca comercios aliados en tu ciudad."
-                            accent="var(--color-directorio)"
-                            icon={<Users size={22} />}
-                            onClick={onGoToDirectory}
-                            cta="Explorar"
-                        />
-                        <QuickAccessCard
-                            title="Fábrica de Socios"
-                            description="Gestiona tus prospectos y acelera tu crecimiento."
-                            accent="var(--color-wallet)"
-                            icon={<Zap size={22} />}
-                            onClick={onGoToProspects}
-                            cta="Ver Prospectos"
-                        />
-                        <QuickAccessCard
-                            title="ShopyFam"
-                            description="Conecta con tu bloque y celebra tus logros en equipo."
-                            accent="var(--color-cloud-blue)"
-                            icon={<Users size={22} />}
-                            onClick={onGoToFam}
-                            cta="Entrar Social"
-                        />
-                        <QuickAccessCard
-                            title="Panel Maestro"
-                            description="Control total del ecosistema y configuración IA."
-                            accent="var(--color-navy)"
-                            icon={<Star size={22} />}
-                            onClick={onGoToAdmin}
-                            cta="Administrar"
-                        />
-                    </div>
-                </div>
 
             </div>
         </div>

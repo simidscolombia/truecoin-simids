@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Coins, ShoppingBag, ArrowRight, Zap,
+  Coins, ShoppingBag,
   LayoutDashboard, Search, Settings, LogOut, Users
 } from 'lucide-react';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -495,12 +495,6 @@ function App() {
                   user={user}
                   balance={balance}
                   onUpdateBalance={(b) => setBalance(b)}
-                  onGoToStore={() => { setCurrentView('marketplace'); setGuestViewMode('products'); }}
-                  onGoToPOS={() => setCurrentView('pos')}
-                  onGoToDirectory={() => { setCurrentView('marketplace'); setGuestViewMode('businesses'); }}
-                  onGoToFam={() => setCurrentView('shopyfam')}
-                  onGoToAdmin={() => setCurrentView('admin')}
-                  onGoToProspects={() => setCurrentView('prospects')}
                 />
               </div>
             )}
@@ -544,48 +538,6 @@ function App() {
         onPurchase={handlePurchase}
       />
 
-      {/* Landing Features Section (Only show on marketplace or dashboard as context) */}
-      {(currentView === 'marketplace' || currentView === 'dashboard') && (
-        <section style={{ background: 'var(--color-bg)', borderTop: '1px solid var(--color-border)', padding: '80px 32px' }}>
-          <div className="landing-grid" style={{ maxWidth: 1280, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 60, alignItems: 'center' }}>
-            {/* Video Left */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              style={{ width: '100%', aspectRatio: '16/9', background: 'var(--color-surface)', borderRadius: 24, overflow: 'hidden', boxShadow: '0 24px 50px rgba(11,31,75,0.1)', border: '1px solid var(--color-border)' }}
-            >
-              <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, var(--color-navy), var(--color-pos))', color: 'white' }}>
-                <div style={{ width: 64, height: 44, background: '#FF0000', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 10 }}>
-                  <div style={{ width: 0, height: 0, borderTop: '10px solid transparent', borderBottom: '10px solid transparent', borderLeft: '16px solid white', marginLeft: 4 }} />
-                </div>
-                <p style={{ marginTop: 16, fontSize: 13, fontWeight: 600, opacity: 0.8 }}>¿Cómo funciona ShopyBrands? (3 Min)</p>
-              </div>
-            </motion.div>
-
-            {/* Content Right */}
-            <div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 16px', borderRadius: 999, background: 'color-mix(in srgb, var(--color-wallet) 12%, white)', color: 'var(--color-wallet)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', marginBottom: 20 }}>
-                <Zap size={13} /> Club VIP ShopyBrands
-              </div>
-              <h2 className="landing-title" style={{ fontSize: 36, fontWeight: 800, color: 'var(--color-navy)', marginBottom: 20, lineHeight: 1.2 }}>
-                Bienvenido al primer Club VIP <br /> <span style={{ color: 'var(--color-cloud-blue)' }}>impulsado por IA.</span>
-              </h2>
-              <p style={{ fontSize: 14, color: 'var(--color-text-muted)' }}>
-                Bienvenido a tu ecosistema ShopyBrands · 12 Mar 2026
-              </p>
-              <p style={{ fontSize: 16, color: 'var(--color-text-muted)', marginBottom: 32, lineHeight: 1.6 }}>
-                Únete a nuestra red de referidos como <strong>Miembro VIP</strong> y accede a precios de mayorista directo de fábrica. Ahorra en tus compras, gana por expandir la red y crece con nosotros.
-              </p>
-              {!isLoggedIn && (
-                <button onClick={() => setShowAuth(true)} className="btn btn-navy btn-lg" style={{ padding: '0 32px' }}>
-                  Registrarme Ahora <ArrowRight size={18} style={{ marginLeft: 8 }} />
-                </button>
-              )}
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* Footer */}
       <footer style={{ padding: '32px', textAlign: 'center', color: 'var(--color-text-muted)', fontSize: 13, borderTop: '1px solid var(--color-border)' }}>

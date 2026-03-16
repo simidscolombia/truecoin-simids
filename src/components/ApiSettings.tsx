@@ -3,10 +3,11 @@ import { supabase } from '../lib/supabase';
 import { Save } from 'lucide-react';
 
 export default function ApiSettings() {
-    const [apiKeys, setApiKeys] = useState<{ wompi_public: string, wompi_private: string, wompi_integrity: string, bold_public: string }>({
+    const [apiKeys, setApiKeys] = useState<{ wompi_public: string, wompi_private: string, wompi_integrity: string, wompi_events: string, bold_public: string }>({
         wompi_public: '',
         wompi_private: '',
         wompi_integrity: '',
+        wompi_events: '',
         bold_public: ''
     });
     const [saving, setSaving] = useState(false);
@@ -71,9 +72,15 @@ export default function ApiSettings() {
                             <input type="password" value={apiKeys.wompi_private} onChange={e => handleChange('wompi_private', e.target.value)} className="input" placeholder="prv_prod_..." />
                         </div>
                     </div>
-                    <div style={{ marginTop: 16 }}>
-                        <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--color-text-muted)', marginBottom: 6 }}>Secreto de Integridad (Events/Webhooks)</label>
-                        <input type="password" value={apiKeys.wompi_integrity} onChange={e => handleChange('wompi_integrity', e.target.value)} className="input" placeholder="Secret..." />
+                    <div style={{ marginTop: 16, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                        <div>
+                            <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--color-text-muted)', marginBottom: 6 }}>Secreto de Integridad (Checkout - prod_integrity_...)</label>
+                            <input type="password" value={apiKeys.wompi_integrity} onChange={e => handleChange('wompi_integrity', e.target.value)} className="input" placeholder="prod_integrity_..." />
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--color-text-muted)', marginBottom: 6 }}>Secreto de Eventos (Webhooks - prod_events_...)</label>
+                            <input type="password" value={apiKeys.wompi_events || ''} onChange={e => handleChange('wompi_events', e.target.value)} className="input" placeholder="prod_events_..." />
+                        </div>
                     </div>
                 </div>
 

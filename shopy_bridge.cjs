@@ -28,10 +28,9 @@ async function loadDynamicConfig() {
         });
         if (response.data && response.data.length > 0) {
             const keys = JSON.parse(response.data[0].value);
-            if (keys.wompi_integrity) {
-                WOMPI_INTEGRITY = keys.wompi_integrity;
-                console.log("✅ Wompi Integrity Secret cargado desde la Base de Datos.");
-            }
+            // Priorizar secreto de eventos para el webhook si existe
+            WOMPI_INTEGRITY = keys.wompi_events || keys.wompi_integrity || WOMPI_INTEGRITY;
+            console.log("✅ Configuración de seguridad Wompi cargada desde la Base de Datos.");
         }
     } catch (e) {
         console.error("⚠️ No se pudo cargar la configuración dinámica:", e.message);

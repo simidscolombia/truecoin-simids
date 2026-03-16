@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     Wallet, Users, Copy, Share2, ArrowUpRight,
-    Clock, Send, TrendingUp, Star, ChevronRight, CheckCircle2, Zap
+    Clock, Send, TrendingUp, Star, ChevronRight, CheckCircle2, Zap, Award
 } from 'lucide-react';
 import GiftMatrix from './GiftMatrix';
+import NetworkTree from './NetworkTree';
 import TransferModal from './TransferModal';
 import RechargeModal from './RechargeModal';
 import RevenueSimulator from './RevenueSimulator';
@@ -103,7 +104,13 @@ export default function Dashboard({
     const [showRecharge, setShowRecharge] = useState(false);
     const [localBalance, setLocalBalance] = useState(balance);
     const [copied, setCopied] = useState(false);
-    const [stats, setStats] = useState({ directReferrals: 0, currentLevel: 1, isVip: false });
+    const [view, setView] = useState<'ascension' | 'network'>('ascension');
+    const [stats, setStats] = useState<{ directReferrals: number, currentLevel: number, isVip: boolean, mentor?: any }>({
+        directReferrals: 0,
+        currentLevel: 1,
+        isVip: false,
+        mentor: null
+    });
 
     useEffect(() => {
         if (user?.id) {
@@ -210,10 +217,10 @@ export default function Dashboard({
                     />
                     <StatCard
                         label="Rango Actual"
-                        value={stats.currentLevel === 1 ? 'VIP Bronce' : stats.currentLevel === 2 ? 'VIP Plata' : 'VIP Oro'}
-                        icon={<Star size={18} />}
+                        value={stats.currentLevel === 1 ? 'VIP Bronce' : stats.currentLevel === 2 ? 'VIP Cobre' : 'VIP Plata'}
+                        icon={<Award size={18} />}
                         color="var(--color-directorio)"
-                        sub={`Siguiente: ${stats.currentLevel === 1 ? 'VIP Plata' : 'VIP Oro'}`}
+                        sub={`Siguiente: ${stats.currentLevel === 1 ? 'VIP Cobre' : stats.currentLevel === 2 ? 'VIP Plata' : 'VIP Oro'}`}
                     />
                 </div>
 
@@ -310,8 +317,58 @@ export default function Dashboard({
 
                 </div>
 
+                {/* View Toggle */}
+                <div style={{ display: 'flex', gap: 8, marginBottom: 20, background: 'var(--color-surface-2)', padding: 6, borderRadius: 12, border: '1px solid var(--color-border)', width: 'fit-content' }}>
+                    <button
+                        onClick={() => setView('ascension')}
+                        style={{
+                            padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 700,
+                            background: view === 'ascension' ? 'white' : 'transparent',
+                            color: view === 'ascension' ? 'var(--color-navy)' : 'var(--color-text-muted)',
+                            boxShadow: view === 'ascension' ? 'var(--shadow-sm)' : 'none',
+                            border: 'none', cursor: 'pointer', transition: 'all 0.2s'
+                        }}
+                    >
+                        Mi Ascensión
+                    </button>
+                    <button
+                        onClick={() => setView('network')}
+                        style={{
+                            padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 700,
+                            background: view === 'network' ? 'white' : 'transparent',
+                            color: view === 'network' ? 'var(--color-navy)' : 'var(--color-text-muted)',
+                            boxShadow: view === 'network' ? 'var(--shadow-sm)' : 'none',
+                            border: 'none', cursor: 'pointer', transition: 'all 0.2s'
+                        }}
+                    >
+                        Mi Red (4 Niveles)
+                    </button>
+                </div>
+
                 <div style={{ marginBottom: 28 }}>
-                    <GiftMatrix currentLevel={stats.currentLevel} referrals={stats.directReferrals} />
+                    <AnimatePresence mode="wait">
+                        {view === 'ascension' ? (
+                            <motion.div
+                                key="ascension"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                <GiftMatrix currentLevel={stats.currentLevel} referrals={stats.directReferrals} />
+                            </motion.div>
+                        ) : (
+                            <motion.div
+                                key="network"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                <NetworkTree userId={user.id || ''} mentor={stats.mentor} />
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
 
                 {/* Quick Access */}

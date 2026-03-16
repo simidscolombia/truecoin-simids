@@ -3,8 +3,8 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Rocket, ShieldCheck, Award,
-    Info,
-    TrendingUp, UserPlus, Lock
+    Info, Cpu,
+    TrendingUp, UserPlus
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -14,7 +14,7 @@ interface GiftMatrixProps {
 }
 
 const RANKS = [
-    "VIP BRONCE", "VIP PLATA", "VIP ORO",
+    "VIP BRONCE", "VIP COBRE", "VIP PLATA", "VIP ORO",
     "PLATINO", "ZAFIRO", "ESMERALDA",
     "DIAMANTE", "DIAMANTE AZUL", "CORONA",
     "EMBAJADOR", "EMBAJADOR REAL", "LEYENDA"
@@ -219,44 +219,54 @@ export default function GiftMatrix({ currentLevel = 1, referrals = 0 }: GiftMatr
                     </p>
                 </div>
 
-                {/* Previsualización del Siguiente Rango (Holograma) */}
-                {nextRank && (
-                    <div style={{
-                        marginTop: 8,
-                        background: 'linear-gradient(135deg, rgba(255,255,255,1), rgba(248,250,252,1))',
-                        border: '1px solid var(--color-border)',
-                        borderRadius: 20,
-                        padding: '16px 20px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        opacity: progress < 100 ? 0.7 : 1,
-                        filter: progress < 100 ? 'grayscale(0.5)' : 'none'
-                    }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                            <div style={{
-                                width: 44, height: 44, borderRadius: '50%',
-                                background: 'color-mix(in srgb, var(--color-wallet) 10%, white)',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                color: 'var(--color-wallet)'
-                            }}>
-                                <Lock size={20} />
-                            </div>
-                            <div>
-                                <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                    Próxima Ascensión
-                                </p>
-                                <p style={{ fontSize: 16, fontWeight: 800, color: 'var(--color-navy)' }}>
-                                    {nextRank}
-                                </p>
+                {/* Distribución de Vitalidad */}
+                <div style={{ marginTop: 8, padding: '24px 20px', background: 'var(--color-surface-2)', borderRadius: 20, border: '1px solid var(--color-border)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+                        <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--color-navy)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+                            <Cpu size={16} />
+                        </div>
+                        <h3 style={{ fontSize: 14, fontWeight: 800, color: 'var(--color-navy)' }}>Distribución del Ciclo</h3>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            <div style={{ width: 12, height: 12, borderRadius: 4, background: '#F59E0B' }} />
+                            <div style={{ flex: 1 }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                                    <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)' }}>RECOMPENSA DIRECTA</span>
+                                    <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--color-navy)' }}>25%</span>
+                                </div>
+                                <div style={{ height: 4, background: 'var(--color-border)', borderRadius: 2, overflow: 'hidden' }}>
+                                    <div style={{ width: '25%', height: '100%', background: '#F59E0B' }} />
+                                </div>
                             </div>
                         </div>
-                        <div style={{ textAlign: 'right' }}>
-                            <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>Capacidad</p>
-                            <p style={{ fontSize: 14, fontWeight: 800, color: 'var(--color-wallet)' }}>{(investment * 2).toLocaleString()} TC</p>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            <div style={{ width: 12, height: 12, borderRadius: 4, background: '#3B82F6' }} />
+                            <div style={{ flex: 1 }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                                    <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)' }}>FONDO DE ASCENSIÓN</span>
+                                    <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--color-navy)' }}>50%</span>
+                                </div>
+                                <div style={{ height: 4, background: 'var(--color-border)', borderRadius: 2, overflow: 'hidden' }}>
+                                    <div style={{ width: '50%', height: '100%', background: '#3B82F6' }} />
+                                </div>
+                            </div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            <div style={{ width: 12, height: 12, borderRadius: 4, background: '#64748B' }} />
+                            <div style={{ flex: 1 }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                                    <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)' }}>INFRAESTRUCTURA</span>
+                                    <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--color-navy)' }}>25%</span>
+                                </div>
+                                <div style={{ height: 4, background: 'var(--color-border)', borderRadius: 2, overflow: 'hidden' }}>
+                                    <div style={{ width: '25%', height: '100%', background: '#64748B' }} />
+                                </div>
+                            </div>
                         </div>
                     </div>
-                )}
+                </div>
             </div>
         </div>
     );

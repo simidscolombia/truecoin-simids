@@ -226,19 +226,54 @@ export const userService = {
             .select('*', { count: 'exact', head: true })
             .eq('referred_by', userId);
 
-        // 2. Obtener nivel actual
+        // 2. Obtener nivel actual y mentor
         const { data: profile, error: err2 } = await supabase
             .from('profiles')
-            .select('current_level, is_vip')
+            .select('current_level, is_vip, referred_by')
             .eq('id', userId)
             .single();
 
         if (err1 || err2) throw err1 || err2;
 
+        let mentor = null;
+        if (profile?.referred_by) {
+            const { data: mentorData } = await supabase
+                .from('profiles')
+                .select('full_name, email')
+                .eq('id', profile.referred_by)
+                .single();
+            mentor = mentorData;
+        }
+
         return {
             directReferrals: directCount || 0,
             currentLevel: profile?.current_level || 1,
-            isVip: profile?.is_vip || false
+            isVip: profile?.is_vip || false,
+            mentor: mentor
+        };
+    },
+
+    async getNetworkDetailed(userId: string) {
+        // Fetch up to 4 levels
+        // L1: Directos
+        const { data: l1 } = await supabase.from('profiles').select('id, full_name, email, current_level, created_at, referred_by').eq('referred_by', userId);
+
+        if (!l1 || l1.length === 0) return { l1: [], l2: [], l3: [], l4: [] };
+
+        const l1Ids = l1.map(u => u.id);
+        const { data: l2 } = await supabase.from('profiles').select('id, full_name, referred_by').in('referred_by', l1Ids);
+
+        const l2Ids = l2?.map(u => u.id) || [];
+        const { data: l3 } = await supabase.from('profiles').select('id, full_name, referred_by').in('referred_by', l2Ids);
+
+        const l3Ids = l3?.map(u => u.id) || [];
+        const { data: l4 } = await supabase.from('profiles').select('id, full_name, referred_by').in('referred_by', l3Ids);
+
+        return {
+            l1: l1 || [],
+            l2: l2 || [],
+            l3: l3 || [],
+            l4: l4 || []
         };
     }
 };

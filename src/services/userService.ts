@@ -258,7 +258,7 @@ export const userService = {
         const { data: allNetwork } = await supabase
             .from('profiles')
             .select('id, full_name, referred_by, current_level, created_at')
-            .or(`referred_by.eq.${userId}`);
+            .eq('referred_by', userId);
 
         if (!allNetwork) return { l1: [], l2: [], l3: [], l4: [] };
 

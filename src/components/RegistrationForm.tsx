@@ -22,7 +22,7 @@ export default function RegistrationForm({ onSuccess, initialReferralCode }: Reg
     const [referrerName, setReferrerName] = useState('');
     const [wompiPublicKey, setWompiPublicKey] = useState('pub_test_Q5yS9pmev6W9kzE0v6X2pY123'); // Fallback
     const [wompiIntegrity, setWompiIntegrity] = useState('');
-    const [regFee, setRegFee] = useState(50000); // Valor por defecto
+    const [regFee, setRegFee] = useState(5000); // Valor por defecto ajustado a 5k para pruebas
     const [regIp, setRegIp] = useState('');
     const [regLoc, setRegLoc] = useState('');
     const [error, setError] = useState('');
@@ -31,6 +31,7 @@ export default function RegistrationForm({ onSuccess, initialReferralCode }: Reg
         const loadSettings = async () => {
             try {
                 const { data } = await userService.getPaymentSettings();
+                console.log("Cargando Ajustes de Pago:", data);
                 if (data?.wompi_public) {
                     setWompiPublicKey(data.wompi_public.trim());
                 }

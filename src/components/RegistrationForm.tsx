@@ -100,11 +100,11 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
             });
 
             // 3. Link de Pago Wompi (CORRECCIÓN: Wompi usa guiones '-' no guiones bajos '_')
-            let paymentUrl = `https://checkout.wompi.co/p/?public-key=${wompiPublicKey}&currency=COP&amount-in-cents=5000000&reference=${tempRef}&redirect_url=${encodeURIComponent(window.location.origin)}`;
+            let paymentUrl = `https://checkout.wompi.co/p/?public-key=${wompiPublicKey}&currency=COP&amount-in-cents=500000&reference=${tempRef}&redirect_url=${encodeURIComponent(window.location.origin)}`;
 
             // 3.1. Agregar Firma de Integridad si existe el secreto
             if (wompiIntegrity) {
-                const text = `${tempRef}5000000COP${wompiIntegrity}`;
+                const text = `${tempRef}500000COP${wompiIntegrity}`;
                 const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
                 const signature = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
                 paymentUrl += `&signature:integrity=${signature}`;

@@ -12,6 +12,8 @@ import ExpansionMap from './ExpansionMap';
 import TransferModal from './TransferModal';
 import RechargeModal from './RechargeModal';
 import { userService } from '../services/userService';
+import { matrixService } from '../services/matrixService';
+import WaitingRoom from './WaitingRoom';
 
 const RANKS = [
     "VIP BRONCE", "VIP COBRE", "VIP PLATA", "VIP ORO",
@@ -80,12 +82,43 @@ export default function Dashboard({
         isVip: false,
         mentor: null
     });
+    const [pendingReferrals, setPendingReferrals] = useState<any[]>([]);
+    const [isPlacing, setIsPlacing] = useState(false);
+    const [matrixSlots, setMatrixSlots] = useState<any[]>([]);
 
     useEffect(() => {
         if (user?.id) {
             userService.getDashboardStats(user.id).then(setStats).catch(console.error);
+            matrixService.getUnplacedReferrals(user.id).then(setPendingReferrals).catch(console.error);
+            matrixService.getMatrixSlots(user.id, stats.currentLevel).then(setMatrixSlots).catch(console.error);
         }
-    }, [user?.id]);
+    }, [user?.id, stats.currentLevel]);
+
+    const handlePlaceUser = async (userId: string, position: number) => {
+        if (!user.id) return;
+        setIsPlacing(true);
+        try {
+            await matrixService.placeUser({
+                matrixOwnerId: user.id,
+                occupantId: userId,
+                recruiterId: user.id, // En este caso el mismo dueño lo ubica
+                level: stats.currentLevel,
+                position
+            });
+            // Refrescar datos
+            const updatedPending = await matrixService.getUnplacedReferrals(user.id);
+            const updatedSlots = await matrixService.getMatrixSlots(user.id, stats.currentLevel);
+            setPendingReferrals(updatedPending);
+            setMatrixSlots(updatedSlots);
+            // Opcional: Notificar éxito
+            alert("✅ Usuario ubicado exitosamente en la matriz.");
+        } catch (err: any) {
+            console.error("Error al ubicar:", err);
+            alert("Error: " + err.message);
+        } finally {
+            setIsPlacing(false);
+        }
+    };
 
     const copyReferral = () => {
         const link = `${window.location.origin}/?ref=${user.referralCode}`;
@@ -286,12 +319,21 @@ export default function Dashboard({
 
                 </div>
 
+                {/* SALA DE ESPERA (IA DRIVEN) */}
+                <div style={{ marginBottom: 24 }}>
+                    <WaitingRoom
+                        pendingUsers={pendingReferrals}
+                        onPlace={handlePlaceUser}
+                        isPlacing={isPlacing}
+                    />
+                </div>
+
                 {/* View Toggle (Glassmorphism) */}
                 <div style={{
                     display: 'flex', gap: 6, marginBottom: 32,
                     background: 'rgba(255,255,255,0.5)',
                     backdropFilter: 'blur(10px)',
-                    padding: 6, borderRadius: 16, border: '1px solid rgba(255,255,255,0.8)',
+                    padding: '6px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.8)',
                     width: 'fit-content',
                     boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
                 }}>
@@ -342,12 +384,7 @@ export default function Dashboard({
                             >
                                 <GiftMatrix
                                     currentLevel={stats.currentLevel}
-                                    slots={Array.from({ length: stats.directReferrals }).map((_, i) => ({
-                                        position: i + 1,
-                                        occupant_id: `mock-${i}`,
-                                        occupant_name: `Socio ${i + 1}`,
-                                        recruiter_id: user.id || null // Asumiendo que son directos para la visual
-                                    }))}
+                                    slots={matrixSlots}
                                 />
                             </motion.div>
                         )}
@@ -377,7 +414,7 @@ export default function Dashboard({
                 </div>
 
 
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }

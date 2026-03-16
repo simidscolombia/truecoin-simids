@@ -16,7 +16,7 @@ import { userService } from './services/userService';
 import { Product } from './services/businessService';
 import ShoppingCart from './components/ShoppingCart';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 type AppView = 'dashboard' | 'marketplace' | 'pos' | 'admin' | 'shopyfam' | 'prospects';
 
 function Header({
@@ -64,7 +64,7 @@ function Header({
         </div>
         <span className="header-logo-text" style={{ fontSize: 20, fontWeight: 800, color: 'var(--color-navy)', letterSpacing: -0.5 }}>
           Shopy<span style={{ color: 'var(--color-wallet)' }}>Brands</span>
-          <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', background: 'var(--color-surface-2)', padding: '2px 6px', borderRadius: 6, marginLeft: 8, verticalAlign: 'middle', display: 'inline-block' }}>V2.7.1 — TEST PRICE (5K) & INTEGRITY FIX</span>
+          <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', background: 'var(--color-surface-2)', padding: '2px 6px', borderRadius: 6, marginLeft: 8, verticalAlign: 'middle', display: 'inline-block' }}>V2.8.0 — SMART REFERRAL LINKS & AUTO-AUTH</span>
         </span>
       </div>
 
@@ -282,19 +282,31 @@ function App() {
   const [guestViewMode, setGuestViewMode] = useState<'products' | 'businesses'>('products');
   const [cart, setCart] = useState<{ product: Product; quantity: number }[]>([]);
   const [showCart, setShowCart] = useState(false);
+  const [initialRef, setInitialRef] = useState('');
 
-  // ── Manejo de Retorno de Wompi ──
-  useState(() => {
+  // ── Manejo de Enlaces de Referido y Retorno de Wompi ──
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
+
+      // 1. Manejo de Retorno de Wompi
       if (params.get('id') || params.get('reference')) {
         setTimeout(() => {
-          alert("🚀 ¡Pago en proceso! Estamos activando tu cuenta ShopyBrands. \n\nRecibirás un WhatsApp en breve y ya podrás iniciar sesión con tu correo.");
+          alert("🚀 ¡Pago en proceso! Estamos activando tu cuenta ShopyBrands. \n\nRecibirás un WhatsApp en breve y ya podrás iniciar sesión con tu correo o nombre.");
           window.history.replaceState({}, document.title, window.location.pathname);
         }, 1000);
       }
+
+      // 2. Manejo de Link de Referido (?ref=CODIGO)
+      const refParam = params.get('ref');
+      if (refParam && !isLoggedIn) {
+        setInitialRef(refParam.toUpperCase());
+        setShowAuth(true);
+        // Limpiamos la URL para que no quede el ?ref= si refresca
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
     }
-  });
+  }, [isLoggedIn]);
 
   const addToCart = (product: Product) => {
     setCart(prev => {
@@ -409,7 +421,10 @@ function App() {
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               style={{ position: 'relative', zIndex: 310, width: '100%', maxWidth: 440 }}
             >
-              <RegistrationForm onSuccess={handleRegisterSuccess} />
+              <RegistrationForm
+                onSuccess={handleRegisterSuccess}
+                initialReferralCode={initialRef}
+              />
             </motion.div>
           </div>
         )}

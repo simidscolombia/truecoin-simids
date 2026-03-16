@@ -102,9 +102,16 @@ export default function Dashboard({
     const [copied, setCopied] = useState(false);
 
     const copyReferral = () => {
-        navigator.clipboard.writeText(`shopybrands.com/ref/${user.referralCode}`);
+        const link = `${window.location.origin}/?ref=${user.referralCode}`;
+        navigator.clipboard.writeText(link);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
+    };
+
+    const shareToWhatsApp = () => {
+        const link = `${window.location.origin}/?ref=${user.referralCode}`;
+        const message = encodeURIComponent(`🚀 ¡Únete a ShopyBrands conmigo! \n\nAccede a precios de mayorista, gana puntos y sé parte del primer club VIP con IA. \n\nRegístrate aquí: ${link}`);
+        window.open(`https://wa.me/?text=${message}`, '_blank');
     };
 
     const handleTransferSuccess = (amount: number) => {
@@ -285,7 +292,7 @@ export default function Dashboard({
                             </button>
                         </div>
 
-                        <button className="btn btn-outline btn-full">
+                        <button onClick={shareToWhatsApp} className="btn btn-outline btn-full">
                             <Share2 size={16} /> Compartir por WhatsApp
                         </button>
                     </div>

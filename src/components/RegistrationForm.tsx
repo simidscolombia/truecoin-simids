@@ -7,12 +7,13 @@ import { userService } from '../services/userService';
 
 interface RegistrationFormProps {
     onSuccess: (userData: any) => void;
+    initialReferralCode?: string;
 }
 
-export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
+export default function RegistrationForm({ onSuccess, initialReferralCode }: RegistrationFormProps) {
     const [step, setStep] = useState(1);
     const [isLoginMode, setIsLoginMode] = useState(false);
-    const [referralCode, setReferralCode] = useState('');
+    const [referralCode, setReferralCode] = useState(initialReferralCode || '');
     const [isValidating, setIsValidating] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [emailLogin, setEmailLogin] = useState('');
@@ -48,6 +49,12 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
         };
         loadSettings();
     }, []);
+
+    useEffect(() => {
+        if (initialReferralCode && initialReferralCode.length >= 4) {
+            handleValidateReferral();
+        }
+    }, [initialReferralCode]);
 
     const handleValidateReferral = async () => {
         if (referralCode.length < 4) {

@@ -7,6 +7,7 @@ export interface Product {
     description: string;
     price_tc: number;
     price_fiat: number; // Precio real en moneda local
+    price_public: number; // Precio sugerido al público
     currency: string;   // e.g., 'COP', 'USD'
     mlm_utility: number;
     image_url: string;

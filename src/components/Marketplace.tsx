@@ -10,14 +10,14 @@ const CATEGORIES = ['Todos', 'Alimentos', 'Electrónica', 'Hogar', 'Moda', 'Salu
 const CITIES = ['Todas', 'Bogotá', 'Medellín', 'Cali', 'Barranquilla', 'Bucaramanga'];
 
 const MOCK_FALLBACK: Product[] = [
-    { id: '1', business_id: null, name: 'Arroz Premium Bolívar 5kg', description: 'Arroz de grano largo seleccionado, cosecha directa de los llanos.', price_tc: 18.00, price_fiat: 24000, currency: 'COP', mlm_utility: 1.80, image_url: '', stock: 120, category: 'Alimentos', is_marketplace: true },
-    { id: '2', business_id: null, name: 'Aceite La Favorita 3L', description: 'Aceite de girasol 100% natural, prensado en frío para tu salud.', price_tc: 22.00, price_fiat: 28000, currency: 'COP', mlm_utility: 2.20, image_url: '', stock: 80, category: 'Alimentos', is_marketplace: true },
-    { id: '3', business_id: null, name: 'Audífonos Bluetooth Pro', description: 'Sonido HD con cancelación de ruido activa y batería de 40h.', price_tc: 89.00, price_fiat: 120000, currency: 'COP', mlm_utility: 8.90, image_url: '', stock: 30, category: 'Electrónica', is_marketplace: true },
-    { id: '4', business_id: null, name: 'Café Juan Valdez 500g', description: 'Mezcla de origen colombiano, tostado medio, aroma intenso.', price_tc: 32.00, price_fiat: 42000, currency: 'COP', mlm_utility: 3.20, image_url: '', stock: 60, category: 'Alimentos', is_marketplace: true },
-    { id: '5', business_id: null, name: 'Vitamina C 1000mg x60', description: 'Suplemento inmunológico de alta biodisponibilidad y pureza.', price_tc: 28.00, price_fiat: 38000, currency: 'COP', mlm_utility: 2.80, image_url: '', stock: 45, category: 'Salud', is_marketplace: true },
-    { id: '6', business_id: null, name: 'Shampoo Pantene 750ml', description: 'Fórmula Pro-V para un cabello fuerte, brillante y saludable.', price_tc: 15.00, price_fiat: 22000, currency: 'COP', mlm_utility: 1.50, image_url: '', stock: 100, category: 'Hogar', is_marketplace: true },
-    { id: '7', business_id: null, name: 'Camiseta Essential Dry-Fit', description: 'Tela transpirable ideal para deporte y uso casual diario.', price_tc: 45.00, price_fiat: 65000, currency: 'COP', mlm_utility: 4.50, image_url: '', stock: 50, category: 'Moda', is_marketplace: true },
-    { id: '8', business_id: null, name: 'Azúcar Manuelita 2kg', description: 'Azúcar refinada de caña colombiana, calidad superior.', price_tc: 8.00, price_fiat: 12000, currency: 'COP', mlm_utility: 0.80, image_url: '', stock: 200, category: 'Alimentos', is_marketplace: true },
+    { id: '1', business_id: null, name: 'Arroz Premium Bolívar 5kg', description: 'Arroz de grano largo seleccionado, cosecha directa de los llanos.', price_tc: 18.00, price_fiat: 24000, price_public: 32400, currency: 'COP', mlm_utility: 1.80, image_url: '', stock: 120, category: 'Alimentos', is_marketplace: true },
+    { id: '2', business_id: null, name: 'Aceite La Favorita 3L', description: 'Aceite de girasol 100% natural, prensado en frío para tu salud.', price_tc: 22.00, price_fiat: 28000, price_public: 37800, currency: 'COP', mlm_utility: 2.20, image_url: '', stock: 80, category: 'Alimentos', is_marketplace: true },
+    { id: '3', business_id: null, name: 'Audífonos Bluetooth Pro', description: 'Sonido HD con cancelación de ruido activa y batería de 40h.', price_tc: 89.00, price_fiat: 120000, price_public: 162000, currency: 'COP', mlm_utility: 8.90, image_url: '', stock: 30, category: 'Electrónica', is_marketplace: true },
+    { id: '4', business_id: null, name: 'Café Juan Valdez 500g', description: 'Mezcla de origen colombiano, tostado medio, aroma intenso.', price_tc: 32.00, price_fiat: 42000, price_public: 56700, currency: 'COP', mlm_utility: 3.20, image_url: '', stock: 60, category: 'Alimentos', is_marketplace: true },
+    { id: '5', business_id: null, name: 'Vitamina C 1000mg x60', description: 'Suplemento inmunológico de alta biodisponibilidad y pureza.', price_tc: 28.00, price_fiat: 38000, price_public: 51300, currency: 'COP', mlm_utility: 2.80, image_url: '', stock: 45, category: 'Salud', is_marketplace: true },
+    { id: '6', business_id: null, name: 'Shampoo Pantene 750ml', description: 'Fórmula Pro-V para un cabello fuerte, brillante y saludable.', price_tc: 15.00, price_fiat: 22000, price_public: 29700, currency: 'COP', mlm_utility: 1.50, image_url: '', stock: 100, category: 'Hogar', is_marketplace: true },
+    { id: '7', business_id: null, name: 'Camiseta Essential Dry-Fit', description: 'Tela transpirable ideal para deporte y uso casual diario.', price_tc: 45.00, price_fiat: 65000, price_public: 87750, currency: 'COP', mlm_utility: 4.50, image_url: '', stock: 50, category: 'Moda', is_marketplace: true },
+    { id: '8', business_id: null, name: 'Azúcar Manuelita 2kg', description: 'Azúcar refinada de caña colombiana, calidad superior.', price_tc: 8.00, price_fiat: 12000, price_public: 16200, currency: 'COP', mlm_utility: 0.80, image_url: '', stock: 200, category: 'Alimentos', is_marketplace: true },
 ];
 
 const CATEGORY_EMOJIS: Record<string, string> = {
@@ -27,7 +27,7 @@ const CATEGORY_EMOJIS: Record<string, string> = {
 function ProductCard({ product, onBuy, layout = 'grid' }: { product: Product; onBuy: (p: Product) => void; layout?: 'grid' | 'list' }) {
     const isList = layout === 'list';
     const fiatPrice = product.price_fiat;
-    const fiatPublic = fiatPrice * 1.35; // 35% de margen estimado
+    const fiatPublic = product.price_public || fiatPrice * 1.35;
     const formatCurrency = (val: number) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: product.currency || 'COP', maximumFractionDigits: 0 }).format(val);
 
     return (
@@ -96,7 +96,7 @@ function ProductCard({ product, onBuy, layout = 'grid' }: { product: Product; on
                             <p style={{ fontSize: isList ? 20 : 20, fontWeight: 800, color: 'var(--color-navy)', margin: 0 }}>
                                 {formatCurrency(fiatPrice)}
                             </p>
-                            <span style={{ fontSize: 11, fontWeight: 700, color: '#16A34A', background: '#DCFCE7', padding: '1px 6px', borderRadius: 4 }}>-35% VIP</span>
+                            <span style={{ fontSize: 11, fontWeight: 700, color: '#16A34A', background: '#DCFCE7', padding: '1px 6px', borderRadius: 4 }}>OFERTA VIP</span>
                         </div>
                         <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-marketplace)', display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
                             <Zap size={14} fill="var(--color-marketplace)" /> {product.price_tc.toFixed(2)} TC

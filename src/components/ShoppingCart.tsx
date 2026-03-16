@@ -42,7 +42,7 @@ export default function ShoppingCart({
     const [isProcessing, setIsProcessing] = useState(false);
 
     const totalFiat = items.reduce((acc, item) => acc + (item.product.price_fiat * item.quantity), 0);
-    const totalStandard = totalFiat * 1.35;
+    const totalStandard = items.reduce((acc, item) => acc + (item.product.price_public * item.quantity), 0);
     const totalTC = items.reduce((acc, item) => acc + (item.product.price_tc * item.quantity), 0);
 
     const formatCurrency = (val: number, currency: string = 'COP') =>
@@ -169,7 +169,7 @@ export default function ShoppingCart({
                                                         <span style={{ fontWeight: 600 }}>{formatCurrency(totalStandard)}</span>
                                                     </div>
                                                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
-                                                        <span style={{ color: 'var(--color-text-muted)' }}>Ahorro VIP (35%)</span>
+                                                        <span style={{ color: 'var(--color-text-muted)' }}>Ahorro VIP</span>
                                                         <span style={{ color: '#16A34A', fontWeight: 700 }}>-{formatCurrency(totalStandard - totalFiat)}</span>
                                                     </div>
                                                     <div style={{ height: 1, background: 'rgba(0,0,0,0.05)', margin: '4px 0' }} />

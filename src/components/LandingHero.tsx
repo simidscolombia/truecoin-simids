@@ -59,7 +59,7 @@ export default function LandingHero({ onGetStarted }: { onGetStarted: () => void
                             </h1>
 
                             <p style={{ fontSize: 18, color: 'rgba(255,255,255,0.8)', lineHeight: 1.6, marginBottom: 40, maxWidth: 500 }}>
-                                ShopyBrands une el poder del comercio real con una red inteligente de beneficios. Ahorra un 35% directo y construye una red de regalos infinita.
+                                ShopyBrands une el poder del comercio real con una red inteligente de beneficios. Obtén Precios VIP exclusivos y construye una red de regalos infinita.
                             </p>
 
                             <div style={{ display: 'flex', gap: 16 }}>
@@ -102,13 +102,13 @@ export default function LandingHero({ onGetStarted }: { onGetStarted: () => void
                             <StepItem
                                 number="01"
                                 title="Regístrate y Actívate"
-                                desc="Crea tu perfil y activa tu membresía VIP para desbloquear el ahorro del 35%."
+                                desc="Crea tu perfil y activa tu membresía VIP para desbloquear Precios VIP exclusivos y beneficios."
                                 icon={ShieldCheck}
                             />
                             <StepItem
                                 number="02"
                                 title="Consume y Ahorra"
-                                desc="Compra en el Marketplace o en negocios aliados usando TrueCoins."
+                                desc="Compra en el Marketplace o en negocios aliados usando TrueCoins y obten Puntos Acumulables."
                                 icon={ShoppingCart}
                             />
                             <StepItem
@@ -128,7 +128,7 @@ export default function LandingHero({ onGetStarted }: { onGetStarted: () => void
                 display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24,
                 paddingTop: 40, borderTop: '1px solid rgba(255,255,255,0.1)'
             }}>
-                <StatSimple label="Ahorro Directo" value="35%" />
+                <StatSimple label="Precios VIP" value="Exclusivo" />
                 <StatSimple label="Niveles de Red" value="12" />
                 <StatSimple label="Moneda Ecosistema" value="TrueCoin" />
                 <StatSimple label="Estructura Pro" value="1 x 4" />
@@ -139,7 +139,7 @@ export default function LandingHero({ onGetStarted }: { onGetStarted: () => void
                 <h2 style={{ color: 'white', fontSize: 24, fontWeight: 900, marginBottom: 40 }}>Tu Camino al Éxito ShopyBrands</h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20, position: 'relative' }}>
                     <VisualStep num="1" color="#4ADE80" title="Activación" text="Paga tu membresía y recibe tus primeros TrueCoins." />
-                    <VisualStep num="2" color="#FACC15" title="Consumo" text="Ahorra 35% en tus compras diarias." />
+                    <VisualStep num="2" color="#FACC15" title="Consumo" text="Accede a Precios VIP y acumula Puntos Acumulables." />
                     <VisualStep num="3" color="#3B82F6" title="Red 1x4" text="Invita 4 socios y empieza a escalar niveles." />
                     <VisualStep num="4" color="#A855F7" title="Infinito" text="Completa el nivel 12 y reinicia el ciclo." />
                 </div>

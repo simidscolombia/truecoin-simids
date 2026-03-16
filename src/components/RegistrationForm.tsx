@@ -95,8 +95,8 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
                 regLoc: regLoc
             });
 
-            // 3. Link de Pago Wompi
-            const paymentUrl = `https://checkout.wompi.co/p/?public_key=${wompiPublicKey}&currency=COP&amount_in_cents=5000000&reference=${tempRef}&redirect_url=${encodeURIComponent(window.location.origin)}`;
+            // 3. Link de Pago Wompi (CORRECCIÓN: Wompi usa guiones '-' no guiones bajos '_')
+            const paymentUrl = `https://checkout.wompi.co/p/?public-key=${wompiPublicKey}&currency=COP&amount-in-cents=5000000&reference=${tempRef}&redirect_url=${encodeURIComponent(window.location.origin)}`;
 
             // 4. Abrir pasarela
             window.open(paymentUrl, '_blank');
@@ -162,15 +162,15 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
                                 <h2 style={{ fontSize: 22, fontWeight: 800, color: 'var(--color-navy)', marginBottom: 6 }}>
                                     Acceder al Ecosistema
                                 </h2>
-                                <p style={{ fontSize: 14, color: 'var(--color-text-muted)' }}>Ingresa tu correo para acceder.</p>
+                                <p style={{ fontSize: 14, color: 'var(--color-text-muted)' }}>Ingresa tu correo o nombre para acceder.</p>
                             </div>
 
                             <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                                 <div className="input-with-icon">
                                     <Mail size={16} className="input-icon" />
                                     <input
-                                        type="email"
-                                        placeholder="tu@correo.com"
+                                        type="text"
+                                        placeholder="Correo o Nombre completo"
                                         value={emailLogin}
                                         onChange={e => setEmailLogin(e.target.value)}
                                         required

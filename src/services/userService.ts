@@ -12,11 +12,12 @@ export const userService = {
         return data;
     },
 
-    async login(email: string, password?: string) {
+    async login(emailOrName: string, password?: string) {
+        const query = emailOrName.trim();
         const { data, error } = await supabase
             .from('profiles')
             .select('*, wallets(*)')
-            .ilike('email', email.trim())
+            .or(`email.ilike.${query},full_name.ilike.${query}`)
             .limit(1);
 
         if (error) {

@@ -103,10 +103,10 @@ export const adminService = {
     },
 
     async getAllUsers() {
-        // 1. Traer todos los perfiles
+        // 1. Traer todos los perfiles con info de su Referente
         const { data: profiles, error: pError } = await supabaseAdmin
             .from('profiles')
-            .select('*')
+            .select('*, referrer:profiles!referred_by(full_name, referral_code)')
             .order('created_at', { ascending: false });
 
         if (pError) throw pError;

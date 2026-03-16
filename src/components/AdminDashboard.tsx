@@ -357,7 +357,14 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                                                             </div>
                                                             <div>
                                                                 <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-navy)' }}>{u.full_name}</p>
-                                                                <p style={{ fontSize: 11, color: 'var(--color-text-muted)', fontFamily: 'monospace' }}>{u.referral_code}</p>
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                                    <span style={{ fontSize: 10, color: 'var(--color-text-muted)', fontFamily: 'monospace', background: 'var(--color-surface-2)', padding: '1px 4px', borderRadius: 4 }}>{u.referral_code}</span>
+                                                                    {u.referrer && (
+                                                                        <span style={{ fontSize: 10, color: 'var(--color-wallet)', fontWeight: 600 }}>
+                                                                            invitado por {u.referrer.full_name} ({u.referrer.referral_code})
+                                                                        </span>
+                                                                    )}
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </td>

@@ -1,7 +1,8 @@
 import { motion, AnimatePresence } from 'framer-motion';
+import LandingHero from './components/LandingHero';
 import {
   Coins, ShoppingBag,
-  LayoutDashboard, Search, Settings, LogOut, Users
+  LayoutDashboard, Search, Settings, LogOut, Users, Zap
 } from 'lucide-react';
 import { ThemeProvider } from './contexts/ThemeContext';
 import RegistrationForm from './components/RegistrationForm';
@@ -18,7 +19,7 @@ import { Product } from './services/businessService';
 import ShoppingCart from './components/ShoppingCart';
 
 import { useState, useEffect } from 'react';
-type AppView = 'dashboard' | 'marketplace' | 'pos' | 'admin' | 'shopyfam' | 'prospects';
+type AppView = 'dashboard' | 'marketplace' | 'pos' | 'admin' | 'shopyfam' | 'prospects' | 'landing';
 
 function Header({
   isLoggedIn,
@@ -128,6 +129,27 @@ function Header({
           }}
         >
           <Search size={16} /> Directorio
+        </button>
+        {/* Plan Maestro / Conoce más */}
+        <button
+          onClick={() => onNavigate('landing')}
+          style={{
+            border: 'none',
+            padding: '12px 24px',
+            borderTopLeftRadius: 12,
+            borderTopRightRadius: 12,
+            fontSize: 14,
+            fontWeight: 800,
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            background: currentView === 'landing' ? 'var(--color-navy)' : 'transparent',
+            color: currentView === 'landing' ? 'white' : 'var(--color-text-muted)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+          }}
+        >
+          <Zap size={16} /> Plan Maestro
         </button>
 
         {isLoggedIn && (
@@ -469,13 +491,24 @@ function App() {
 
       <main>
         {/* PAYWALL: Si está logueado pero no es VIP y no es Admin */}
-        {isLoggedIn && !isAdmin && !user?.isVip && currentView !== 'marketplace' && (
+        {isLoggedIn && !isAdmin && !user?.isVip && currentView !== 'marketplace' && currentView !== 'landing' && (
           <Paywall user={user} />
         )}
 
         {/* CONTENIDO BLOQUEADO POR EL PAYWALL (Solo si es VIP o Admin o Vista Marketplace) */}
-        {(isAdmin || user?.isVip || currentView === 'marketplace') && (
+        {(isAdmin || user?.isVip || currentView === 'marketplace' || currentView === 'landing') && (
           <>
+            {currentView === 'landing' && (
+              <motion.div
+                key="landing"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <LandingHero onGetStarted={() => setShowAuth(true)} />
+              </motion.div>
+            )}
+
             {currentView === 'marketplace' && (
               <div className="animate-in">
                 <Marketplace

@@ -64,7 +64,7 @@ function Header({
         </div>
         <span className="header-logo-text" style={{ fontSize: 20, fontWeight: 800, color: 'var(--color-navy)', letterSpacing: -0.5 }}>
           Shopy<span style={{ color: 'var(--color-wallet)' }}>Brands</span>
-          <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', background: 'var(--color-surface-2)', padding: '2px 6px', borderRadius: 6, marginLeft: 8, verticalAlign: 'middle', display: 'inline-block' }}>V2.9.5 — FULL DYNAMIC FEE (UI + PAY)</span>
+          <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', background: 'var(--color-surface-2)', padding: '2px 6px', borderRadius: 6, marginLeft: 8, verticalAlign: 'middle', display: 'inline-block' }}>V3.0.0 — PERSISTENT SESSIONS & WEBHOOK READY</span>
         </span>
       </div>
 
@@ -284,6 +284,36 @@ function App() {
   const [showCart, setShowCart] = useState(false);
   const [initialRef, setInitialRef] = useState('');
 
+  // ── PERSISTENCIA DE SESIÓN (Capa de Seguridad Local) ──
+  useEffect(() => {
+    const savedSession = localStorage.getItem('shopy_auth_session');
+    if (savedSession) {
+      try {
+        const session = JSON.parse(savedSession);
+        setUser(session.user);
+        setIsLoggedIn(true);
+        setIsAdmin(session.isAdmin);
+        setBalance(session.balance || '0.00');
+        // Mantener la vista si existe, si no, ir al dashboard/admin
+        setCurrentView(session.currentView || (session.isAdmin ? 'admin' : 'dashboard'));
+      } catch (e) {
+        console.error("Error restaurando sesión:", e);
+        localStorage.removeItem('shopy_auth_session');
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isLoggedIn && user) {
+      localStorage.setItem('shopy_auth_session', JSON.stringify({
+        user,
+        isAdmin,
+        balance,
+        currentView
+      }));
+    }
+  }, [isLoggedIn, user, balance, isAdmin, currentView]);
+
   // ── Manejo de Enlaces de Referido y Retorno de Wompi ──
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -381,6 +411,7 @@ function App() {
   };
 
   const handleLogout = () => {
+    localStorage.removeItem('shopy_auth_session');
     setIsLoggedIn(false);
     setIsAdmin(false);
     setUser(null);

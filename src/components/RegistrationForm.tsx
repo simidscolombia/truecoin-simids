@@ -80,25 +80,38 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
         setError('');
 
         try {
-            // GENERAMOS REFERENCIA ÚNICA PARA EL PAGO (SIN CREAR USUARIO TODAVÍA)
-            const tempRef = `POS-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+            // 1. GENERAMOS REFERENCIA ÚNICA
+            const tempRef = `REG-${Math.random().toString(36).substring(2, 10).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
 
-            // Link de Pago Wompi - USANDO LLAVE DEL ADMIN
-            const paymentUrl = `https://checkout.wompi.co/p/?public_key=${wompiPublicKey}&currency=COP&amount_in_cents=5000000&reference=${tempRef}`;
+            // 2. GUARDAMOS INTENTO EN DB (AUDITORÍA & PERSISTENCIA)
+            await userService.createRegistrationAttempt({
+                reference: tempRef,
+                fullName: formData.fullName,
+                email: formData.email,
+                phone: formData.phone,
+                password: formData.password,
+                referralCode: referralCode,
+                regIp: regIp,
+                regLoc: regLoc
+            });
 
-            // Abrir pasarela
+            // 3. Link de Pago Wompi
+            const paymentUrl = `https://checkout.wompi.co/p/?public_key=${wompiPublicKey}&currency=COP&amount_in_cents=5000000&reference=${tempRef}&redirect_url=${encodeURIComponent(window.location.origin)}`;
+
+            // 4. Abrir pasarela
             window.open(paymentUrl, '_blank');
 
-            // Notificamos al usuario
-            alert(`🚀 PASARELA INICIADA\n\nPor seguridad, tu cuenta NO se creará en el sistema hasta que realices el pago.\n\n📍 Registro detectado desde: ${regIp || 'Desconocido'} (${regLoc || 'Buscando...'})\n\nCompleta el pago en la otra pestaña.`);
+            // 5. Notificamos al usuario
+            alert(`🚀 REGISTRO INICIADO: ${formData.fullName}\n\nPor seguridad, tu cuenta se activará automáticamente apenas Wompi confirme tu pago.\n\n📍 IP: ${regIp || 'Detectada'} | Loc: ${regLoc || 'Detectada'}\n\nEl sistema te enviará un WhatsApp de bienvenida al confirmar el pago.`);
 
-            // Resetear flujo para evitar registros accidentales
+            // Resetear flujo
             setStep(1);
             setReferralCode('');
             setIsLoginMode(true);
 
         } catch (err: any) {
-            setError('Error al conectar con Wompi.');
+            console.error("Error en registro:", err);
+            setError('Error al iniciar el proceso de registro. Intenta de nuevo.');
         } finally {
             setIsLoading(false);
         }

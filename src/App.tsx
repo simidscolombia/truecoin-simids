@@ -283,6 +283,19 @@ function App() {
   const [cart, setCart] = useState<{ product: Product; quantity: number }[]>([]);
   const [showCart, setShowCart] = useState(false);
 
+  // ── Manejo de Retorno de Wompi ──
+  useState(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('id') || params.get('reference')) {
+        setTimeout(() => {
+          alert("🚀 ¡Pago en proceso! Estamos activando tu cuenta ShopyBrands. \n\nRecibirás un WhatsApp en breve y ya podrás iniciar sesión con tu correo.");
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }, 1000);
+      }
+    }
+  });
+
   const addToCart = (product: Product) => {
     setCart(prev => {
       const existing = prev.find(item => item.product.id === product.id);

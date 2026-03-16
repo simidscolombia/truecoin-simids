@@ -167,5 +167,36 @@ export const userService = {
     async getPaymentSettings() {
         const { data } = await supabase.from('app_settings').select('value').eq('key', 'payment_api_keys').single();
         return { data: data ? JSON.parse(data.value) : null };
+    },
+
+    // ── Registro Seguro (Pre-pago) ────────────────────────────
+    async createRegistrationAttempt(attemptData: {
+        reference: string,
+        fullName: string,
+        email: string,
+        phone: string,
+        password: string,
+        referralCode: string,
+        regIp?: string,
+        regLoc?: string
+    }) {
+        const { data, error } = await supabase
+            .from('registration_attempts')
+            .insert([{
+                reference: attemptData.reference,
+                full_name: attemptData.fullName,
+                email: attemptData.email,
+                phone: attemptData.phone,
+                password: attemptData.password,
+                referral_code: attemptData.referralCode,
+                reg_ip: attemptData.regIp,
+                reg_location: attemptData.regLoc,
+                status: 'pending'
+            }])
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
     }
 };

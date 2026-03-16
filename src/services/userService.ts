@@ -301,5 +301,12 @@ export const userService = {
             l3: enrich(l3 || [], l4 || []),
             l4: enrich(l4 || [], l5 || [])
         };
+    },
+
+    // ── Simulación de Mensajería IA ──────────────────────────
+    async sendNotification(phone: string, message: string) {
+        console.log(`📡 [SHANNON AI BRIDGE] Enviando a ${phone}: ${message}`);
+        // Aquí iría el fetch a WAHA o bridge de WhatsApp
+        return true;
     }
 };

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ShoppingBag, Search, Star, Zap, Building2, MapPin, Phone, LayoutGrid, List } from 'lucide-react';
 import { businessService, Product, Business } from '../services/businessService';
+import LandingHero from './LandingHero';
 
 const CATEGORIES = ['Todos', 'Alimentos', 'Electrónica', 'Hogar', 'Moda', 'Salud'];
 const CITIES = ['Todas', 'Bogotá', 'Medellín', 'Cali', 'Barranquilla', 'Bucaramanga'];
@@ -201,9 +202,10 @@ export default function Marketplace({ onAddToCart, isGuest, onLoginRequired, vie
 
     const filteredProducts = products.filter(p => {
         const matchCat = activeCategory === 'Todos' || p.category === activeCategory;
-        const matchSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
-        const mockCity = p.id === '1' || p.id === '3' ? 'Bogotá' : 'Medellín';
-        const matchCity = activeCity === 'Todas' || mockCity === activeCity;
+        const matchSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            p.description.toLowerCase().includes(searchTerm.toLowerCase());
+        // Eliminamos la asignación forzada de ciudades para que la búsqueda sea nacional por defecto
+        const matchCity = activeCity === 'Todas' || (p as any).city === activeCity;
         return matchCat && matchSearch && matchCity;
     });
 
@@ -222,6 +224,8 @@ export default function Marketplace({ onAddToCart, isGuest, onLoginRequired, vie
 
     return (
         <div className="module-page animate-in">
+
+            {isGuest && <LandingHero onGetStarted={onLoginRequired || (() => { })} />}
 
 
             {/* Dynamic Color Filter Bar */}

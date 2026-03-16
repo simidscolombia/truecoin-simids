@@ -1,117 +1,185 @@
 'use client';
 
-import { useState } from 'react';
-import { TrendingUp, ArrowRight, Zap, Target } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import {
+    Award,
+    ChevronRight, Zap, Calculator,
+    Target
+} from 'lucide-react';
+import { giftService } from '../services/giftService';
 
 export default function RevenueSimulator() {
-    const [referrals, setReferrals] = useState(4);
-    const [duplication, setDuplication] = useState(4);
-    const [levels, setLevels] = useState(3);
+    const [referralCount, setReferralCount] = useState(4);
+    const [level, setLevel] = useState(1);
 
-    // Lógica de cálculo basada en el plan 2-2-2-4 y 1x4
-    // Simplificado para la proyección: 
-    // Nivel 1: $X, Nivel 2: $Y...
-    // Supongamos un promedio de 10 TC ($10,000 COP) de ganancia residual por socio activo en la red
-    const tcValue = 1000; // 1 TC = $1000 COP
+    // Cálculo de proyecciones
+    const stats = useMemo(() => {
+        const levelValue = giftService.getLevelValue(level);
+        const rewardBase = levelValue * 0.25;
 
-    const calculateTotalPartners = () => {
-        let total = 0;
-        let currentLevelPartners = referrals;
-        for (let i = 0; i < levels; i++) {
-            total += currentLevelPartners;
-            currentLevelPartners = currentLevelPartners * duplication;
-        }
-        return total;
-    };
+        // Mis directos que llenan mi nivel (máximo 4 para el ciclo actual)
+        const myDirectsInMyMatrix = Math.min(referralCount, 4);
 
-    const totalPartners = calculateTotalPartners();
-    const monthlyTC = totalPartners * 5; // 5 TC por socio de ganancia residual promedio
-    const monthlyCOP = monthlyTC * tcValue;
+        // Excedente de referidos que generan Bono de Mérito (Shannon Effect) en mi red de abajo
+        const spilloverReferrals = Math.max(0, referralCount - 4);
+
+
+        // Nota: En la matriz 1x4, el premio total al completar es el 25% del valor de entrada
+        const completeLevelReward = rewardBase;
+
+        // Calculamos cuánto gano por poner gente debajo (Bono de Mérito 50% de la recompensa del que recibe)
+        const meritBonusPerPerson = (rewardBase * 0.50);
+        const totalMeritBonus = spilloverReferrals * meritBonusPerPerson;
+
+        return {
+            levelName: RANKS[level - 1],
+            entryValue: levelValue,
+            directGain: myDirectsInMyMatrix >= 4 ? completeLevelReward : 0,
+            meritGain: totalMeritBonus,
+            totalEstimated: (myDirectsInMyMatrix >= 4 ? completeLevelReward : 0) + totalMeritBonus,
+            spilloverImpact: spilloverReferrals
+        };
+    }, [referralCount, level]);
 
     return (
-        <div className="card-lg" style={{ padding: 32, background: 'linear-gradient(135deg, #0B1F4B, #1E40AF)', color: 'white', position: 'relative', overflow: 'hidden' }}>
-            <div style={{ position: 'absolute', top: -20, right: -20, opacity: 0.1 }}>
-                <TrendingUp size={200} />
-            </div>
+        <div className="card-lg" style={{ padding: 40, background: 'var(--color-navy)', color: 'white', borderRadius: 32 }}>
+            <div style={{ display: 'flex', gap: 40, flexWrap: 'wrap' }}>
 
-            <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-                    <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Target size={24} color="var(--color-wallet)" />
+                {/* Left Side: Controls */}
+                <div style={{ flex: '1 1 400px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 32 }}>
+                        <div style={{ padding: 10, background: 'var(--color-wallet)', borderRadius: 12, color: 'var(--color-navy)' }}>
+                            <Calculator size={24} />
+                        </div>
+                        <div>
+                            <h2 style={{ fontSize: 24, fontWeight: 900 }}>Simulador de Ganancias</h2>
+                            <p style={{ fontSize: 14, opacity: 0.7 }}>Proyecta tu éxito con el Efecto Shannon</p>
+                        </div>
                     </div>
-                    <div>
-                        <h2 style={{ fontSize: 24, fontWeight: 900, marginBottom: 2 }}>Simulador de Libertad 🚀</h2>
-                        <p style={{ fontSize: 13, opacity: 0.7 }}>Proyecta tu crecimiento en el ecosistema ShopyBrands</p>
+
+                    {/* Level Selector */}
+                    <div style={{ marginBottom: 40 }}>
+                        <label style={{ display: 'block', fontSize: 13, fontWeight: 800, marginBottom: 16, opacity: 0.6, textTransform: 'uppercase' }}>
+                            Nivel de Desafío
+                        </label>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
+                            {[1, 2, 3, 4, 5, 6, 7, 8].map(l => (
+                                <button
+                                    key={l}
+                                    onClick={() => setLevel(l)}
+                                    style={{
+                                        padding: '12px',
+                                        borderRadius: 12,
+                                        border: '1px solid',
+                                        borderColor: level === l ? 'var(--color-wallet)' : 'rgba(255,255,255,0.1)',
+                                        background: level === l ? 'var(--color-wallet)' : 'transparent',
+                                        color: level === l ? 'var(--color-navy)' : 'white',
+                                        fontWeight: 800,
+                                        fontSize: 13,
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s'
+                                    }}
+                                >
+                                    Niv {l}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Referral Slider */}
+                    <div style={{ marginBottom: 20 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                            <label style={{ fontSize: 13, fontWeight: 800, opacity: 0.6, textTransform: 'uppercase' }}>
+                                Tus Referidos Directos
+                            </label>
+                            <span style={{ fontSize: 28, fontWeight: 900, color: 'var(--color-wallet)' }}>{referralCount}</span>
+                        </div>
+                        <input
+                            type="range"
+                            min="0"
+                            max="100"
+                            value={referralCount}
+                            onChange={(e) => setReferralCount(parseInt(e.target.value))}
+                            style={{
+                                width: '100%',
+                                accentColor: 'var(--color-wallet)',
+                                cursor: 'pointer'
+                            }}
+                        />
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, fontSize: 11, opacity: 0.5 }}>
+                            <span>0 socios</span>
+                            <span>50 socios</span>
+                            <span>100 socios</span>
+                        </div>
                     </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 24, marginBottom: 32 }}>
-                    {/* Controls */}
+                {/* Right Side: Results */}
+                <div style={{ flex: '1 1 300px', background: 'rgba(255,255,255,0.05)', borderRadius: 24, padding: 32, border: '1px solid rgba(255,255,255,0.1)' }}>
+                    <div style={{ textAlign: 'center', marginBottom: 40 }}>
+                        <p style={{ fontSize: 13, fontWeight: 700, opacity: 0.6, marginBottom: 8 }}>GANANCIA ESTIMADA POR CICLO</p>
+                        <h3 style={{ fontSize: 48, fontWeight: 900, color: 'var(--color-wallet)' }}>
+                            {stats.totalEstimated.toLocaleString()} <span style={{ fontSize: 20 }}>TC</span>
+                        </h3>
+                    </div>
+
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                        <div>
-                            <label style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', opacity: 0.8, marginBottom: 8, display: 'block' }}>
-                                Tus Referidos Directos: <span style={{ color: 'var(--color-wallet)', fontSize: 16 }}>{referrals}</span>
-                            </label>
-                            <input
-                                type="range" min="1" max="10" step="1"
-                                value={referrals}
-                                onChange={(e) => setReferrals(parseInt(e.target.value))}
-                                style={{ width: '100%', accentColor: 'var(--color-wallet)' }}
-                            />
-                        </div>
-                        <div>
-                            <label style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', opacity: 0.8, marginBottom: 8, display: 'block' }}>
-                                Duplicación (¿Cuántos traen ellos?): <span style={{ color: 'var(--color-wallet)', fontSize: 16 }}>{duplication}</span>
-                            </label>
-                            <input
-                                type="range" min="2" max="6" step="1"
-                                value={duplication}
-                                onChange={(e) => setDuplication(parseInt(e.target.value))}
-                                style={{ width: '100%', accentColor: 'var(--color-wallet)' }}
-                            />
-                        </div>
-                        <div>
-                            <label style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', opacity: 0.8, marginBottom: 8, display: 'block' }}>
-                                Profundidad de Red: <span style={{ color: 'var(--color-wallet)', fontSize: 16 }}>{levels} Niveles</span>
-                            </label>
-                            <input
-                                type="range" min="1" max="5" step="1"
-                                value={levels}
-                                onChange={(e) => setLevels(parseInt(e.target.value))}
-                                style={{ width: '100%', accentColor: 'var(--color-wallet)' }}
-                            />
-                        </div>
+                        <ResultRow
+                            icon={<Award size={18} />}
+                            label="Recompensa Tu Matriz"
+                            value={`${stats.directGain.toLocaleString()} TC`}
+                            sub={referralCount < 4 ? "Faltan socios para completar" : "Nivel completado"}
+                        />
+                        <ResultRow
+                            icon={<Zap size={18} />}
+                            label="Bono de Mérito IA"
+                            value={`${stats.meritGain.toLocaleString()} TC`}
+                            sub={`Por ${stats.spilloverImpact} socios puestos en tu red`}
+                            highlight
+                        />
+                        <ResultRow
+                            icon={<Target size={18} />}
+                            label="Pasa al Nivel Siguiente"
+                            value={stats.levelName}
+                            sub={`Fondo acumulado: ${(stats.entryValue * 0.5).toLocaleString()} TC`}
+                        />
                     </div>
 
-                    {/* Results Card */}
-                    <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 24, padding: 24, border: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                        <div style={{ marginBottom: 20 }}>
-                            <p style={{ fontSize: 12, fontWeight: 700, opacity: 0.6, textTransform: 'uppercase' }}>Socios en tu Red</p>
-                            <p style={{ fontSize: 40, fontWeight: 900, color: 'white' }}>{totalPartners.toLocaleString()}</p>
-                        </div>
-                        <div style={{ height: 1, background: 'rgba(255,255,255,0.1)', marginBottom: 20 }} />
-                        <div>
-                            <p style={{ fontSize: 12, fontWeight: 700, opacity: 0.6, textTransform: 'uppercase' }}>Ingreso Mensual Estimado</p>
-                            <p style={{ fontSize: 32, fontWeight: 900, color: 'var(--color-wallet)' }}>
-                                {monthlyTC.toLocaleString()} <span style={{ fontSize: 16 }}>TC</span>
-                            </p>
-                            <p style={{ fontSize: 18, fontWeight: 700, opacity: 0.9 }}>
-                                ≈ ${monthlyCOP.toLocaleString()} COP
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <div style={{ background: 'white', color: 'var(--color-navy)', borderRadius: 16, padding: '16px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <Zap size={20} color="var(--color-wallet)" />
-                        <span style={{ fontSize: 14, fontWeight: 700 }}>Con esta red alcanzarías el rango <strong>PLATINO DIAMANTE</strong></span>
-                    </div>
-                    <button className="btn btn-navy" style={{ padding: '8px 20px', fontSize: 13 }}>
-                        Ver Plan de Acción <ArrowRight size={14} />
+                    <button
+                        className="btn btn-wallet btn-lg"
+                        style={{ width: '100%', marginTop: 32, height: 56, borderRadius: 16, fontSize: 16, fontWeight: 800 }}
+                    >
+                        Empezar Ahora <ChevronRight size={20} />
                     </button>
                 </div>
             </div>
         </div>
     );
 }
+
+function ResultRow({ icon, label, value, sub, highlight }: any) {
+    return (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{
+                width: 40, height: 40, borderRadius: 10,
+                background: highlight ? 'var(--color-wallet)' : 'rgba(255,255,255,0.1)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: highlight ? 'var(--color-navy)' : 'white'
+            }}>
+                {icon}
+            </div>
+            <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, opacity: 0.8 }}>{label}</span>
+                    <span style={{ fontSize: 16, fontWeight: 900, color: highlight ? 'var(--color-wallet)' : 'white' }}>{value}</span>
+                </div>
+                <p style={{ fontSize: 11, opacity: 0.5 }}>{sub}</p>
+            </div>
+        </div>
+    );
+}
+
+const RANKS = [
+    "VIP BRONCE", "VIP PLATA", "VIP ORO", "PLATINO",
+    "ZAFIRO", "ESMERALDA", "DIAMANTE", "DIAMANTE AZUL"
+];

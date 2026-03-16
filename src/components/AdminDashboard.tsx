@@ -130,15 +130,34 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
     const handleStartScan = () => {
         if (!scanQuery) return;
         setIsScanning(true);
+
+        // Simulación inteligente basada en el query para no mostrar siempre Medellín
         setTimeout(() => {
+            const query = scanQuery.toLowerCase();
+            let city = "Colombia";
+            if (query.includes("bogotá")) city = "Bogotá";
+            if (query.includes("medellín")) city = "Medellín";
+            if (query.includes("cali")) city = "Cali";
+            if (query.includes("barranquilla")) city = "Barranquilla";
+
+            const categories = [
+                { keyword: 'caf', name: 'Café', cat: 'Gastronomía' },
+                { keyword: 'rest', name: 'Restaurante', cat: 'Gastronomía' },
+                { keyword: 'gym', name: 'Gimnasio', cat: 'Salud y Bienestar' },
+                { keyword: 'ropa', name: 'Tienda de Ropa', cat: 'Moda' },
+                { keyword: 'tec', name: 'Tecnología', cat: 'Tecnología' },
+            ];
+
+            const foundCat = categories.find(c => query.includes(c.keyword)) || { name: 'Comercio', cat: 'General' };
+
             const results = [
-                { id: 'g1', name: "Mondongo's Poblado", address: "Cl 10 #38-38, El Poblado", category: "Comida Típica", rating: 4.7, image_url: "https://images.unsplash.com/photo-1541167760496-162955ed8a9f?q=80&w=400" },
-                { id: 'g2', name: "Carmen Restaurant", address: "Cra 36 #10A-27, Provenza", category: "Alta Cocina", rating: 4.8, image_url: "https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=400" },
-                { id: 'g3', name: "Pergamino Café", address: "Cl 10B #36-38, Poblado", category: "Café Especial", rating: 4.8, image_url: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=400" },
+                { id: 'g1', name: `${foundCat.name} La Gran Vía`, address: `Carrera 15 con Calle 93, ${city}`, category: foundCat.cat, rating: 4.5, image_url: "https://images.unsplash.com/photo-1541167760496-162955ed8a9f?q=80&w=400" },
+                { id: 'g2', name: `${foundCat.name} Imperial`, address: `Avenida Principal #45-12, ${city}`, category: foundCat.cat, rating: 4.8, image_url: "https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=400" },
+                { id: 'g3', name: `${foundCat.name} Selecto`, address: `Centro Comercial Elite, ${city}`, category: foundCat.cat, rating: 4.9, image_url: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=400" },
             ];
             setScanResults(results);
             setIsScanning(false);
-        }, 2000);
+        }, 1500);
     };
 
     const handleImportOne = async (bus: any) => {
@@ -474,7 +493,7 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                                         <SearchCode size={18} className="input-icon" style={{ color: '#4F46E5' }} />
                                         <input
                                             type="text"
-                                            placeholder="Ej: Mejores Cafeterías en Medellín"
+                                            placeholder="Ej: Gimnasios en Bogotá o Restaurantes en Cali"
                                             value={scanQuery}
                                             onChange={e => setScanQuery(e.target.value)}
                                             className="input"

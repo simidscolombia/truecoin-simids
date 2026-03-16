@@ -88,12 +88,24 @@ export default function ProspectManager({ user }: { user: any }) {
         }
     };
 
-    const handleStatusUpdate = async (id: string, newStatus: any) => {
+    const handleStatusUpdate = async (id: string, newStatus: "nuevo" | "contactado" | "seguimiento" | "cerrado") => {
         try {
             await userService.updateProspectStatus(id, newStatus);
-            loadProspects();
-        } catch (error) {
-            console.error(error);
+            setProspects(prev => prev.map(p => p.id === id ? { ...p, status: newStatus } : p));
+
+            // Simular seguimiento IA
+            const prospect = prospects.find(p => p.id === id);
+            if (prospect && prospect.phone) {
+                let followUp = "";
+                if (newStatus === 'contactado') followUp = `📝 *Shopy AI:* He registrado tu interés, ${prospect.full_name}. Un Embajador te contactará pronto para explicarte el modelo 1x4.`;
+                if (newStatus === 'cerrado') followUp = `✅ *Shopy AI:* ¡Confirmado! Eres oficialmente parte de la red. Revisa tu App para ver tus primeras recompensas.`;
+
+                if (followUp) {
+                    userService.sendNotification(prospect.phone, followUp);
+                }
+            }
+        } catch (err) {
+            alert("Error al actualizar estado");
         }
     };
 
@@ -222,7 +234,8 @@ export default function ProspectManager({ user }: { user: any }) {
                                 <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', marginBottom: 4 }}>Estado</p>
                                 <select
                                     value={prospect.status}
-                                    onChange={(e) => handleStatusUpdate(prospect.id, e.target.value)}
+                                    onChange={(e) => handleStatusUpdate(prospect.id, e.target.value as any)}
+                                    className="status-select"
                                     style={{
                                         padding: '4px 12px', borderRadius: 20, fontSize: 11, fontWeight: 800,
                                         background: statusStyle.bg, color: statusStyle.text,

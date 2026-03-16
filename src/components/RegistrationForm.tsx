@@ -80,7 +80,15 @@ export default function RegistrationForm({ onSuccess, initialReferralCode }: Reg
                 referralCode: referralCode
             });
 
-            // 2. Notificar éxito local y pasar al flujo de App
+            // 2. Notificar por IA (Simulado)
+            if (profile.phone) {
+                const welcomeMsg = `🚀 *¡Bienvenido a ShopyBrands, ${profile.full_name}!* 
+Tu cuenta VIP ha sido activada. Tu código de socio es: *${profile.referral_code}*. 
+Prepárate para crecer en red 1x4 y ganar TrueCoins. ¡Nos vemos dentro! ✨`;
+                userService.sendNotification(profile.phone, welcomeMsg);
+            }
+
+            // 3. Notificar éxito local y pasar al flujo de App
             onSuccess(profile);
 
         } catch (err: any) {

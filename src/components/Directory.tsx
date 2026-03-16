@@ -9,20 +9,21 @@ import {
 import BusinessProfile from './BusinessProfile';
 import { businessService, Business } from '../services/businessService';
 
-const CATEGORIES = ['Todos', 'Gastronomía', 'Construcción', 'Salud', 'Ropa', 'Tecnología', 'Servicios'];
+const CATEGORIES = ['Todos', 'Gastronomía', 'Construcción', 'Salud', 'Moda', 'Tecnología', 'Hogar', 'Servicios'];
+const CITIES = ['Todas', 'Bogotá', 'Medellín', 'Cali', 'Barranquilla', 'Bucaramanga'];
 
 const CAT_EMOJIS: Record<string, string> = {
     Todos: '🗺️', Gastronomía: '🍽️', Construcción: '🏗️',
-    Salud: '💊', Ropa: '👗', Tecnología: '💻', Servicios: '⚙️',
+    Salud: '💊', Moda: '👗', Tecnología: '💻', Hogar: '🏠', Servicios: '⚙️',
 };
 
 const MOCK_BUSINESSES: Business[] = [
     { id: 'b1', owner_id: '', name: 'Restaurante El Poblado', category: 'Gastronomía', description: 'Cocina colombiana de autor con ingredientes de la región.', address: 'Cl 10 #38-38, El Poblado, Medellín', phone: '+57 300 1234567', is_vip: true, membership_tier: 'vip', source: 'local', rating: 4.8, image_url: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=400', payment_config: {} },
-    { id: 'b2', owner_id: '', name: 'TechStore Laureles', category: 'Tecnología', description: 'Tienda de electrónica y accesorios con garantía y soporte.', address: 'Cra 70 #44B-10, Laureles', phone: '+57 301 9876543', is_vip: true, membership_tier: 'vip', source: 'local', rating: 4.5, image_url: 'https://images.unsplash.com/photo-1491933382434-500287f9b54b?q=80&w=400', payment_config: {} },
-    { id: 'b3', owner_id: '', name: 'Pergamino Café', category: 'Gastronomía', description: 'Café de especialidad con los mejores granos de Colombia.', address: 'Cl 10B #36-38, El Poblado', phone: '+57 302 5551234', is_vip: true, membership_tier: 'vip', source: 'google', rating: 4.9, image_url: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=400', payment_config: {} },
-    { id: 'b4', owner_id: '', name: 'Clínica Dental Smile', category: 'Salud', description: 'Odontología estética y general. Ortodoncistas certificados.', address: 'Av El Poblado #1-50, Torre Médica', phone: '+57 304 8887654', is_vip: false, membership_tier: 'free', source: 'google', rating: 4.3, image_url: 'https://images.unsplash.com/photo-1629909615957-be38d48fbbe4?q=80&w=400', payment_config: {} },
-    { id: 'b5', owner_id: '', name: 'Moda Fénix Boutique', category: 'Ropa', description: 'Ropa casual y formal para hombre y mujer. Marcas colombianas.', address: 'Cc Oviedo Local 245, Medellín', phone: '+57 305 3334455', is_vip: false, membership_tier: 'free', source: 'local', rating: 4.1, image_url: 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?q=80&w=400', payment_config: {} },
-    { id: 'b6', owner_id: '', name: 'Constructora Andina', category: 'Construcción', description: 'Remodelaciones y obra gris con los mejores materiales.', address: 'Cra 43A #18-70, El Estadio', phone: '+57 303 6667788', is_vip: false, membership_tier: 'free', source: 'google', rating: 4.4, image_url: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=400', payment_config: {} },
+    { id: 'b2', owner_id: '', name: 'TechStore Laureles', category: 'Tecnología', description: 'Tienda de electrónica y accesorios con garantía y soporte.', address: 'Cra 70 #44B-10, Laureles, Medellín', phone: '+57 301 9876543', is_vip: true, membership_tier: 'vip', source: 'local', rating: 4.5, image_url: 'https://images.unsplash.com/photo-1491933382434-500287f9b54b?q=80&w=400', payment_config: {} },
+    { id: 'b3', owner_id: '', name: 'Andino Gourmet Bogotá', category: 'Gastronomía', description: 'Experiencia culinaria de alto nivel en el corazón de la capital.', address: 'Cra 11 #82-71, Bogotá', phone: '+57 302 5551234', is_vip: true, membership_tier: 'vip', source: 'google', rating: 4.9, image_url: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=400', payment_config: {} },
+    { id: 'b4', owner_id: '', name: 'Clínica Dental Cali', category: 'Salud', description: 'Odontología estética y general. Ortodoncistas certificados.', address: 'Av 6N #22-04, Cali', phone: '+57 304 8887654', is_vip: false, membership_tier: 'free', source: 'google', rating: 4.3, image_url: 'https://images.unsplash.com/photo-1629909615957-be38d48fbbe4?q=80&w=400', payment_config: {} },
+    { id: 'b5', owner_id: '', name: 'Moda Caribe Barranquilla', category: 'Moda', description: 'Ropa casual y formal para hombre y mujer. Estilo fresco.', address: 'Cc Buenavista, Barranquilla', phone: '+57 305 3334455', is_vip: false, membership_tier: 'free', source: 'local', rating: 4.1, image_url: 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?q=80&w=400', payment_config: {} },
+    { id: 'b6', owner_id: '', name: 'Constructora del Valle', category: 'Construcción', description: 'Remodelaciones y obra gris con los mejores materiales.', address: 'Avenida Sexta #18-70, Cali', phone: '+57 303 6667788', is_vip: false, membership_tier: 'free', source: 'google', rating: 4.4, image_url: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=400', payment_config: {} },
 ];
 
 interface DirectoryProps {
@@ -34,6 +35,7 @@ interface DirectoryProps {
 export default function Directory({ onBack, userBalance, onPurchase }: DirectoryProps) {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('Todos');
+    const [selectedCity, setSelectedCity] = useState('Todas');
     const [selectedBusiness, setSelectedBusiness] = useState<Business | null>(null);
     const [businesses, setBusinesses] = useState<Business[]>([]);
     const [loading, setLoading] = useState(true);
@@ -59,7 +61,8 @@ export default function Directory({ onBack, userBalance, onPurchase }: Directory
             b.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             b.description.toLowerCase().includes(searchTerm.toLowerCase());
         const matchCat = selectedCategory === 'Todos' || b.category === selectedCategory;
-        return matchSearch && matchCat;
+        const matchCity = selectedCity === 'Todas' || b.address.toLowerCase().includes(selectedCity.toLowerCase());
+        return matchSearch && matchCat && matchCity;
     });
 
     const vipCount = filtered.filter(b => b.membership_tier === 'vip').length;
@@ -110,6 +113,7 @@ export default function Directory({ onBack, userBalance, onPurchase }: Directory
             <div style={{
                 background: 'var(--color-surface)', borderBottom: '1px solid var(--color-border)',
                 padding: '14px 32px', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
+                position: 'sticky', top: 0, zIndex: 10
             }}>
                 <div className="input-with-icon" style={{ flex: 1, minWidth: 220, maxWidth: 360 }}>
                     <Search size={16} className="input-icon" />
@@ -133,9 +137,24 @@ export default function Directory({ onBack, userBalance, onPurchase }: Directory
                         </button>
                     ))}
                 </div>
-                <button className="btn btn-outline btn-sm">
-                    <Filter size={14} /> Filtros
-                </button>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 'auto' }}>
+                    <select
+                        value={selectedCity}
+                        onChange={(e) => setSelectedCity(e.target.value)}
+                        style={{
+                            height: 38, padding: '0 12px', borderRadius: 10,
+                            background: 'var(--color-surface-2)', border: '1px solid var(--color-border)',
+                            color: 'var(--color-navy)', fontSize: 13, fontWeight: 700, outline: 'none', minWidth: 160
+                        }}
+                    >
+                        {CITIES.map(c => <option key={c} value={c}>{c === 'Todas' ? '📍 Toda Colombia' : c}</option>)}
+                    </select>
+
+                    <button className="btn btn-outline btn-sm" style={{ height: 38 }}>
+                        <Filter size={14} /> Filtros
+                    </button>
+                </div>
             </div>
 
             {/* Content */}

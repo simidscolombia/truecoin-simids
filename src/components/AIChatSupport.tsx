@@ -22,6 +22,7 @@ export default function AIChatSupport() {
     ]);
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
+    const [supportMode, setSupportMode] = useState<'ai' | 'human'>('ai');
 
     // ── 3D Parallax Logic ──────────────────────────────────
     const mouseX = useMotionValue(0);
@@ -52,6 +53,16 @@ export default function AIChatSupport() {
         const userMsg: Message = { id: Date.now(), text, sender: 'user', time: now() };
         setMessages((prev: Message[]) => [...prev, userMsg]);
         setInput('');
+
+        if (supportMode === 'human') {
+            // En modo humano, la IA no responde, solo se notificaría al admin (simulado)
+            setTimeout(() => {
+                const aiMsg: Message = { id: Date.now() + 1, text: "💬 Mensaje enviado a soporte humano. Un agente te responderá pronto.", sender: 'ai', time: now() };
+                setMessages((prev: Message[]) => [...prev, aiMsg]);
+            }, 500);
+            return;
+        }
+
         setIsTyping(true);
 
         try {
@@ -59,6 +70,16 @@ export default function AIChatSupport() {
                 role: m.sender === 'user' ? 'user' : 'assistant',
                 content: m.text
             }));
+
+            // Detectar si el usuario pide ayuda humana
+            if (text.toLowerCase().includes('soporte') || text.toLowerCase().includes('humano') || text.toLowerCase().includes('persona')) {
+                setTimeout(() => {
+                    const aiMsg: Message = { id: Date.now() + 1, text: "Entiendo que necesitas atención personalizada. ¿Quieres que transfiera esta conversación a un agente humano?", sender: 'ai', time: now() };
+                    setMessages((prev: Message[]) => [...prev, aiMsg]);
+                    setIsTyping(false);
+                }, 800);
+                return;
+            }
 
             const response = await aiService.getResponse(text, history);
 
@@ -71,6 +92,12 @@ export default function AIChatSupport() {
             console.error('Error en Shopy:', error);
             setIsTyping(false);
         }
+    };
+
+    const requestHuman = () => {
+        setSupportMode('human');
+        const msg: Message = { id: Date.now(), text: "🔄 Transferido a Soporte Humano. Shopy IA se ha silenciado.", sender: 'ai', time: now() };
+        setMessages(prev => [...prev, msg]);
     };
 
     return (
@@ -128,14 +155,18 @@ export default function AIChatSupport() {
                                     />
                                 </motion.div>
                                 <div>
-                                    <p style={{ fontSize: 16, fontWeight: 800, color: 'white', margin: 0, letterSpacing: -0.5 }}>Shopy</p>
+                                    <p style={{ fontSize: 16, fontWeight: 800, color: 'white', margin: 0, letterSpacing: -0.5 }}>
+                                        {supportMode === 'ai' ? 'Shopy Master IA' : 'Soporte Vital'}
+                                    </p>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                         <motion.span
                                             animate={{ opacity: [1, 0.5, 1], scale: [1, 1.2, 1] }}
                                             transition={{ duration: 2, repeat: Infinity }}
-                                            style={{ width: 8, height: 8, borderRadius: '50%', background: '#4ADE80', display: 'inline-block' }}
+                                            style={{ width: 8, height: 8, borderRadius: '50%', background: supportMode === 'ai' ? '#4ADE80' : '#3B82F6', display: 'inline-block' }}
                                         />
-                                        <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>Ecosistema Activo</span>
+                                        <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>
+                                            {supportMode === 'ai' ? 'Ecosistema Inteligente' : 'Agente Humano en línea'}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -219,15 +250,15 @@ export default function AIChatSupport() {
 
                                 {/* Floating Suggestions */}
                                 <div style={{ padding: '0 18px 14px', display: 'flex', gap: 8, overflowX: 'auto', flexShrink: 0, scrollbarWidth: 'none' }}>
-                                    {[
+                                    {supportMode === 'ai' && [
                                         { l: '¿Cómo subo de nivel?', v: 'nivel' },
-                                        { l: 'Saldo actual', v: 'saldo' },
+                                        { l: 'Hablar con humano 👤', v: 'human', action: requestHuman },
                                         { l: 'Precios VIP', v: 'vip' }
                                     ].map(s => (
                                         <motion.button
                                             key={s.v}
                                             whileHover={{ y: -2 }}
-                                            onClick={() => setInput(s.l)}
+                                            onClick={() => s.action ? s.action() : setInput(s.l)}
                                             style={{
                                                 padding: '6px 14px', borderRadius: 12, border: '1px solid var(--color-border)',
                                                 background: 'var(--color-surface)', fontSize: 12, fontWeight: 600,
@@ -238,6 +269,14 @@ export default function AIChatSupport() {
                                             {s.l}
                                         </motion.button>
                                     ))}
+                                    {supportMode === 'human' && (
+                                        <button
+                                            onClick={() => setSupportMode('ai')}
+                                            style={{ padding: '6px 14px', borderRadius: 12, background: 'var(--color-navy)', color: 'white', border: 'none', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}
+                                        >
+                                            ✨ Volver a Shopy IA
+                                        </button>
+                                    )}
                                 </div>
 
                                 {/* Modern Input Container */}

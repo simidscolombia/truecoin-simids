@@ -1,16 +1,18 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
-    Rocket, ShieldCheck, Award,
+    Award,
     Info, Cpu,
     TrendingUp, UserPlus
 } from 'lucide-react';
 import { useState } from 'react';
 
+import { giftService, MatrixSlot } from '../services/giftService';
+
 interface GiftMatrixProps {
     currentLevel?: number;
-    referrals?: number;
+    slots?: MatrixSlot[];
 }
 
 const RANKS = [
@@ -20,52 +22,25 @@ const RANKS = [
     "EMBAJADOR", "EMBAJADOR REAL", "LEYENDA"
 ];
 
-const LEVEL_VALUES: Record<number, number> = {
-    1: 50, 2: 100, 3: 200, 4: 400, 5: 800,
-    6: 1600, 7: 3200, 8: 6400, 9: 12800,
-    10: 25600, 11: 51200, 12: 102400,
-};
 
-export default function GiftMatrix({ currentLevel = 1, referrals = 0 }: GiftMatrixProps) {
+
+export default function GiftMatrix({ currentLevel = 1, slots = [] }: GiftMatrixProps) {
     const [hoveredSlot, setHoveredSlot] = useState<number | null>(null);
-    const investment = LEVEL_VALUES[currentLevel] || 50;
+    const investment = giftService.getLevelValue(currentLevel);
+    const referrals = slots.length;
     const progress = (referrals / 4) * 100;
 
-    // Configuración de propósitos por slot
-    const slotConfig = [
-        {
-            id: 1,
-            label: "Socio 1",
-            icon: <Award size={18} />,
-            color: "#F59E0B",
-            desc: "Aporta 25% de TC directamente a tu saldo disponible.",
-            type: "reward"
-        },
-        {
-            id: 2,
-            label: "Socio 2",
-            icon: <Rocket size={18} />,
-            color: "#3B82F6",
-            desc: "Aporta 50% de TC al fondo de ascensión para tu siguiente rango.",
-            type: "propulsion"
-        },
-        {
-            id: 3,
-            label: "Socio 3",
-            icon: <Rocket size={18} />,
-            color: "#3B82F6",
-            desc: "Aporta 50% de TC al fondo de ascensión para tu siguiente rango.",
-            type: "propulsion"
-        },
-        {
-            id: 4,
-            label: "Socio 4",
-            icon: <ShieldCheck size={18} />,
-            color: "#64748B",
-            desc: "Aporta 25% de TC a la estabilidad de la infraestructura SaaS.",
-            type: "maintenance"
-        }
-    ];
+    // Crear 4 slots, llenando con datos reales de 'slots' o vacíos
+    const displaySlots = [1, 2, 3, 4].map(pos => {
+        const data = slots.find(s => s.position === pos);
+        return {
+            pos,
+            data,
+            isActive: !!data,
+            // Cálculo de recompensa usando el servicio de mérito
+            dist: data ? giftService.calculateRewardDistribution(currentLevel, 'current_user_id', data.recruiter_id || '') : null
+        };
+    });
 
     const nextRank = currentLevel < 12 ? RANKS[currentLevel] : null;
 
@@ -123,70 +98,81 @@ export default function GiftMatrix({ currentLevel = 1, referrals = 0 }: GiftMatr
                     display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 16,
                     position: 'relative'
                 }}>
-                    {slotConfig.map((config) => {
-                        const isActive = config.id <= referrals;
-                        const isHovered = hoveredSlot === config.id;
+                    {displaySlots.map((slot) => {
+                        const isActive = slot.isActive;
+                        const isHovered = hoveredSlot === slot.pos;
+                        const color = isActive ? (slot.dist?.isSpillover ? '#8B5CF6' : '#10B981') : 'var(--color-border)';
 
                         return (
                             <motion.div
-                                key={config.id}
-                                onMouseEnter={() => setHoveredSlot(config.id)}
+                                key={slot.pos}
+                                onMouseEnter={() => setHoveredSlot(slot.pos)}
                                 onMouseLeave={() => setHoveredSlot(null)}
                                 whileHover={{ y: -5 }}
                                 style={{
                                     padding: '20px 16px',
                                     borderRadius: 20,
-                                    border: `2px ${isActive ? 'solid' : 'dashed'} ${isActive ? config.color : 'var(--color-border)'}`,
-                                    background: isActive ? `color-mix(in srgb, ${config.color} 5%, var(--color-bg))` : 'var(--color-surface-2)',
+                                    border: `2px ${isActive ? 'solid' : 'dashed'} ${color}`,
+                                    background: isActive ? `color-mix(in srgb, ${color} 5%, var(--color-bg))` : 'var(--color-surface-2)',
                                     display: 'flex',
                                     flexDirection: 'column',
                                     alignItems: 'center',
                                     gap: 12,
-                                    cursor: 'help',
-                                    transition: 'background 0.3s, border 0.3s'
+                                    position: 'relative',
+                                    transition: 'all 0.3s'
                                 }}
                             >
                                 <div style={{
                                     width: 44, height: 44, borderRadius: 14,
-                                    background: isActive ? config.color : 'var(--color-border)',
+                                    background: color,
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                                     color: 'white',
-                                    boxShadow: isActive ? `0 8px 20px -5px ${config.color}80` : 'none',
-                                    transition: 'all 0.3s'
+                                    boxShadow: isActive ? `0 8px 20px -5px ${color}80` : 'none',
                                 }}>
-                                    {isActive ? config.icon : <UserPlus size={20} opacity={0.4} />}
+                                    {isActive ? (slot.dist?.isSpillover ? <Cpu size={20} /> : <Award size={20} />) : <UserPlus size={20} opacity={0.4} />}
                                 </div>
                                 <div style={{ textAlign: 'center' }}>
                                     <p style={{ fontSize: 12, fontWeight: 800, color: isActive ? 'var(--color-navy)' : 'var(--color-text-muted)', marginBottom: 2 }}>
-                                        {config.label}
+                                        {isActive ? slot.data?.occupant_name : `Posición ${slot.pos}`}
                                     </p>
                                     <div style={{
                                         fontSize: 10, fontWeight: 700,
-                                        color: isActive ? config.color : 'var(--color-text-muted)',
+                                        color: color,
                                         textTransform: 'uppercase', letterSpacing: '0.04em'
                                     }}>
-                                        {isActive ? 'Activo' : 'Pendiente'}
+                                        {isActive ? (slot.dist?.isSpillover ? 'Derrame IA' : 'Directo') : 'Pendiente'}
                                     </div>
                                 </div>
 
-                                {/* Tooltip / Info Overlay (Solo móvil o desktop sutil) */}
-                                <AnimatePresence>
-                                    {isHovered && (
-                                        <motion.div
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: 10 }}
-                                            style={{
-                                                position: 'absolute', bottom: 'calc(100% + 10px)', left: 0, right: 0,
-                                                background: 'var(--color-navy)', color: 'white', padding: 12,
-                                                borderRadius: 12, fontSize: 11, zIndex: 10, boxShadow: 'var(--shadow-lg)'
-                                            }}
-                                        >
-                                            <strong>{config.label}:</strong> {config.desc}
-                                            <div style={{ position: 'absolute', bottom: -5, left: '50%', transform: 'translateX(-50%)', width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: '6px solid var(--color-navy)' }}></div>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
+                                {isHovered && isActive && (
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.9 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        style={{
+                                            position: 'absolute', bottom: 'calc(100% + 12px)', left: -20, right: -20,
+                                            background: 'var(--color-navy)', color: 'white', padding: '12px 16px',
+                                            borderRadius: 16, fontSize: 11, zIndex: 10, boxShadow: 'var(--shadow-lg)',
+                                            border: '1px solid rgba(255,255,255,0.1)'
+                                        }}
+                                    >
+                                        <div style={{ marginBottom: 8, borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: 8 }}>
+                                            <strong>💰 Distribución de Mérito</strong>
+                                        </div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                                            <span>Para ti:</span>
+                                            <span style={{ color: '#4ADE80', fontWeight: 700 }}>+{slot.dist?.ownerGain} TC</span>
+                                        </div>
+                                        {slot.dist?.isSpillover && (
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', opacity: 0.8 }}>
+                                                <span>Bono Líder:</span>
+                                                <span style={{ color: '#FACC15' }}>+{slot.dist?.recruiterBonus} TC</span>
+                                            </div>
+                                        )}
+                                        <div style={{ fontSize: 9, opacity: 0.6, marginTop: 8 }}>
+                                            El 50% restante impulsa tu ascenso al siguiente rango.
+                                        </div>
+                                    </motion.div>
+                                )}
                             </motion.div>
                         );
                     })}

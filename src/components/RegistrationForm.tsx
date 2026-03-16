@@ -20,6 +20,7 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
     const [formData, setFormData] = useState({ fullName: '', email: '', phone: '', password: '', confirmPassword: '' });
     const [referrerName, setReferrerName] = useState('');
     const [wompiPublicKey, setWompiPublicKey] = useState('pub_test_Q5yS9pmev6W9kzE0v6X2pY123'); // Fallback
+    const [wompiIntegrity, setWompiIntegrity] = useState('');
     const [regIp, setRegIp] = useState('');
     const [regLoc, setRegLoc] = useState('');
     const [error, setError] = useState('');
@@ -30,6 +31,9 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
                 const { data } = await userService.getPaymentSettings();
                 if (data?.wompi_public) {
                     setWompiPublicKey(data.wompi_public.trim());
+                }
+                if (data?.wompi_integrity) {
+                    setWompiIntegrity(data.wompi_integrity.trim());
                 }
 
                 // Track IP Info (Opcional pero útil)
@@ -96,7 +100,15 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
             });
 
             // 3. Link de Pago Wompi (CORRECCIÓN: Wompi usa guiones '-' no guiones bajos '_')
-            const paymentUrl = `https://checkout.wompi.co/p/?public-key=${wompiPublicKey}&currency=COP&amount-in-cents=5000000&reference=${tempRef}&redirect_url=${encodeURIComponent(window.location.origin)}`;
+            let paymentUrl = `https://checkout.wompi.co/p/?public-key=${wompiPublicKey}&currency=COP&amount-in-cents=5000000&reference=${tempRef}&redirect_url=${encodeURIComponent(window.location.origin)}`;
+
+            // 3.1. Agregar Firma de Integridad si existe el secreto
+            if (wompiIntegrity) {
+                const text = `${tempRef}5000000COP${wompiIntegrity}`;
+                const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+                const signature = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+                paymentUrl += `&signature:integrity=${signature}`;
+            }
 
             // 4. Abrir pasarela
             window.open(paymentUrl, '_blank');

@@ -2,8 +2,8 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Zap, Rocket, ShieldCheck, Award,
-    ChevronRight, Info, Cpu, Star,
+    Rocket, ShieldCheck, Award,
+    Info,
     TrendingUp, UserPlus, Lock
 } from 'lucide-react';
 import { useState } from 'react';

@@ -25,8 +25,8 @@ export default function RegistrationForm({ onSuccess, initialReferralCode }: Reg
 
     useEffect(() => {
         // Cargar IP (Auditoría básica)
-        fetch('https://api.ipify.org?format=json').then(r => r.json()).then(d => {
-            // console.log("IP:", d.ip);
+        fetch('https://api.ipify.org?format=json').then(r => r.json()).then(() => {
+            // IP fetched
         }).catch(() => { });
     }, []);
 

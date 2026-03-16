@@ -20,41 +20,14 @@ export default function RegistrationForm({ onSuccess, initialReferralCode }: Reg
     const [passwordLogin, setPasswordLogin] = useState('');
     const [formData, setFormData] = useState({ fullName: '', email: '', phone: '', password: '', confirmPassword: '' });
     const [referrerName, setReferrerName] = useState('');
-    const [wompiPublicKey, setWompiPublicKey] = useState('pub_test_Q5yS9pmev6W9kzE0v6X2pY123'); // Fallback
-    const [wompiIntegrity, setWompiIntegrity] = useState('');
-    const [regFee, setRegFee] = useState(5000); // Valor por defecto ajustado a 5k para pruebas
-    const [regIp, setRegIp] = useState('');
-    const [regLoc, setRegLoc] = useState('');
     const [privacyAccepted, setPrivacyAccepted] = useState(false);
-    const [finalPaymentUrl, setFinalPaymentUrl] = useState('');
     const [error, setError] = useState('');
 
     useEffect(() => {
-        const loadSettings = async () => {
-            try {
-                const { data } = await userService.getPaymentSettings();
-                console.log("Cargando Ajustes de Pago:", data);
-                if (data?.wompi_public) {
-                    setWompiPublicKey(data.wompi_public.trim());
-                }
-                if (data?.wompi_integrity) {
-                    setWompiIntegrity(data.wompi_integrity.trim());
-                }
-                if (data?.reg_fee) {
-                    setRegFee(Number(data.reg_fee));
-                }
-
-                // Track IP Info (Opcional pero útil)
-                const ipRes = await fetch('https://ipapi.co/json/').then(r => r.json()).catch(() => null);
-                if (ipRes) {
-                    setRegIp(ipRes.ip || '');
-                    setRegLoc(`${ipRes.city}, ${ipRes.country_name}`);
-                }
-            } catch (e) {
-                console.error("Error loading keys:", e);
-            }
-        };
-        loadSettings();
+        // Cargar IP (Auditoría básica)
+        fetch('https://api.ipify.org?format=json').then(r => r.json()).then(d => {
+            // console.log("IP:", d.ip);
+        }).catch(() => { });
     }, []);
 
     useEffect(() => {
@@ -98,43 +71,21 @@ export default function RegistrationForm({ onSuccess, initialReferralCode }: Reg
         setError('');
 
         try {
-            // 1. GENERAMOS REFERENCIA ÚNICA
-            const tempRef = `REG-${Math.random().toString(36).substring(2, 10).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
-
-            // 2. GUARDAMOS INTENTO EN DB (AUDITORÍA & PERSISTENCIA)
-            await userService.createRegistrationAttempt({
-                reference: tempRef,
+            // 1. Crear el perfil de inmediato
+            const profile = await userService.register({
                 fullName: formData.fullName,
                 email: formData.email,
                 phone: formData.phone,
                 password: formData.password,
-                referralCode: referralCode,
-                regIp: regIp,
-                regLoc: regLoc
+                referralCode: referralCode
             });
 
-            // 3. Link de Pago Wompi
-            const amountInCents = regFee * 100;
-            let paymentUrl = `https://checkout.wompi.co/p/?public-key=${wompiPublicKey}&currency=COP&amount-in-cents=${amountInCents}&reference=${tempRef}&redirect_url=${encodeURIComponent(window.location.origin)}`;
-
-            // 3.1. Agregar Firma de Integridad si existe el secreto
-            if (wompiIntegrity) {
-                const text = `${tempRef}${amountInCents}COP${wompiIntegrity}`;
-                const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
-                const signature = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
-                paymentUrl += `&signature:integrity=${signature}`;
-            }
-
-            // 5. Cambiar a pantalla de confirmación
-            setFinalPaymentUrl(paymentUrl);
-            setStep(4);
-
-            // Intentar abrir automáticamente (opcional)
-            window.open(paymentUrl, '_blank');
+            // 2. Notificar éxito local y pasar al flujo de App
+            onSuccess(profile);
 
         } catch (err: any) {
             console.error("Error en registro:", err);
-            setError('Error al iniciar el proceso de registro. Intenta de nuevo.');
+            setError(err.message || 'Error al crear la cuenta. Intenta con otro correo.');
         } finally {
             setIsLoading(false);
         }
@@ -428,11 +379,11 @@ export default function RegistrationForm({ onSuccess, initialReferralCode }: Reg
                                     Total a Pagar
                                 </p>
                                 <p style={{ fontSize: 32, fontWeight: 800, color: 'var(--color-navy)' }}>
-                                    ${(regFee || 0).toLocaleString()} <span style={{ fontSize: 14, opacity: 0.6 }}>COP</span>
+                                    ${(0).toLocaleString()} <span style={{ fontSize: 14, opacity: 0.6 }}>COP</span>
                                 </p>
                                 <div style={{ height: 1, background: 'var(--color-border)', margin: '14px 0' }}></div>
                                 <p style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>
-                                    Recibirás <strong>{Math.floor(regFee / 1000)} TC</strong> para participar en la Red de Regalos.
+                                    Recibirás <strong>{Math.floor(0 / 1000)} TC</strong> para participar en la Red de Regalos.
                                 </p>
                             </div>
 
@@ -471,54 +422,6 @@ export default function RegistrationForm({ onSuccess, initialReferralCode }: Reg
                                 style={{ width: '100%', marginTop: 20, fontSize: 13, color: 'var(--color-text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}
                             >
                                 ← Regresar a mis datos
-                            </button>
-                        </motion.div>
-                    )}
-
-                    {/* ── STEP 4 — Confirmación de Inicio de Pago ── */}
-                    {step === 4 && (
-                        <motion.div key="step4" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} style={{ textAlign: 'center' }}>
-                            <div style={{ width: 64, height: 64, borderRadius: 20, background: '#F0FDF4', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', color: '#16A34A' }}>
-                                <CheckCircle2 size={32} />
-                            </div>
-
-                            <h2 style={{ fontSize: 24, fontWeight: 800, color: 'var(--color-navy)', marginBottom: 8 }}>
-                                ¡Registro Iniciado!
-                            </h2>
-                            <p style={{ fontSize: 14, color: 'var(--color-text-muted)', marginBottom: 24, lineHeight: 1.6 }}>
-                                Por seguridad, tu cuenta se activará automáticamente apenas **Wompi** confirme tu pago.
-                            </p>
-
-                            <div style={{ background: 'var(--color-surface-2)', borderRadius: 16, padding: 20, marginBottom: 24, textAlign: 'left' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                                    <div style={{ width: 20, height: 20, borderRadius: 6, background: 'var(--color-wallet)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 10, fontWeight: 800 }}>1</div>
-                                    <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-navy)' }}>Completa el pago en la pasarela segura.</p>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                                    <div style={{ width: 20, height: 20, borderRadius: 6, background: 'var(--color-wallet)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 10, fontWeight: 800 }}>2</div>
-                                    <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-navy)' }}>Espera el WhatsApp de bienvenida.</p>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                    <div style={{ width: 20, height: 20, borderRadius: 6, background: 'var(--color-wallet)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 10, fontWeight: 800 }}>3</div>
-                                    <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-navy)' }}>Inicia sesión y expande tu red.</p>
-                                </div>
-                            </div>
-
-                            <a
-                                href={finalPaymentUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="btn btn-wallet btn-full btn-lg"
-                                style={{ justifyContent: 'center', textDecoration: 'none' }}
-                            >
-                                Re-abrir ventana de Pago <Zap size={18} />
-                            </a>
-
-                            <button
-                                onClick={() => { setIsLoginMode(true); setStep(1); setFinalPaymentUrl(''); }}
-                                style={{ width: '100%', marginTop: 20, fontSize: 13, color: 'var(--color-wallet)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700 }}
-                            >
-                                Ya pagué, ir al Inicio de Sesión
                             </button>
                         </motion.div>
                     )}

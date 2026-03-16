@@ -160,26 +160,52 @@ app.post('/api/wompi-webhook', async (req, res) => {
     }
 
     try {
-        // 2. Buscar si es un intento de registro
-        console.log(`🔍 Buscando registro pendiente para referencia: ${reference}`);
-
         const supabaseHeaders = {
             'apikey': SUPABASE_SERVICE_ROLE,
             'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE}`,
             'Content-Type': 'application/json'
         };
 
-        const { data: attempts } = await axios.get(`${SUPABASE_URL}/rest/v1/registration_attempts?reference=eq.${reference}&status=eq.pending`, {
-            headers: supabaseHeaders
-        });
+        // CASO A: Activación de usuario existente (Referencia ACT-...)
+        if (reference.startsWith('ACT-')) {
+            const userId = reference.split('-')[1]; // El ID está en la referencia
+            console.log(`💎 Activando usuario existente ID: ${userId}`);
 
-        if (!attempts || attempts.length === 0) {
-            console.log("ℹ️ No se encontró un intento de registro pendiente para esta referencia.");
-            return res.status(200).send('Processed');
+            // 1. Verificar si ya es VIP (Evitar duplicidad de recompensas)
+            const { data: profiles } = await axios.get(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}`, { headers: supabaseHeaders });
+            if (!profiles || profiles.length === 0) return res.status(200).send('User not found');
+
+            const profile = profiles[0];
+            if (profile.is_vip) {
+                console.log("⚠️ Usuario ya es VIP. Ignorando pago duplicado.");
+                return res.status(200).send('Already VIP');
+            }
+
+            // 2. Activar VIP
+            await axios.patch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}`, { is_vip: true }, { headers: supabaseHeaders });
+
+            // 3. Cargar Billetera
+            const rewardTC = (amount_in_cents / 100) / 1000;
+            const { data: wallets } = await axios.get(`${SUPABASE_URL}/rest/v1/wallets?user_id=eq.${userId}`, { headers: supabaseHeaders });
+
+            if (wallets && wallets.length > 0) {
+                const currentBalance = Number(wallets[0].balance_tc || 0);
+                await axios.patch(`${SUPABASE_URL}/rest/v1/wallets?user_id=eq.${userId}`, { balance_tc: currentBalance + rewardTC }, { headers: supabaseHeaders });
+            } else {
+                await axios.post(`${SUPABASE_URL}/rest/v1/wallets`, { user_id: userId, balance_tc: rewardTC }, { headers: supabaseHeaders });
+            }
+
+            console.log(`✅ Usuario ${profile.full_name} activado con ${rewardTC} TC`);
+
+            // 4. Notificar
+            const welcomeMsg = `¡Felicidades ${profile.full_name}! 🚀 Tu pago ha sido confirmado y tu oficina virtual ShopyBrands ya está ACTIVA. ✅\n\n💎 Recibiste: ${rewardTC.toFixed(2)} TC\n\nYa puedes entrar y expander tu red: https://truecoin-simids.vercel.app`;
+            await axios.post(`${WAHA_URL}/api/sendText`, { chatId: profile.phone.includes('@') ? profile.phone : `${profile.phone.replace('+', '')}@c.us`, text: welcomeMsg, session: 'default' }).catch(() => { });
+
+            return res.status(200).send('Activated');
         }
 
-        const attempt = attempts[0];
-        console.log(`🚀 Iniciando creación de usuario para: ${attempt.full_name} (${attempt.email})`);
+        // CASO B: Flujo antiguo o residual (REG-...)
+        console.log(`🔍 Buscando registro pendiente para referencia: ${reference}`);
 
         // 3. Crear Perfil en Supabase (Lógica similar a userService.register pero en el Bridge)
 

@@ -2,31 +2,40 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, User, ShieldCheck, Clock, ArrowRight, X, CheckCircle2, Coins } from 'lucide-react';
+import { Send, User, ShieldCheck, Clock, ArrowRight, X, CheckCircle2, Coins, AlertCircle } from 'lucide-react';
+import { userService } from '../services/userService';
 
 interface TransferModalProps {
     isOpen: boolean;
     onClose: () => void;
+    user: any;
     onSuccess: (amount: number, receiver?: string) => void;
 }
 
-export default function TransferModal({ isOpen, onClose, onSuccess }: TransferModalProps) {
+export default function TransferModal({ isOpen, onClose, user, onSuccess }: TransferModalProps) {
     const [step, setStep] = useState(1);
     const [receiver, setReceiver] = useState('');
     const [amount, setAmount] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
+    const [error, setError] = useState('');
 
     const handleNext = () => {
         if (step === 1 && receiver && amount) setStep(2);
     };
 
-    const handleConfirm = () => {
+    const handleConfirm = async () => {
+        if (!user?.id) return;
         setIsProcessing(true);
-        setTimeout(() => {
+        setError('');
+        try {
+            await userService.transferTC(user.id, receiver, Number(amount));
             onSuccess(Number(amount), receiver);
             setStep(3);
+        } catch (err: any) {
+            setError(err.message || 'Error al procesar la transferencia.');
+        } finally {
             setIsProcessing(false);
-        }, 2000);
+        }
     };
 
     const resetAndClose = () => {
@@ -155,6 +164,13 @@ export default function TransferModal({ isOpen, onClose, onSuccess }: TransferMo
                             <p style={{ fontSize: 11, color: '#DC2626', textAlign: 'center', fontWeight: 600, marginBottom: 16, padding: '0 16px', lineHeight: 1.5 }}>
                                 ⚠️ Una vez confirmada, no podrás cancelar esta operación durante 24 horas.
                             </p>
+
+                            {error && (
+                                <div style={{ display: 'flex', gap: 8, padding: '10px 14px', background: '#FEF2F2', border: '1px solid #FEE2E2', borderRadius: 10, marginBottom: 16, color: '#DC2626', fontSize: 13 }}>
+                                    <AlertCircle size={16} style={{ flexShrink: 0 }} />
+                                    <span>{error}</span>
+                                </div>
+                            )}
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                                 <button

@@ -12,6 +12,7 @@ import ShopyFam from './components/ShopyFam';
 import ProspectManager from './components/ProspectManager';
 import AIChatSupport from './components/AIChatSupport';
 import AdminDashboard from './components/AdminDashboard';
+import Paywall from './components/Paywall';
 import { userService } from './services/userService';
 import { Product } from './services/businessService';
 import ShoppingCart from './components/ShoppingCart';
@@ -64,7 +65,7 @@ function Header({
         </div>
         <span className="header-logo-text" style={{ fontSize: 20, fontWeight: 800, color: 'var(--color-navy)', letterSpacing: -0.5 }}>
           Shopy<span style={{ color: 'var(--color-wallet)' }}>Brands</span>
-          <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', background: 'var(--color-surface-2)', padding: '2px 6px', borderRadius: 6, marginLeft: 8, verticalAlign: 'middle', display: 'inline-block' }}>V3.0.0 — PERSISTENT SESSIONS & WEBHOOK READY</span>
+          <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', background: 'var(--color-surface-2)', padding: '2px 6px', borderRadius: 6, marginLeft: 8, verticalAlign: 'middle', display: 'inline-block' }}>V3.1.0 — REAL-TIME PAYWALL & WALLET CONNECTED</span>
         </span>
       </div>
 
@@ -294,8 +295,10 @@ function App() {
         setIsLoggedIn(true);
         setIsAdmin(session.isAdmin);
         setBalance(session.balance || '0.00');
-        // Mantener la vista si existe, si no, ir al dashboard/admin
-        setCurrentView(session.currentView || (session.isAdmin ? 'admin' : 'dashboard'));
+        // Asegurarnos de cargar el estado is_vip
+        if (session.user) {
+          setUser({ ...session.user });
+        }
       } catch (e) {
         console.error("Error restaurando sesión:", e);
         localStorage.removeItem('shopy_auth_session');
@@ -375,7 +378,8 @@ function App() {
       fullName: profile.full_name,
       referralCode: profile.referral_code,
       id: profile.id,
-      email: profile.email
+      email: profile.email,
+      isVip: profile.is_vip // 👈 IMPORTANTE
     });
 
     setIsAdmin(isSuperAdmin);
@@ -385,6 +389,8 @@ function App() {
       if (fullProfile.wallets?.length > 0) {
         setBalance(Number(fullProfile.wallets[0].balance_tc).toFixed(2));
       }
+      // Actualizar isVip desde la DB por si acaso
+      setUser((prev: any) => ({ ...prev, isVip: fullProfile.is_vip }));
     } catch (err) {
       console.error('Error cargando perfil:', err);
     }
@@ -462,56 +468,67 @@ function App() {
       </AnimatePresence>
 
       <main>
-        {currentView === 'marketplace' && (
-          <div className="animate-in">
-            <Marketplace
-              isGuest={!isLoggedIn}
-              onLoginRequired={() => setShowAuth(true)}
-              viewMode={guestViewMode}
-              setViewMode={setGuestViewMode}
-              onAddToCart={addToCart}
-              userBalance={balance}
-            />
-          </div>
+        {/* PAYWALL: Si está logueado pero no es VIP y no es Admin */}
+        {isLoggedIn && !isAdmin && !user?.isVip && currentView !== 'marketplace' && (
+          <Paywall user={user} />
         )}
 
-        {currentView === 'dashboard' && isLoggedIn && (
-          <div className="animate-in">
-            <Dashboard
-              user={user}
-              balance={balance}
-              onGoToStore={() => { setCurrentView('marketplace'); setGuestViewMode('products'); }}
-              onGoToPOS={() => setCurrentView('pos')}
-              onGoToDirectory={() => { setCurrentView('marketplace'); setGuestViewMode('businesses'); }}
-              onGoToFam={() => setCurrentView('shopyfam')}
-              onGoToAdmin={() => setCurrentView('admin')}
-              onGoToProspects={() => setCurrentView('prospects')}
-            />
-          </div>
-        )}
+        {/* CONTENIDO BLOQUEADO POR EL PAYWALL (Solo si es VIP o Admin o Vista Marketplace) */}
+        {(isAdmin || user?.isVip || currentView === 'marketplace') && (
+          <>
+            {currentView === 'marketplace' && (
+              <div className="animate-in">
+                <Marketplace
+                  isGuest={!isLoggedIn}
+                  onLoginRequired={() => setShowAuth(true)}
+                  viewMode={guestViewMode}
+                  setViewMode={setGuestViewMode}
+                  onAddToCart={addToCart}
+                  userBalance={balance}
+                />
+              </div>
+            )}
 
-        {currentView === 'prospects' && isLoggedIn && (
-          <div className="animate-in">
-            <ProspectManager user={user} />
-          </div>
-        )}
+            {currentView === 'dashboard' && isLoggedIn && (
+              <div className="animate-in">
+                <Dashboard
+                  user={user}
+                  balance={balance}
+                  onUpdateBalance={(b) => setBalance(b)}
+                  onGoToStore={() => { setCurrentView('marketplace'); setGuestViewMode('products'); }}
+                  onGoToPOS={() => setCurrentView('pos')}
+                  onGoToDirectory={() => { setCurrentView('marketplace'); setGuestViewMode('businesses'); }}
+                  onGoToFam={() => setCurrentView('shopyfam')}
+                  onGoToAdmin={() => setCurrentView('admin')}
+                  onGoToProspects={() => setCurrentView('prospects')}
+                />
+              </div>
+            )}
 
-        {currentView === 'shopyfam' && isLoggedIn && (
-          <div className="animate-in">
-            <ShopyFam user={user} />
-          </div>
-        )}
+            {currentView === 'prospects' && isLoggedIn && (
+              <div className="animate-in">
+                <ProspectManager user={user} />
+              </div>
+            )}
 
-        {currentView === 'pos' && isLoggedIn && isAdmin && (
-          <div className="animate-in">
-            <POSSystem onBack={() => setCurrentView('dashboard')} />
-          </div>
-        )}
+            {currentView === 'shopyfam' && isLoggedIn && (
+              <div className="animate-in">
+                <ShopyFam user={user} />
+              </div>
+            )}
 
-        {currentView === 'admin' && isLoggedIn && isAdmin && (
-          <div className="animate-in">
-            <AdminDashboard onBack={() => setCurrentView('dashboard')} />
-          </div>
+            {currentView === 'pos' && isLoggedIn && (isAdmin || user?.isVip) && (
+              <div className="animate-in">
+                <POSSystem onBack={() => setCurrentView('dashboard')} />
+              </div>
+            )}
+
+            {currentView === 'admin' && isLoggedIn && isAdmin && (
+              <div className="animate-in">
+                <AdminDashboard onBack={() => setCurrentView('dashboard')} />
+              </div>
+            )}
+          </>
         )}
       </main>
 

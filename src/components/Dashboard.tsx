@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
     Wallet, Users, Copy, Share2, ArrowUpRight,
@@ -10,10 +10,12 @@ import GiftMatrix from './GiftMatrix';
 import TransferModal from './TransferModal';
 import RechargeModal from './RechargeModal';
 import RevenueSimulator from './RevenueSimulator';
+import { userService } from '../services/userService';
 
 interface DashboardProps {
     user: { fullName: string; referralCode: string; id?: string };
     balance: string;
+    onUpdateBalance: (balance: string) => void;
     onGoToStore: () => void;
     onGoToPOS: () => void;
     onGoToDirectory: () => void;
@@ -89,6 +91,7 @@ function QuickAccessCard({
 export default function Dashboard({
     user,
     balance,
+    onUpdateBalance,
     onGoToStore,
     onGoToPOS,
     onGoToDirectory,
@@ -100,6 +103,13 @@ export default function Dashboard({
     const [showRecharge, setShowRecharge] = useState(false);
     const [localBalance, setLocalBalance] = useState(balance);
     const [copied, setCopied] = useState(false);
+    const [stats, setStats] = useState({ directReferrals: 0, currentLevel: 1, isVip: false });
+
+    useEffect(() => {
+        if (user?.id) {
+            userService.getDashboardStats(user.id).then(setStats).catch(console.error);
+        }
+    }, [user?.id]);
 
     const copyReferral = () => {
         const link = `${window.location.origin}/?ref=${user.referralCode}`;
@@ -117,14 +127,14 @@ export default function Dashboard({
     const handleTransferSuccess = (amount: number) => {
         const newBal = (Number(localBalance) - amount).toFixed(2);
         setLocalBalance(newBal);
+        onUpdateBalance(newBal);
     };
 
     const handleRechargeSuccess = (amount: number) => {
-        // En un caso real, esto pasa a estado "Pendiente de Confirmación de Tesorería".
-        // Para que el Demo se vea vivo e interactivo de inmediato, le pre-cargamos el saldo al usuario en la UI.
         const newBal = (Number(localBalance) + amount).toFixed(2);
         setLocalBalance(newBal);
-        alert(`¡Solicitud enviada! Hemós notificado a tesorería. Para esta demostración, se te han acreditado ${amount} TC inmediatamente.`);
+        onUpdateBalance(newBal);
+        alert(`¡Pago confirmado! Se han acreditado ${amount} TC a tu saldo.`);
     };
 
     return (
@@ -132,6 +142,7 @@ export default function Dashboard({
             <TransferModal
                 isOpen={showTransfer}
                 onClose={() => setShowTransfer(false)}
+                user={user}
                 onSuccess={handleTransferSuccess}
             />
             <RechargeModal
@@ -148,12 +159,12 @@ export default function Dashboard({
                         Hola, <span style={{ color: 'var(--color-cloud-blue)' }}>{user.fullName.split(' ')[0]}</span> 👋
                     </h1>
                     <p style={{ fontSize: 'clamp(12px, 3.5vw, 14px)', color: 'var(--color-text-muted)' }}>
-                        Bienvenido a tu ecosistema ShopyBrands · 12 Mar 2026
+                        Bienvenido a tu ecosistema ShopyBrands · {new Date().toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' })}
                     </p>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
                     <span className="badge" style={{ background: 'var(--color-navy)', color: 'white', border: 'none' }}>
-                        ⭐ VIP BRONCE (L1)
+                        ⭐ VIP {stats.currentLevel === 1 ? 'BRONCE' : stats.currentLevel === 2 ? 'PLATA' : 'ORO'} (L{stats.currentLevel})
                     </span>
                     <div style={{
                         display: 'flex',
@@ -192,17 +203,17 @@ export default function Dashboard({
                     />
                     <StatCard
                         label="Referidos Activos"
-                        value="1"
+                        value={stats.directReferrals.toString()}
                         icon={<Users size={18} />}
                         color="var(--color-cloud-blue)"
-                        sub="Nivel 1 · 1/4 cupos"
+                        sub={`Nivel ${stats.currentLevel} · ${stats.directReferrals}/4 cupos`}
                     />
                     <StatCard
                         label="Rango Actual"
-                        value="VIP Bronce"
+                        value={stats.currentLevel === 1 ? 'VIP Bronce' : stats.currentLevel === 2 ? 'VIP Plata' : 'VIP Oro'}
                         icon={<Star size={18} />}
                         color="var(--color-directorio)"
-                        sub="Siguiente: VIP Plata"
+                        sub={`Siguiente: ${stats.currentLevel === 1 ? 'VIP Plata' : 'VIP Oro'}`}
                     />
                 </div>
 
@@ -260,7 +271,7 @@ export default function Dashboard({
                                 Tu Red
                             </h2>
                             <span className="badge badge-navy">
-                                <TrendingUp size={10} /> Nivel 1
+                                <TrendingUp size={10} /> Nivel {stats.currentLevel}
                             </span>
                         </div>
 
@@ -299,9 +310,8 @@ export default function Dashboard({
 
                 </div>
 
-                {/* Gift Matrix */}
                 <div style={{ marginBottom: 28 }}>
-                    <GiftMatrix currentLevel={1} referrals={1} />
+                    <GiftMatrix currentLevel={stats.currentLevel} referrals={stats.directReferrals} />
                 </div>
 
                 {/* Quick Access */}

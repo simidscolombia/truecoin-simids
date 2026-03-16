@@ -39,8 +39,8 @@ export const userService = {
         return profile;
     },
 
-    async register(userData: { fullName: string, email: string, phone: string, referralCode: string, password?: string }) {
-        // 1. Buscar al referente por su código
+    async register(userData: any) {
+        // 1. Validar el código de referido del patrocinador
         let referredById = null;
         if (userData.referralCode) {
             const { data: referrer } = await supabase
@@ -52,7 +52,7 @@ export const userService = {
             if (referrer) referredById = referrer.id;
         }
 
-        // 2. Generar un código único alfanumérico corto (6 caracteres sin caracteres ambiguos O,0,I,1,L)
+        // 2. Generar un código único
         const generateCode = () => {
             const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
             let result = '';
@@ -63,7 +63,7 @@ export const userService = {
         };
         const newCode = generateCode();
 
-        // 3. Crear el perfil vinculado
+        // 3. Crear el perfil (INACTIVO inicialmente)
         const { data: profile, error: pError } = await supabase
             .from('profiles')
             .insert([{
@@ -72,23 +72,20 @@ export const userService = {
                 phone: userData.phone,
                 referral_code: newCode,
                 referred_by: referredById,
-                password: userData.password, // Nota: En producción usar Supabase Auth
-                current_level: 1 // Inicia en nivel 1
+                password: userData.password,
+                current_level: 1,
+                is_vip: false // 🛑 BLOQUEADO HASTA PAGO
             }])
             .select()
             .single();
 
         if (pError) throw pError;
 
-        // 4. Crear la billetera inicial con 50.00 TC (según membresía)
-        const { error: wError } = await supabase
-            .from('wallets')
-            .insert([{
-                user_id: profile.id,
-                balance_tc: 50.00
-            }]);
-
-        if (wError) throw wError;
+        // 4. Crear Billetera Vacia
+        await supabase.from('wallets').insert([{
+            user_id: profile.id,
+            balance_tc: 0
+        }]);
 
         return profile;
     },
@@ -103,7 +100,7 @@ export const userService = {
 
         if (!wallet) throw new Error('Wallet not found');
 
-        const newBalance = Number(wallet.balance_tc) + amount;
+        const newBalance = Math.max(0, Number(wallet.balance_tc) + amount);
 
         const { error } = await supabase
             .from('wallets')
@@ -112,6 +109,27 @@ export const userService = {
 
         if (error) throw error;
         return newBalance;
+    },
+
+    async transferTC(senderId: string, receiverEmailOrCode: string, amount: number) {
+        // 1. Buscar receptor
+        const query = receiverEmailOrCode.trim();
+        const { data: receiver } = await supabase
+            .from('profiles')
+            .select('id, full_name')
+            .or(`email.eq.${query},referral_code.eq.${query.toUpperCase()}`)
+            .single();
+
+        if (!receiver) throw new Error('Receptor no encontrado.');
+        if (receiver.id === senderId) throw new Error('No puedes enviarte TC a ti mismo.');
+
+        // 2. Restar al emisor
+        await this.updateBalance(senderId, -amount);
+
+        // 3. Sumar al receptor
+        await this.updateBalance(receiver.id, amount);
+
+        return receiver.full_name;
     },
 
     // ── Gestión de Prospectos ─────────────────────────────────
@@ -199,5 +217,28 @@ export const userService = {
 
         if (error) throw error;
         return data;
+    },
+
+    async getDashboardStats(userId: string) {
+        // 1. Contar referidos directos
+        const { count: directCount, error: err1 } = await supabase
+            .from('profiles')
+            .select('*', { count: 'exact', head: true })
+            .eq('referred_by', userId);
+
+        // 2. Obtener nivel actual
+        const { data: profile, error: err2 } = await supabase
+            .from('profiles')
+            .select('current_level, is_vip')
+            .eq('id', userId)
+            .single();
+
+        if (err1 || err2) throw err1 || err2;
+
+        return {
+            directReferrals: directCount || 0,
+            currentLevel: profile?.current_level || 1,
+            isVip: profile?.is_vip || false
+        };
     }
 };

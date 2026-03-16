@@ -151,7 +151,7 @@ export default function NetworkTree({ userId, mentor }: NetworkTreeProps) {
                     }}></div>
 
                     <LevelCard
-                        title="Nivel 1 (Directos)"
+                        title="Nivel 1"
                         count={network.l1.length}
                         icon={<Award size={18} />}
                         color="#F59E0B"

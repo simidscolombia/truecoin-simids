@@ -35,34 +35,34 @@ export default function GiftMatrix({ currentLevel = 1, referrals = 0 }: GiftMatr
     const slotConfig = [
         {
             id: 1,
-            label: "Conexión Directa",
+            label: "Socio 1",
             icon: <Award size={18} />,
             color: "#F59E0B",
-            desc: "Puntos de recompensa liberados inmediatamente a tu saldo.",
+            desc: "Aporta 25% de TC directamente a tu saldo disponible.",
             type: "reward"
         },
         {
             id: 2,
-            label: "Propulsión I",
+            label: "Socio 2",
             icon: <Rocket size={18} />,
             color: "#3B82F6",
-            desc: "Energía acumulada para tu ascensión automática al siguiente nivel.",
+            desc: "Aporta 50% de TC al fondo de ascensión para tu siguiente rango.",
             type: "propulsion"
         },
         {
             id: 3,
-            label: "Propulsión II",
+            label: "Socio 3",
             icon: <Rocket size={18} />,
             color: "#3B82F6",
-            desc: "Segunda fase de energía. Bloquea el salto de rango.",
+            desc: "Aporta 50% de TC al fondo de ascensión para tu siguiente rango.",
             type: "propulsion"
         },
         {
             id: 4,
-            label: "Nodo Maestro",
+            label: "Socio 4",
             icon: <ShieldCheck size={18} />,
             color: "#64748B",
-            desc: "Garantiza la estabilidad y soporte del ecosistema Shopy.",
+            desc: "Aporta 25% de TC a la estabilidad de la infraestructura SaaS.",
             type: "maintenance"
         }
     ];

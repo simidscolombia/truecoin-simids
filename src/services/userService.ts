@@ -254,26 +254,52 @@ export const userService = {
     },
 
     async getNetworkDetailed(userId: string) {
-        // Fetch up to 4 levels
-        // L1: Directos
-        const { data: l1 } = await supabase.from('profiles').select('id, full_name, email, current_level, created_at, referred_by').eq('referred_by', userId);
+        // Fetch profiles levels to build the tree and counts
+        const { data: allNetwork } = await supabase
+            .from('profiles')
+            .select('id, full_name, referred_by, current_level, created_at')
+            .or(`referred_by.eq.${userId}`);
 
-        if (!l1 || l1.length === 0) return { l1: [], l2: [], l3: [], l4: [] };
+        if (!allNetwork) return { l1: [], l2: [], l3: [], l4: [] };
 
+        // For deeper levels, we need recursive or multi-step fetching. 
+        // Let's do it in 4 steps to ensure we get exactly L1-L4 and can count their children.
+
+        // L1
+        const l1 = allNetwork;
         const l1Ids = l1.map(u => u.id);
-        const { data: l2 } = await supabase.from('profiles').select('id, full_name, referred_by').in('referred_by', l1Ids);
 
+        // L2
+        const { data: l2 } = await supabase.from('profiles').select('id, full_name, referred_by, current_level').in('referred_by', l1Ids);
         const l2Ids = l2?.map(u => u.id) || [];
-        const { data: l3 } = await supabase.from('profiles').select('id, full_name, referred_by').in('referred_by', l2Ids);
 
+        // L3
+        const { data: l3 } = await supabase.from('profiles').select('id, full_name, referred_by, current_level').in('referred_by', l2Ids);
         const l3Ids = l3?.map(u => u.id) || [];
-        const { data: l4 } = await supabase.from('profiles').select('id, full_name, referred_by').in('referred_by', l3Ids);
+
+        // L4
+        const { data: l4 } = await supabase.from('profiles').select('id, full_name, referred_by, current_level').in('referred_by', l3Ids);
+        const l4Ids = l4?.map(u => u.id) || [];
+
+        // L5 (just to count L4 children)
+        const { data: l5 } = await supabase.from('profiles').select('referred_by').in('referred_by', l4Ids);
+
+        const countChildren = (memberId: string, nextLevel: any[]) => {
+            return nextLevel.filter(child => child.referred_by === memberId).length;
+        };
+
+        const enrich = (list: any[], nextLevel: any[]) => {
+            return list.map(m => ({
+                ...m,
+                referralCount: countChildren(m.id, nextLevel)
+            }));
+        };
 
         return {
-            l1: l1 || [],
-            l2: l2 || [],
-            l3: l3 || [],
-            l4: l4 || []
+            l1: enrich(l1, l2 || []),
+            l2: enrich(l2 || [], l3 || []),
+            l3: enrich(l3 || [], l4 || []),
+            l4: enrich(l4 || [], l5 || [])
         };
     }
 };

@@ -25,6 +25,8 @@ export default function RegistrationForm({ onSuccess, initialReferralCode }: Reg
     const [regFee, setRegFee] = useState(5000); // Valor por defecto ajustado a 5k para pruebas
     const [regIp, setRegIp] = useState('');
     const [regLoc, setRegLoc] = useState('');
+    const [privacyAccepted, setPrivacyAccepted] = useState(false);
+    const [finalPaymentUrl, setFinalPaymentUrl] = useState('');
     const [error, setError] = useState('');
 
     useEffect(() => {
@@ -123,16 +125,12 @@ export default function RegistrationForm({ onSuccess, initialReferralCode }: Reg
                 paymentUrl += `&signature:integrity=${signature}`;
             }
 
-            // 4. Abrir pasarela
+            // 5. Cambiar a pantalla de confirmación
+            setFinalPaymentUrl(paymentUrl);
+            setStep(4);
+
+            // Intentar abrir automáticamente (opcional)
             window.open(paymentUrl, '_blank');
-
-            // 5. Notificamos al usuario
-            alert(`🚀 REGISTRO INICIADO: ${formData.fullName}\n\nPor seguridad, tu cuenta se activará automáticamente apenas Wompi confirme tu pago.\n\n📍 IP: ${regIp || 'Detectada'} | Loc: ${regLoc || 'Detectada'}\n\nEl sistema te enviará un WhatsApp de bienvenida al confirmar el pago.`);
-
-            // Resetear flujo
-            setStep(1);
-            setReferralCode('');
-            setIsLoginMode(true);
 
         } catch (err: any) {
             console.error("Error en registro:", err);
@@ -362,6 +360,18 @@ export default function RegistrationForm({ onSuccess, initialReferralCode }: Reg
                                     />
                                 </div>
 
+                                <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer', padding: '10px 0', marginTop: 8 }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={privacyAccepted}
+                                        onChange={e => setPrivacyAccepted(e.target.checked)}
+                                        style={{ marginTop: 4 }}
+                                    />
+                                    <span style={{ fontSize: 13, color: 'var(--color-text-muted)', lineHeight: 1.4 }}>
+                                        Acepto las <strong style={{ color: 'var(--color-navy)' }}>Políticas de Privacidad</strong> y el tratamiento de mis datos para la activación del servicio.
+                                    </span>
+                                </label>
+
                                 <button
                                     onClick={() => {
                                         if (formData.password !== formData.confirmPassword) {
@@ -373,11 +383,11 @@ export default function RegistrationForm({ onSuccess, initialReferralCode }: Reg
                                             setStep(3);
                                         }
                                     }}
-                                    disabled={!formData.fullName || !formData.email || !formData.password}
+                                    disabled={!formData.fullName || !formData.email || !formData.password || !privacyAccepted}
                                     className="btn btn-navy btn-full btn-lg"
-                                    style={{ justifyContent: 'center', marginTop: 10 }}
+                                    style={{ justifyContent: 'center', opacity: (!formData.fullName || !formData.email || !formData.password || !privacyAccepted) ? 0.5 : 1 }}
                                 >
-                                    Continuar al Pago <ArrowRight size={16} />
+                                    Siguiente Paso <ArrowRight size={16} />
                                 </button>
                                 {error && <p style={{ fontSize: 12, color: '#DC2626', textAlign: 'center' }}>{error}</p>}
                             </div>
@@ -461,6 +471,54 @@ export default function RegistrationForm({ onSuccess, initialReferralCode }: Reg
                                 style={{ width: '100%', marginTop: 20, fontSize: 13, color: 'var(--color-text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}
                             >
                                 ← Regresar a mis datos
+                            </button>
+                        </motion.div>
+                    )}
+
+                    {/* ── STEP 4 — Confirmación de Inicio de Pago ── */}
+                    {step === 4 && (
+                        <motion.div key="step4" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} style={{ textAlign: 'center' }}>
+                            <div style={{ width: 64, height: 64, borderRadius: 20, background: '#F0FDF4', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', color: '#16A34A' }}>
+                                <CheckCircle2 size={32} />
+                            </div>
+
+                            <h2 style={{ fontSize: 24, fontWeight: 800, color: 'var(--color-navy)', marginBottom: 8 }}>
+                                ¡Registro Iniciado!
+                            </h2>
+                            <p style={{ fontSize: 14, color: 'var(--color-text-muted)', marginBottom: 24, lineHeight: 1.6 }}>
+                                Por seguridad, tu cuenta se activará automáticamente apenas **Wompi** confirme tu pago.
+                            </p>
+
+                            <div style={{ background: 'var(--color-surface-2)', borderRadius: 16, padding: 20, marginBottom: 24, textAlign: 'left' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                                    <div style={{ width: 20, height: 20, borderRadius: 6, background: 'var(--color-wallet)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 10, fontWeight: 800 }}>1</div>
+                                    <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-navy)' }}>Completa el pago en la pasarela segura.</p>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                                    <div style={{ width: 20, height: 20, borderRadius: 6, background: 'var(--color-wallet)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 10, fontWeight: 800 }}>2</div>
+                                    <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-navy)' }}>Espera el WhatsApp de bienvenida.</p>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                    <div style={{ width: 20, height: 20, borderRadius: 6, background: 'var(--color-wallet)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 10, fontWeight: 800 }}>3</div>
+                                    <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-navy)' }}>Inicia sesión y expande tu red.</p>
+                                </div>
+                            </div>
+
+                            <a
+                                href={finalPaymentUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn btn-wallet btn-full btn-lg"
+                                style={{ justifyContent: 'center', textDecoration: 'none' }}
+                            >
+                                Re-abrir ventana de Pago <Zap size={18} />
+                            </a>
+
+                            <button
+                                onClick={() => { setIsLoginMode(true); setStep(1); setFinalPaymentUrl(''); }}
+                                style={{ width: '100%', marginTop: 20, fontSize: 13, color: 'var(--color-wallet)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700 }}
+                            >
+                                Ya pagué, ir al Inicio de Sesión
                             </button>
                         </motion.div>
                     )}

@@ -146,6 +146,9 @@ app.post('/api/wompi-webhook', async (req, res) => {
 
         if (hash !== signature.checksum) {
             console.error("❌ Firma de Webhook INVÁLIDA");
+            console.log("DEBUG - Cadena construida:", str);
+            console.log("DEBUG - Hash generado:", hash);
+            console.log("DEBUG - Checksum recibido:", signature.checksum);
             return res.status(401).send('Invalid signature');
         }
         console.log("✅ Firma de Webhook Validada");
@@ -214,10 +217,13 @@ app.post('/api/wompi-webhook', async (req, res) => {
 
         const newProfile = newProfiles[0];
 
-        // 3d. Crear Billetera
+        // 3d. Crear Billetera (1 TC por cada 1.000 COP pagados)
+        const paidAmountCop = amount_in_cents / 100;
+        const rewardTC = paidAmountCop / 1000;
+
         await axios.post(`${SUPABASE_URL}/rest/v1/wallets`, {
             user_id: newProfile.id,
-            balance_tc: 50.00
+            balance_tc: rewardTC
         }, {
             headers: supabaseHeaders
         });
@@ -233,7 +239,7 @@ app.post('/api/wompi-webhook', async (req, res) => {
         console.log(`✅ Usuario creado y activado: ${newProfile.id}`);
 
         // 5. Notificar por WhatsApp vía Shopy
-        const welcomeMessage = `¡Hola ${attempt.full_name}! 🚀 Bienvenido a la elite de ShopyBrands.\n\nTu pago de membresía ha sido confirmado y tu cuenta ya está ACTIVA. ✅\n\n💎 Recibiste: 50.00 TC\n🎟️ Tu código de referido: ${newCode}\n\nYa puedes ingresar a la plataforma: ${process.env.APP_URL || 'https://shopybrands.com'}\n\n¡Estoy lista para ayudarte a crecer! 🤖`;
+        const welcomeMessage = `¡Hola ${attempt.full_name}! 🚀 Bienvenido a la elite de ShopyBrands.\n\nTu pago de membresía ha sido confirmado y tu cuenta ya está ACTIVA. ✅\n\n💎 Recibiste: ${rewardTC.toFixed(2)} TC\n🎟️ Tu código de referido: ${newCode}\n\nYa puedes ingresar con tu correo y contraseña: ${process.env.APP_URL || 'https://truecoin-simids.vercel.app'}\n\n¡Estoy lista para ayudarte a crecer! 🤖`;
 
         try {
             await axios.post(`${WAHA_URL}/api/sendText`, {
@@ -243,7 +249,7 @@ app.post('/api/wompi-webhook', async (req, res) => {
             });
             console.log(`📱 WhatsApp de bienvenida enviado a ${attempt.phone}`);
         } catch (waErr) {
-            console.error("❌ Error enviando WhatsApp de bienvenida");
+            console.error("❌ Error enviando WhatsApp de bienvenida:", waErr.message);
         }
 
         res.status(200).send('Activated');

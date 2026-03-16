@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import GiftMatrix from './GiftMatrix';
 import NetworkTree from './NetworkTree';
+import ExpansionMap from './ExpansionMap';
 import TransferModal from './TransferModal';
 import RechargeModal from './RechargeModal';
 import { userService } from '../services/userService';
@@ -72,7 +73,7 @@ export default function Dashboard({
     const [showRecharge, setShowRecharge] = useState(false);
     const [localBalance, setLocalBalance] = useState(balance);
     const [copied, setCopied] = useState(false);
-    const [view, setView] = useState<'ascension' | 'network'>('ascension');
+    const [view, setView] = useState<'ascension' | 'network' | 'expansion'>('ascension');
     const [stats, setStats] = useState<{ directReferrals: number, currentLevel: number, isVip: boolean, mentor?: any }>({
         directReferrals: 0,
         currentLevel: 1,
@@ -314,13 +315,24 @@ export default function Dashboard({
                             border: 'none', cursor: 'pointer', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                         }}
                     >
-                        Mi Red (4 Niveles)
+                        Escalabilidad
+                    </button>
+                    <button
+                        onClick={() => setView('expansion')}
+                        style={{
+                            padding: '10px 24px', borderRadius: 12, fontSize: 13, fontWeight: 800,
+                            background: view === 'expansion' ? 'var(--color-navy)' : 'transparent',
+                            color: view === 'expansion' ? 'white' : 'var(--color-text-muted)',
+                            border: 'none', cursor: 'pointer', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                        }}
+                    >
+                        Plan Maestro
                     </button>
                 </div>
 
                 <div style={{ marginBottom: 28 }}>
                     <AnimatePresence mode="wait">
-                        {view === 'ascension' ? (
+                        {view === 'ascension' && (
                             <motion.div
                                 key="ascension"
                                 initial={{ opacity: 0, y: 10 }}
@@ -330,7 +342,8 @@ export default function Dashboard({
                             >
                                 <GiftMatrix currentLevel={stats.currentLevel} referrals={stats.directReferrals} />
                             </motion.div>
-                        ) : (
+                        )}
+                        {view === 'network' && (
                             <motion.div
                                 key="network"
                                 initial={{ opacity: 0, y: 10 }}
@@ -339,6 +352,17 @@ export default function Dashboard({
                                 transition={{ duration: 0.2 }}
                             >
                                 <NetworkTree userId={user.id || ''} mentor={stats.mentor} />
+                            </motion.div>
+                        )}
+                        {view === 'expansion' && (
+                            <motion.div
+                                key="expansion"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                <ExpansionMap />
                             </motion.div>
                         )}
                     </AnimatePresence>

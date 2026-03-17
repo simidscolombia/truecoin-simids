@@ -234,15 +234,11 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                 className={`admin-sidebar ${isSidebarOpen ? 'open' : ''}`}
                 style={{ width: 280, background: 'var(--color-surface)', borderRight: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', flexShrink: 0 }}
             >
-                {/* Header */}
-                <div style={{ padding: '24px 20px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid var(--color-border)' }}>
-                    <div style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--color-admin)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <ShieldAlert size={20} color="white" />
-                    </div>
-                    <div>
-                        <span style={{ fontSize: 20, fontWeight: 900, color: 'var(--color-navy)', letterSpacing: -0.5 }}>Shopy<span style={{ color: 'var(--color-wallet)' }}>Brands</span></span>
-                        <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', background: 'var(--color-surface-2)', padding: '2px 6px', borderRadius: 6, marginLeft: 8, verticalAlign: 'middle', display: 'inline-block' }}>V2.5.6 — ANALYTICS PRO</span>
-                    </div>
+                {/* Header - Minimalist since we have the top nav */}
+                <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--color-border)' }}>
+                    <p style={{ fontSize: 11, fontWeight: 800, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>
+                        Panel de Control
+                    </p>
                 </div>
 
                 {/* Navigation */}

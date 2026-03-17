@@ -18,7 +18,7 @@ import { userService } from './services/userService';
 import { Product } from './services/businessService';
 import ShoppingCart from './components/ShoppingCart';
 import { useState, useEffect } from 'react';
-import { FULL_VERSION_STRING } from './constants';
+import { APP_VERSION } from './constants';
 
 type AppView = 'dashboard' | 'marketplace' | 'pos' | 'admin' | 'shopyfam' | 'prospects' | 'landing';
 
@@ -61,17 +61,27 @@ function Header({
       zIndex: 100,
     }}>
       {/* Logo Left */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }} onClick={() => onNavigate('landing')}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer' }} onClick={() => onNavigate('landing')}>
         <img
           src="/assets/logo.png"
           alt="ShopyBrands Logo"
-          style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover' }}
+          style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'contain', background: 'white', border: '1px solid var(--color-border)' }}
         />
         <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <span className="header-logo-text" style={{ fontSize: 18, fontWeight: 950, color: 'var(--color-navy)', letterSpacing: -0.8, lineHeight: 1 }}>
-            Shopy<span style={{ color: 'var(--color-wallet)' }}>Brands</span>
-          </span>
-          <span style={{ fontSize: 9, fontWeight: 800, color: 'var(--color-text-muted)', letterSpacing: 0.2, marginTop: 2 }}>{FULL_VERSION_STRING}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span className="header-logo-text" style={{ fontSize: 20, fontWeight: 950, color: 'var(--color-navy)', letterSpacing: -0.8, lineHeight: 1 }}>
+              Shopy<span style={{ color: 'var(--color-wallet)' }}>Brands</span>
+            </span>
+            <span style={{
+              fontSize: 10, fontWeight: 900, color: 'var(--color-navy)', background: 'var(--color-surface-2)',
+              padding: '2px 8px', borderRadius: 20, border: '1px solid var(--color-border)'
+            }}>
+              {APP_VERSION}
+            </span>
+          </div>
+          <p style={{ fontSize: 9, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, margin: '2px 0 0 0' }}>
+            Master Expansion Plan
+          </p>
         </div>
       </div>
 

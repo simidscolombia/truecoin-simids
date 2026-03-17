@@ -11,7 +11,7 @@ import { adminService } from '../services/adminService';
 import ThemeCustomizer from './ThemeCustomizer';
 import ApiSettings from './ApiSettings';
 
-import { FULL_VERSION_STRING } from '../constants';
+import { APP_VERSION } from '../constants';
 
 export default function AdminDashboard({ onBack }: { onBack: () => void }) {
     const [activeTab, setActiveTab] = useState<'stats' | 'users' | 'directory' | 'expansion' | 'themes' | 'banks'>('stats');
@@ -254,7 +254,7 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                         Panel de Control
                     </p>
                     <p style={{ fontSize: 9, fontWeight: 700, color: 'var(--color-admin)', marginTop: 4, opacity: 0.8 }}>
-                        {FULL_VERSION_STRING}
+                        {APP_VERSION}
                     </p>
                 </div>
 

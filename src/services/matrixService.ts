@@ -13,7 +13,12 @@ export const matrixService = {
                 occupant_id,
                 recruiter_id,
                 profiles!occupant_id (
-                    full_name
+                    full_name,
+                    current_level
+                ),
+                recruiter:profiles!recruiter_id (
+                    full_name,
+                    referral_code
                 )
             `)
             .eq('matrix_owner_id', ownerId)
@@ -29,7 +34,10 @@ export const matrixService = {
             position: item.position,
             occupant_id: item.occupant_id,
             occupant_name: item.profiles?.full_name || 'Desconocido',
-            recruiter_id: item.recruiter_id
+            current_level: item.profiles?.current_level || 1,
+            recruiter_id: item.recruiter_id,
+            recruiter_name: item.recruiter?.full_name || 'Sistema / IA',
+            recruiter_code: item.recruiter?.referral_code || 'SB-AUTO'
         }));
     },
 

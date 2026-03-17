@@ -7,8 +7,10 @@ export interface MatrixSlot {
     position: number;
     occupant_id: string | null;
     occupant_name?: string;
+    current_level?: number;
     recruiter_id: string | null;
     recruiter_name?: string;
+    recruiter_code?: string;
     created_at?: string;
 }
 

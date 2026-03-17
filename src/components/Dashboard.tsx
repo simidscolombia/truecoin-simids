@@ -180,24 +180,37 @@ export default function Dashboard({ user, balance }: { user: any; balance: strin
                                     <h3 style={{ fontSize: 22, fontWeight: 950, color: 'var(--color-navy)', margin: '0 0 4px 0' }}>{selectedDetailUser.full_name}</h3>
                                     <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--color-wallet)', textTransform: 'uppercase', letterSpacing: 1 }}>{RANKS[(selectedDetailUser.current_level || 1) - 1]}</span>
 
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 32, textAlign: 'left' }}>
+                                    <div style={{ marginTop: 24, padding: '12px 16px', background: 'rgba(30, 41, 59, 0.03)', borderRadius: 16, border: '1px dashed var(--color-border)', textAlign: 'left' }}>
+                                        <p style={{ fontSize: 10, fontWeight: 800, color: 'var(--color-text-muted)', textTransform: 'uppercase', margin: '0 0 4px 0' }}>Referido por:</p>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                            <div style={{ width: 24, height: 24, borderRadius: 6, background: 'var(--color-navy)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 900 }}>
+                                                {selectedDetailUser.recruiter_name?.charAt(0) || 'S'}
+                                            </div>
+                                            <div>
+                                                <p style={{ fontSize: 13, fontWeight: 900, color: 'var(--color-navy)', margin: 0 }}>{selectedDetailUser.recruiter_name || 'Sistema / IA'}</p>
+                                                <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-wallet)', margin: 0 }}>Cód: {selectedDetailUser.recruiter_code || 'SB-AUTO'}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 24, textAlign: 'left' }}>
                                         <div style={{ padding: 16, background: 'var(--color-surface-2)', borderRadius: 20 }}>
                                             <p style={{ fontSize: 10, fontWeight: 800, color: 'var(--color-text-muted)', textTransform: 'uppercase', marginBottom: 4 }}>ID SOCIO</p>
                                             <p style={{ fontSize: 14, fontWeight: 900, color: 'var(--color-navy)', margin: 0 }}>#{selectedDetailUser.id.substring(0, 8)}</p>
                                         </div>
                                         <div style={{ padding: 16, background: 'var(--color-surface-2)', borderRadius: 20 }}>
-                                            <p style={{ fontSize: 10, fontWeight: 800, color: 'var(--color-text-muted)', textTransform: 'uppercase', marginBottom: 4 }}>ENERGÍA</p>
-                                            <p style={{ fontSize: 14, fontWeight: 900, color: 'var(--color-wallet)', margin: 0 }}>400 TC</p>
+                                            <p style={{ fontSize: 10, fontWeight: 800, color: 'var(--color-text-muted)', textTransform: 'uppercase', marginBottom: 4 }}>ENERGÍA / NIVEL</p>
+                                            <p style={{ fontSize: 14, fontWeight: 900, color: 'var(--color-wallet)', margin: 0 }}>{((selectedDetailUser.current_level || 1) * 100).toLocaleString()} <span style={{ fontSize: 10 }}>PUNTOS</span></p>
                                         </div>
                                     </div>
 
                                     <div style={{ marginTop: 24, padding: 20, background: 'var(--color-surface-2)', borderRadius: 24, display: 'flex', alignItems: 'center', gap: 14 }}>
                                         <div style={{ width: 40, height: 40, borderRadius: 12, background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--color-border)' }}>
-                                            <Shield size={20} color="var(--color-directorio)" />
+                                            <Shield size={20} color="var(--color-wallet)" />
                                         </div>
                                         <div style={{ textAlign: 'left' }}>
-                                            <p style={{ fontSize: 10, fontWeight: 800, color: 'var(--color-text-muted)', margin: 0 }}>ESTADO DEL NODO</p>
-                                            <p style={{ fontSize: 13, fontWeight: 900, color: 'var(--color-navy)', margin: 0 }}>Activo Proyectando Red</p>
+                                            <p style={{ fontSize: 10, fontWeight: 800, color: 'var(--color-text-muted)', margin: 0 }}>ESTADO DEL SOCIO</p>
+                                            <p style={{ fontSize: 13, fontWeight: 900, color: 'var(--color-navy)', margin: 0 }}>Nodo Activo y Proyectando</p>
                                         </div>
                                     </div>
 

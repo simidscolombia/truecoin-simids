@@ -100,7 +100,13 @@ export default function GiftMatrix({
                             onMouseLeave={() => setHoveredSlot(null)}
                             onClick={() => {
                                 if (isActive) {
-                                    onSelectUser?.({ id: slot.data?.occupant_id, full_name: slot.data?.occupant_name });
+                                    onSelectUser?.({
+                                        id: slot.data?.occupant_id,
+                                        full_name: slot.data?.occupant_name,
+                                        current_level: slot.data?.current_level,
+                                        recruiter_name: slot.data?.recruiter_name,
+                                        recruiter_code: slot.data?.recruiter_code
+                                    });
                                 } else if (isPlacing) {
                                     onSelectPosition?.(slot.pos);
                                 }

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Wallet, Users, Copy, Send, CheckCircle2, Award, Zap, Shield
+    Wallet, Users, Copy, Send, CheckCircle2, Award, Zap, Shield, UserPlus
 } from 'lucide-react';
 import GiftMatrix from './GiftMatrix';
 import NetworkTree from './NetworkTree';
@@ -16,7 +16,7 @@ const RANKS = [
     "VIP BRONCE", "VIP PLATA", "VIP ORO",
     "PLATINO I", "PLATINO II", "PLATINO III",
     "ESMERALDA I", "ESMERALDA II", "ESMERALDA III",
-    "ZAFIRO", "DIAMANTE", "LEYENDA SIMID"
+    "ZAFIRO", "DIAMANTE", "SOY LEYENDA"
 ];
 
 function StatCard({ label, value, unit, icon, color }: { label: string; value: string; unit?: string; icon: React.ReactNode; color: string; }) {
@@ -42,7 +42,7 @@ function StatCard({ label, value, unit, icon, color }: { label: string; value: s
     );
 }
 
-export default function Dashboard({ user, balance }: { user: any; balance: string; onUpdateBalance?: (b: string) => void; }) {
+export default function Dashboard({ user, balance, onUpdateBalance }: { user: any; balance: string; onUpdateBalance?: (b: string) => void; }) {
     const [showTransfer, setShowTransfer] = useState(false);
     const [showRecharge, setShowRecharge] = useState(false);
     const [localBalance, setLocalBalance] = useState(balance);
@@ -51,6 +51,12 @@ export default function Dashboard({ user, balance }: { user: any; balance: strin
     const [stats, setStats] = useState<any>({ directReferrals: 0, currentLevel: 1, isVip: false });
     const [matrixSlots, setMatrixSlots] = useState<any[]>([]);
     const [selectedDetailUser, setSelectedDetailUser] = useState<any | null>(null);
+
+    // Placement Logic
+    const [showPlacementModal, setShowPlacementModal] = useState(false);
+    const [selectedPosition, setSelectedPosition] = useState<number | null>(null);
+    const [pendingReferrals, setPendingReferrals] = useState<any[]>([]);
+    const [isPlacing, setIsPlacing] = useState(false);
 
     useEffect(() => {
         if (user?.id) {
@@ -66,15 +72,43 @@ export default function Dashboard({ user, balance }: { user: any; balance: strin
             ]);
             setStats(s);
             setMatrixSlots(m);
+
+            // Also fetch pending referrals for placement
+            const pending = await matrixService.getUnplacedReferrals(user.id);
+            setPendingReferrals(pending);
         } catch (e) {
             console.error(e);
         }
     };
 
+    const handlePlaceUser = async (occupantId: string) => {
+        if (!selectedPosition || !user?.id) return;
+        setIsPlacing(true);
+        try {
+            await matrixService.placeUser({
+                matrixOwnerId: user.id,
+                occupantId: occupantId,
+                recruiterId: user.id,
+                level: stats.currentLevel,
+                position: selectedPosition
+            });
+            setShowPlacementModal(false);
+            setSelectedPosition(null);
+            await fetchDashboardData();
+        } catch (e: any) {
+            alert(e.message || "Error al ubicar socio");
+        } finally {
+            setIsPlacing(false);
+        }
+    };
 
     return (
         <div className="module-page animate-in" style={{ background: 'var(--color-surface-2)', minHeight: '100vh', paddingBottom: 60 }}>
-            <TransferModal isOpen={showTransfer} onClose={() => setShowTransfer(false)} user={user} onSuccess={(amt: number) => setLocalBalance((prev) => (Number(prev) - amt).toFixed(2))} />
+            <TransferModal isOpen={showTransfer} onClose={() => setShowTransfer(false)} user={user} onSuccess={(amt: number) => {
+                const nb = (Number(localBalance) - amt).toFixed(2);
+                setLocalBalance(nb);
+                onUpdateBalance?.(nb);
+            }} />
             <RechargeModal isOpen={showRecharge} onClose={() => setShowRecharge(false)} user={user} onRechargeRequestSubmit={() => { }} />
 
             <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 20px' }}>
@@ -138,6 +172,11 @@ export default function Dashboard({ user, balance }: { user: any; balance: strin
                                     currentLevel={stats.currentLevel}
                                     slots={matrixSlots}
                                     onSelectUser={(u: any) => setSelectedDetailUser(u)}
+                                    isPlacing={pendingReferrals.length > 0}
+                                    onSelectPosition={(pos) => {
+                                        setSelectedPosition(pos);
+                                        setShowPlacementModal(true);
+                                    }}
                                 />
                             </motion.div>
                         ) : (
@@ -154,8 +193,9 @@ export default function Dashboard({ user, balance }: { user: any; balance: strin
                     </AnimatePresence>
                 </div>
 
-                {/* 4. User Detail Modal (Anti-Dummy Experience) */}
+                {/* 4. Modals */}
                 <AnimatePresence>
+                    {/* User Detail Modal */}
                     {selectedDetailUser && (
                         <div style={{ position: 'fixed', inset: 0, zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
                             <motion.div
@@ -218,6 +258,68 @@ export default function Dashboard({ user, balance }: { user: any; balance: strin
                                         onClick={() => setSelectedDetailUser(null)}
                                         style={{ marginTop: 32, width: '100%', padding: '16px', borderRadius: 16, border: 'none', background: 'var(--color-navy)', color: 'white', fontWeight: 900, cursor: 'pointer', transition: 'all 0.2s' }}
                                     >CERRAR FICHA</button>
+                                </div>
+                            </motion.div>
+                        </div>
+                    )}
+
+                    {/* Placement Selection Modal */}
+                    {showPlacementModal && (
+                        <div style={{ position: 'fixed', inset: 0, zIndex: 2100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+                            <motion.div
+                                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                                onClick={() => !isPlacing && setShowPlacementModal(false)}
+                                style={{ position: 'absolute', inset: 0, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(8px)' }}
+                            />
+                            <motion.div
+                                initial={{ scale: 0.9, y: 20, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.9, y: 20, opacity: 0 }}
+                                style={{
+                                    width: '100%', maxWidth: 440, background: 'white', borderRadius: 32, overflow: 'hidden', position: 'relative',
+                                    boxShadow: '0 30px 60px rgba(0,0,0,0.2)', border: '1px solid var(--color-border)'
+                                }}
+                            >
+                                <div style={{ padding: '32px 32px 24px' }}>
+                                    <h3 style={{ fontSize: 20, fontWeight: 950, color: 'var(--color-navy)', marginBottom: 8 }}>Ubicar Socio Directo</h3>
+                                    <p style={{ fontSize: 13, color: 'var(--color-text-muted)', fontWeight: 600 }}>Selecciona un socio de tu lista de espera para ubicarlo en la posición {selectedPosition}.</p>
+                                </div>
+                                <div style={{ maxHeight: 350, overflowY: 'auto', padding: '0 32px 32px' }}>
+                                    {pendingReferrals.length > 0 ? (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                            {pendingReferrals.map(ref => (
+                                                <button
+                                                    key={ref.id}
+                                                    disabled={isPlacing}
+                                                    onClick={() => handlePlaceUser(ref.id)}
+                                                    style={{
+                                                        display: 'flex', alignItems: 'center', gap: 14, padding: 16, borderRadius: 20,
+                                                        background: '#F8FAFC', border: '1px solid var(--color-border)', cursor: 'pointer',
+                                                        transition: 'all 0.2s', width: '100%', textAlign: 'left',
+                                                        opacity: isPlacing ? 0.6 : 1
+                                                    }}
+                                                >
+                                                    <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--color-navy)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 900 }}>
+                                                        {ref.full_name?.charAt(0)}
+                                                    </div>
+                                                    <div style={{ flex: 1 }}>
+                                                        <p style={{ fontSize: 15, fontWeight: 900, color: 'var(--color-navy)', margin: 0 }}>{ref.full_name}</p>
+                                                        <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-wallet)', margin: 0 }}>{ref.email}</p>
+                                                    </div>
+                                                    <UserPlus size={18} color="var(--color-wallet)" />
+                                                </button>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                                            <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-text-muted)' }}>No tienes socios directos pendientes de ubicar.</p>
+                                        </div>
+                                    )}
+                                </div>
+                                <div style={{ padding: 24, borderTop: '1px solid #F1F5F9', textAlign: 'right' }}>
+                                    <button
+                                        onClick={() => setShowPlacementModal(false)}
+                                        disabled={isPlacing}
+                                        style={{ background: 'none', border: 'none', color: 'var(--color-text-muted)', fontWeight: 800, cursor: 'pointer', padding: '8px 16px' }}
+                                    >CANCELAR</button>
                                 </div>
                             </motion.div>
                         </div>

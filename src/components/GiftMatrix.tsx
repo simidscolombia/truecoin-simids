@@ -17,7 +17,7 @@ const RANKS = [
     "VIP BRONCE", "VIP PLATA", "VIP ORO",
     "PLATINO I", "PLATINO II", "PLATINO III",
     "ESMERALDA I", "ESMERALDA II", "ESMERALDA III",
-    "ZAFIRO", "DIAMANTE", "LEYENDA SIMID"
+    "ZAFIRO", "DIAMANTE", "SOY LEYENDA"
 ];
 
 export default function GiftMatrix({

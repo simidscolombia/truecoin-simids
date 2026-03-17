@@ -33,6 +33,7 @@ export default function GiftMatrix({
     const isLevelUnlocked = browsingLevel <= currentLevel;
     const isActiveLevel = browsingLevel === currentLevel;
     const pointsForLevel = browsingLevel * 100;
+    const fillingPercentage = isActiveLevel ? (slots.length / 4) * 100 : (isLevelUnlocked ? 100 : 0);
 
     // Distribución del premio (80% Socio, 10% Red/Hijos, 10% Sistema)
     const distribution = {
@@ -47,228 +48,169 @@ export default function GiftMatrix({
     });
 
     return (
-        <div id="gift-matrix-layout" style={{
-            display: 'grid',
-            gridTemplateColumns: '120px 1fr 280px',
-            gap: 24,
-            alignItems: 'start',
-            maxWidth: '100%',
-            overflowX: 'hidden'
-        }}>
-            {/* ── COLUMNA 1: ESCALONES (V) ── */}
-            <div style={{
-                background: 'white',
-                borderRadius: 24,
-                padding: '16px 8px',
-                border: '1px solid var(--color-border)',
-                height: '75vh',
-                overflowY: 'auto',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 8,
-                scrollbarWidth: 'none',
-                position: 'sticky',
-                top: 20
+        <div id="gift-matrix-unified" style={{ maxWidth: 800, margin: '0 auto' }}>
+            {/* ── UNIFIED BOARD ── */}
+            <div className="card-lg" style={{
+                padding: '40px', background: 'white', borderRadius: 40,
+                border: isPlacing && isActiveLevel ? '3px solid var(--color-wallet)' : '1px solid var(--color-border)',
+                boxShadow: '0 25px 60px rgba(0,0,0,0.06)',
+                position: 'relative',
+                overflow: 'hidden'
             }}>
-                <p style={{ fontSize: 9, fontWeight: 900, color: 'var(--color-text-muted)', textAlign: 'center', textTransform: 'uppercase', marginBottom: 8 }}>Niveles</p>
-                {levels.map(lvl => {
-                    const isUnlocked = lvl <= currentLevel;
-                    const isSelected = lvl === browsingLevel;
-                    return (
-                        <button
-                            key={lvl}
-                            onClick={() => setBrowsingLevel(lvl)}
-                            style={{
-                                width: '100%', padding: '12px 0', borderRadius: 12, border: 'none',
-                                background: isSelected ? 'var(--color-navy)' : (isUnlocked ? 'white' : 'rgba(0,0,0,0.03)'),
-                                color: isSelected ? 'white' : (isUnlocked ? 'var(--color-navy)' : 'var(--color-text-muted)'),
-                                cursor: 'pointer', fontWeight: 800, fontSize: 13, transition: 'all 0.2s',
-                                position: 'relative',
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center'
-                            }}
-                        >
-                            L{lvl}
-                            {lvl === currentLevel && (
-                                <div style={{
-                                    position: 'absolute', top: 4, right: 4, width: 6, height: 6,
-                                    borderRadius: '50%', background: '#10B981', border: '1px solid white'
-                                }} />
-                            )}
-                        </button>
-                    );
-                })}
-            </div>
 
-            {/* ── COLUMNA 2: EL TABLERO (ShopyGift) ── */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-                <div className="card-lg" style={{
-                    padding: '40px 32px', background: 'white', borderRadius: 32,
-                    border: isPlacing && isActiveLevel ? '3px solid var(--color-wallet)' : '1px solid var(--color-border)',
-                    boxShadow: '0 20px 40px rgba(0,0,0,0.05)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center'
+                {/* ── LEVEL SELECTOR (HORIZONTAL BAR AT THE TOP) ── */}
+                <div style={{
+                    display: 'flex', gap: 8, marginBottom: 32, overflowX: 'auto',
+                    padding: '4px 4px 12px', scrollbarWidth: 'none',
+                    borderBottom: '1px solid #F1F5F9'
                 }}>
-                    <div style={{ textAlign: 'center', marginBottom: 40 }}>
-                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: isLevelUnlocked ? 'rgba(245, 158, 11, 0.1)' : '#F1F5F9', padding: '6px 14px', borderRadius: 999, marginBottom: 16 }}>
-                            <Award size={14} color={isLevelUnlocked ? 'var(--color-wallet)' : '#94A3B8'} />
-                            <span style={{ fontSize: 11, fontWeight: 900, color: isLevelUnlocked ? 'var(--color-navy)' : '#94A3B8', textTransform: 'uppercase' }}>
-                                {RANKS[(browsingLevel - 1) % 12]}
+                    {levels.map(lvl => {
+                        const isUnlocked = lvl <= currentLevel;
+                        const isCurrent = lvl === currentLevel;
+                        const isSelected = lvl === browsingLevel;
+                        return (
+                            <button
+                                key={lvl}
+                                onClick={() => setBrowsingLevel(lvl)}
+                                style={{
+                                    flexShrink: 0, width: 44, height: 44, borderRadius: 12, border: 'none',
+                                    background: isSelected ? 'var(--color-navy)' : (isUnlocked ? 'rgba(245, 158, 11, 0.05)' : '#F8FAFC'),
+                                    color: isSelected ? 'white' : (isUnlocked ? 'var(--color-wallet)' : '#94A3B8'),
+                                    cursor: 'pointer', fontWeight: 900, fontSize: 13, transition: 'all 0.2s',
+                                    position: 'relative', opacity: isUnlocked || isSelected ? 1 : 0.6
+                                }}
+                            >
+                                {lvl}
+                                {isCurrent && <div style={{ position: 'absolute', top: -3, right: -3, width: 10, height: 10, borderRadius: '50%', background: '#10B981', border: '2px solid white' }} />}
+                            </button>
+                        );
+                    })}
+                </div>
+
+                {/* ── MAIN HEADER: RANK + PROGRESS ── */}
+                <div style={{ textAlign: 'center', marginBottom: 44 }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'rgba(245, 158, 11, 0.08)', padding: '10px 24px', borderRadius: 999, marginBottom: 16 }}>
+                        <Award size={20} color="var(--color-wallet)" />
+                        <span style={{ fontSize: 14, fontWeight: 950, color: 'var(--color-navy)', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                            {RANKS[(browsingLevel - 1) % 12]}
+                        </span>
+                    </div>
+
+                    <h2 style={{ fontSize: 36, fontWeight: 950, color: 'var(--color-navy)', margin: 0, letterSpacing: -1 }}>
+                        ShopyGift <span style={{ color: 'var(--color-wallet)' }}>Nivel {browsingLevel}</span>
+                    </h2>
+
+                    {/* PROGRESS BAR (Unified) */}
+                    <div style={{ maxWidth: 400, margin: '28px auto 0' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10, fontSize: 12, fontWeight: 900, color: 'var(--color-text-muted)' }}>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <Zap size={14} color="var(--color-wallet)" /> PROGRESO DEL NIVEL
                             </span>
+                            <span>{Math.round(fillingPercentage)}% COMPLETADO</span>
                         </div>
-                        <h2 style={{ fontSize: 32, fontWeight: 950, color: 'var(--color-navy)', margin: 0, letterSpacing: -1 }}>
-                            {browsingLevel === currentLevel ? 'ShopyGift Activo' : `ShopyGift Nivel ${browsingLevel}`}
-                        </h2>
-                        {browsingLevel === currentLevel && (
-                            <p style={{ marginTop: 8, fontSize: 14, fontWeight: 700, color: 'var(--color-wallet)' }}>
-                                {slots.length}/4 puestos completados
-                            </p>
-                        )}
-                    </div>
-
-                    <div className="matrix-grid" style={{
-                        display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 40, width: '100%', maxWidth: 460,
-                        opacity: isLevelUnlocked ? 1 : 0.4,
-                        filter: isLevelUnlocked ? 'none' : 'grayscale(1)',
-                        padding: '20px 0'
-                    }}>
-                        {displaySlots.map(slot => {
-                            const isActive = slot.isActive;
-                            return (
-                                <motion.div
-                                    key={slot.pos}
-                                    onClick={() => {
-                                        if (isActive && slot.data) onSelectUser?.({ ...slot.data, id: slot.data.occupant_id, full_name: slot.data.occupant_name });
-                                        else if (isPlacing && isActiveLevel) onSelectPosition?.(slot.pos);
-                                    }}
-                                    whileHover={{ y: isActive || (isPlacing && isActiveLevel) ? -8 : 0 }}
-                                    style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, cursor: (isActive || (isPlacing && isActiveLevel)) ? 'pointer' : 'default' }}
-                                >
-                                    <div style={{
-                                        width: 110, height: 110, borderRadius: '50%',
-                                        border: isActive ? '4px solid var(--color-wallet)' : '2px dashed #CBD5E1',
-                                        background: isActive ? 'white' : '#F8FAFC',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        boxShadow: isActive ? '0 12px 30px rgba(245, 158, 11, 0.25)' : 'none',
-                                        position: 'relative',
-                                        transition: 'all 0.3s'
-                                    }}>
-                                        {isActive && slot.data ? (
-                                            <div style={{ fontSize: 40, fontWeight: 950, color: 'var(--color-wallet)' }}>{slot.data.occupant_name?.charAt(0)}</div>
-                                        ) : (
-                                            <div style={{ position: 'relative' }}>
-                                                <UserPlus size={40} color="#CBD5E1" />
-                                                {isPlacing && isActiveLevel && (
-                                                    <motion.div
-                                                        animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
-                                                        transition={{ repeat: Infinity, duration: 1.5 }}
-                                                        style={{ position: 'absolute', inset: -10, borderRadius: '50%', background: 'rgba(245, 158, 11, 0.1)' }}
-                                                    />
-                                                )}
-                                            </div>
-                                        )}
-                                        {isActive && slot.data && (
-                                            <div style={{
-                                                position: 'absolute', bottom: -5, right: -5, background: 'var(--color-navy)', color: 'white',
-                                                padding: '4px 10px', borderRadius: 10, fontSize: 11, fontWeight: 950, border: '3px solid white',
-                                                boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
-                                            }}>
-                                                L{slot.data.current_level || 1}
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div style={{ textAlign: 'center' }}>
-                                        <p style={{ fontSize: 15, fontWeight: 800, color: isActive ? 'var(--color-navy)' : '#94A3B8', margin: 0 }}>
-                                            {(isActive && slot.data) ? slot.data.occupant_name?.split(' ')[0] : (isPlacing && isActiveLevel ? 'Disponible' : `Puesto ${slot.pos}`)}
-                                        </p>
-                                        <p style={{ fontSize: 11, fontWeight: 700, color: isActive ? 'var(--color-wallet)' : '#94A3B8', textTransform: 'uppercase', marginTop: 2 }}>
-                                            {isActive ? 'Miembro Activo' : (isPlacing && isActiveLevel ? '¡Haz clic aquí!' : 'Vacío')}
-                                        </p>
-                                    </div>
-                                </motion.div>
-                            );
-                        })}
-                    </div>
-                </div>
-
-                <div className="card" style={{ padding: 24, borderRadius: 28, display: 'flex', gap: 16, alignItems: 'center', border: '1px solid var(--color-border)' }}>
-                    <div style={{ width: 48, height: 48, borderRadius: 16, background: 'rgba(245, 158, 11, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Zap size={24} color="var(--color-wallet)" />
-                    </div>
-                    <div>
-                        <p style={{ fontSize: 14, fontWeight: 900, color: 'var(--color-navy)', margin: 0 }}>Regla de Salto Automático</p>
-                        <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-text-muted)', margin: 0 }}>
-                            Al completar los 4 espacios del nivel {browsingLevel}, el sistema te otorga el premio y te posiciona en el Nivel {browsingLevel + 1}.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            {/* ── COLUMNA 3: DETALLE DE RECOMPENSA ── */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                <div style={{ background: 'var(--color-navy)', color: 'white', padding: 32, borderRadius: 32, boxShadow: '0 15px 35px rgba(15, 23, 42, 0.2)' }}>
-                    <p style={{ fontSize: 11, fontWeight: 800, opacity: 0.6, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>RECOMPENSA DE NIVEL</p>
-                    <div style={{ fontSize: 40, fontWeight: 950, color: 'var(--color-wallet)', marginBottom: 4 }}>{pointsForLevel.toLocaleString()}</div>
-                    <p style={{ fontSize: 14, fontWeight: 800 }}>PUNTOS TOTALES</p>
-
-                    <div style={{ height: 1, background: 'rgba(255,255,255,0.1)', margin: '24px 0' }} />
-
-                    <p style={{ fontSize: 10, fontWeight: 900, marginBottom: 16, opacity: 0.7 }}>CÓMO SE REPARTE:</p>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-wallet)' }} />
-                                <span style={{ fontSize: 12, fontWeight: 600 }}>Tú (80%)</span>
-                            </div>
-                            <span style={{ fontSize: 16, fontWeight: 950 }}>{distribution.propia} </span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#38BDF8' }} />
-                                <span style={{ fontSize: 12, fontWeight: 600 }}>Hijos (10%)</span>
-                            </div>
-                            <span style={{ fontSize: 16, fontWeight: 950 }}>{distribution.red} </span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#94A3B8' }} />
-                                <span style={{ fontSize: 12, fontWeight: 600 }}>IA IA (10%)</span>
-                            </div>
-                            <span style={{ fontSize: 16, fontWeight: 950 }}>{distribution.sistema} </span>
+                        <div style={{ height: 12, background: '#F1F5F9', borderRadius: 99, overflow: 'hidden', padding: 2 }}>
+                            <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: `${fillingPercentage}%` }}
+                                style={{ height: '100%', background: 'linear-gradient(90deg, var(--color-wallet), #FFB02E)', borderRadius: 99 }}
+                            />
                         </div>
                     </div>
                 </div>
 
-                <div className="card" style={{ padding: 24, borderRadius: 32, border: '1px solid var(--color-border)' }}>
-                    <h4 style={{ fontSize: 13, fontWeight: 950, color: 'var(--color-navy)', letterSpacing: 0.5, borderBottom: '1px solid #F1F5F9', paddingBottom: 12, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
-                        MONITOREO DE HIJOS
-                    </h4>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                        {slots.length > 0 ? slots.map(s => (
-                            <div key={s.occupant_id} style={{
-                                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                background: '#F8FAFC', padding: '14px', borderRadius: 16, border: '1px solid var(--color-border)',
-                                transition: 'transform 0.2s', cursor: 'pointer'
-                            }} onClick={() => onSelectUser?.({ ...s, id: s.occupant_id, full_name: s.occupant_name })}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--color-navy)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 900 }}>
-                                        {s.occupant_name?.charAt(0)}
-                                    </div>
-                                    <span style={{ fontSize: 13, fontWeight: 800 }}>{s.occupant_name?.split(' ')[0]}</span>
+                {/* ── MATRIX BOARD ── */}
+                <div style={{
+                    display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 40, width: '100%', maxWidth: 460, margin: '0 auto',
+                    opacity: isLevelUnlocked ? 1 : 0.4,
+                    filter: isLevelUnlocked ? 'none' : 'grayscale(1)',
+                    position: 'relative'
+                }}>
+                    {displaySlots.map(slot => {
+                        const isActive = slot.isActive;
+                        return (
+                            <motion.div
+                                key={slot.pos}
+                                onClick={() => {
+                                    if (isActive && slot.data) onSelectUser?.({ ...slot.data, id: slot.data.occupant_id, full_name: slot.data.occupant_name });
+                                    else if (isPlacing && isActiveLevel) onSelectPosition?.(slot.pos);
+                                }}
+                                whileHover={{ scale: isActive || (isPlacing && isActiveLevel) ? 1.05 : 1 }}
+                                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, cursor: (isActive || (isPlacing && isActiveLevel)) ? 'pointer' : 'default' }}
+                            >
+                                <div style={{
+                                    width: 110, height: 110, borderRadius: '50%',
+                                    border: isActive ? '4px solid var(--color-wallet)' : '2px dashed #CBD5E1',
+                                    background: isActive ? 'white' : '#F8FAFC',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    boxShadow: isActive ? '0 15px 35px rgba(245, 158, 11, 0.2)' : 'none',
+                                    position: 'relative'
+                                }}>
+                                    {isActive && slot.data ? (
+                                        <div style={{ fontSize: 40, fontWeight: 950, color: 'var(--color-wallet)' }}>{slot.data.occupant_name?.charAt(0)}</div>
+                                    ) : (
+                                        <div style={{ position: 'relative' }}>
+                                            <UserPlus size={40} color="#CBD5E1" />
+                                            {isPlacing && isActiveLevel && (
+                                                <motion.div
+                                                    animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+                                                    transition={{ repeat: Infinity, duration: 2 }}
+                                                    style={{ position: 'absolute', inset: -10, borderRadius: '50%', background: 'rgba(245, 158, 11, 0.15)' }}
+                                                />
+                                            )}
+                                        </div>
+                                    )}
+                                    {isActive && slot.data && (
+                                        <div style={{
+                                            position: 'absolute', bottom: -5, right: -5, background: 'var(--color-navy)', color: 'white',
+                                            padding: '4px 10px', borderRadius: 10, fontSize: 11, fontWeight: 950, border: '3px solid white'
+                                        }}>
+                                            L{slot.data.current_level || 1}
+                                        </div>
+                                    )}
                                 </div>
-                                <span style={{ fontSize: 10, fontWeight: 950, color: 'var(--color-wallet)', background: 'white', padding: '4px 10px', borderRadius: 8, border: '1px solid rgba(245, 158, 11, 0.2)' }}>
-                                    NIVEL {s.current_level || 1}
-                                </span>
-                            </div>
-                        )) : (
-                            <div style={{ textAlign: 'center', padding: '30px 0' }}>
-                                <p style={{ fontSize: 12, color: '#94A3B8', fontWeight: 600, margin: 0 }}>No hay socios directos aún en este nivel.</p>
-                            </div>
-                        )}
+                                <div style={{ textAlign: 'center' }}>
+                                    <p style={{ fontSize: 15, fontWeight: 900, color: isActive ? 'var(--color-navy)' : '#94A3B8', margin: 0 }}>
+                                        {(isActive && slot.data) ? slot.data.occupant_name.split(' ')[0] : `Puesto ${slot.pos}`}
+                                    </p>
+                                    <p style={{ fontSize: 10, fontWeight: 700, color: isActive ? 'var(--color-wallet)' : '#94A3B8', textTransform: 'uppercase', marginTop: 3 }}>
+                                        {isActive ? 'Activo' : 'Disponible'}
+                                    </p>
+                                </div>
+                            </motion.div>
+                        );
+                    })}
+                </div>
+
+                {/* ── REWARD & DISTRIBUTION (Unified Banner) ── */}
+                <div style={{
+                    marginTop: 52, padding: 32, background: 'var(--color-navy)', borderRadius: 32, color: 'white',
+                    boxShadow: '0 15px 40px rgba(15, 23, 42, 0.2)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 32
+                }}>
+                    <div>
+                        <p style={{ fontSize: 11, fontWeight: 800, opacity: 0.6, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>PREMIO DE NIVEL</p>
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+                            <span style={{ fontSize: 44, fontWeight: 950, color: 'var(--color-wallet)' }}>{pointsForLevel}</span>
+                            <span style={{ fontSize: 16, fontWeight: 800 }}>PUNTOS</span>
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: 32, paddingLeft: 32, borderLeft: '1px solid rgba(255,255,255,0.1)' }}>
+                        <div style={{ textAlign: 'center' }}>
+                            <p style={{ fontSize: 18, fontWeight: 950, color: 'white', margin: 0 }}>{distribution.propia}</p>
+                            <p style={{ fontSize: 10, fontWeight: 800, color: 'var(--color-wallet)', opacity: 0.8 }}>TÚ (80%)</p>
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                            <p style={{ fontSize: 18, fontWeight: 950, color: 'white', margin: 0 }}>{distribution.red}</p>
+                            <p style={{ fontSize: 10, fontWeight: 800, opacity: 0.6 }}>RED (10%)</p>
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                            <p style={{ fontSize: 18, fontWeight: 950, color: 'white', margin: 0 }}>{distribution.sistema}</p>
+                            <p style={{ fontSize: 10, fontWeight: 800, opacity: 0.6 }}>IA (10%)</p>
+                        </div>
                     </div>
                 </div>
+
             </div>
         </div>
     );

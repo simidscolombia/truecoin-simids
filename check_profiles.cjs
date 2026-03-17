@@ -26,7 +26,7 @@ function httpsReq(url, method, headers, body) {
 
 async function checkProfiles() {
     const res = await httpsReq(
-        SUPABASE_URL + '/rest/v1/profiles?select=id,email,full_name',
+        SUPABASE_URL + '/rest/v1/profiles?select=id,email,full_name,current_level',
         'GET',
         {
             'apikey': SERVICE_ROLE,

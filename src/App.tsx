@@ -70,16 +70,17 @@ function Header({
         </span>
       </div>
 
-      {/* Navigation Tabs - Centered & Integrated */}
+      {/* Navigation Tabs - Integrated */}
       <div className="header-nav" style={{
         height: '100%',
         display: 'flex',
         alignItems: 'flex-end',
-        gap: 12,
-        position: 'absolute',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        bottom: -1
+        gap: 8,
+        bottom: -1,
+        overflowX: 'auto',
+        scrollbarWidth: 'none',
+        flex: 1,
+        justifyContent: 'center'
       }}>
         {/* Marketplace / Products */}
         <button
@@ -103,7 +104,7 @@ function Header({
             gap: 8,
           }}
         >
-          <ShoppingBag size={16} /> Tienda en Línea
+          <ShoppingBag size={16} /> <span className="hide-mobile">Tienda en Línea</span>
         </button>
 
         {/* Directory / Businesses */}
@@ -128,7 +129,7 @@ function Header({
             gap: 8,
           }}
         >
-          <Search size={16} /> Directorio
+          <Search size={16} /> <span className="hide-mobile">Directorio</span>
         </button>
         {/* Plan Maestro / Conoce más */}
         <button
@@ -149,7 +150,7 @@ function Header({
             gap: 8,
           }}
         >
-          <Zap size={16} /> Plan Maestro
+          <Zap size={16} /> <span className="hide-mobile">Plan Maestro</span>
         </button>
 
         {isLoggedIn && (
@@ -171,7 +172,7 @@ function Header({
               gap: 8,
             }}
           >
-            <LayoutDashboard size={16} /> Dashboard
+            <LayoutDashboard size={16} /> <span className="hide-mobile">Dashboard</span>
           </button>
         )}
 
@@ -194,7 +195,7 @@ function Header({
               gap: 8,
             }}
           >
-            <Users size={16} /> ShopyFam
+            <Users size={16} /> <span className="hide-mobile">ShopyFam</span>
           </button>
         )}
 
@@ -217,7 +218,7 @@ function Header({
               gap: 8,
             }}
           >
-            <Settings size={16} /> Admin Cerebro
+            <Settings size={16} /> <span className="hide-mobile">Admin Cerebro</span>
           </button>
         )}
       </div>

@@ -83,10 +83,7 @@ export default function GiftMatrix({
                 )}
             </AnimatePresence>
 
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(4, 1fr)',
-                gap: 16,
+            <div className="matrix-grid" style={{
                 position: 'relative',
                 padding: '20px 0'
             }}>

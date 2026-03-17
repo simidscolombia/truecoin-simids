@@ -122,11 +122,11 @@ export default function Dashboard({ user, balance }: { user: any; balance: strin
                     <StatCard label="Nivel Actual" value={RANKS[(stats.currentLevel - 1) % 12]} icon={<Award size={20} />} color="var(--color-directorio)" />
                 </div>
 
-                {/* 3. Main Action Center (Two Columns) */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 24, alignItems: 'start', marginBottom: 32 }}>
+                {/* 3. Main Action Center (Flexible Flow) */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 24, alignItems: 'start', marginBottom: 32 }}>
 
                     {/* Left: Waiting Room */}
-                    <div style={{ position: 'sticky', top: 100 }}>
+                    <div style={{ flex: '1 1 340px' }}>
                         <WaitingRoom
                             pendingUsers={pendingReferrals}
                             onPlace={userId => setSelectedUserToPlace(pendingReferrals.find(p => p.id === userId))}
@@ -147,7 +147,7 @@ export default function Dashboard({ user, balance }: { user: any; balance: strin
                     </div>
 
                     {/* Right: The Board / Matrix */}
-                    <div>
+                    <div style={{ flex: '2 1 600px', minWidth: '320px' }}>
                         {/* Tab Switcher */}
                         <div style={{ display: 'flex', gap: 8, marginBottom: 20, background: 'rgba(0,0,0,0.05)', padding: 6, borderRadius: 16, width: 'fit-content' }}>
                             {['ascension', 'network'].map((v: any) => (

@@ -740,16 +740,21 @@ h6 {
     overflow-x: auto !important;
     justify-content: flex-start !important;
     height: auto !important;
-    margin-top: 8px !important;
+    margin-top: 4px !important;
     border-bottom: 1px solid var(--color-border) !important;
     padding-bottom: 4px !important;
+    display: flex !important;
+    gap: 4px !important;
   }
 
   .header-nav button {
-    padding: 8px 12px !important;
-    font-size: 12px !important;
+    padding: 6px 12px !important;
+    font-size: 11px !important;
     white-space: nowrap !important;
+    flex-shrink: 0 !important;
   }
+
+
 
   .header-logo-text {
     font-size: 16px !important;
@@ -1027,3 +1032,7 @@ h6 {
     transform: rotate(360deg);
   }
 }
+/* RESPONSIVE UTILITIES */
+.matrix-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+@media (max-width: 768px) { .matrix-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; } .hide-mobile { display: none !important; } }
+@media (max-width: 480px) { .matrix-grid { grid-template-columns: 1fr; gap: 16px; } }

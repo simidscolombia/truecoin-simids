@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import LandingHero from './components/LandingHero';
 import {
-  Coins, ShoppingBag,
+  ShoppingBag,
   LayoutDashboard, Search, Settings, LogOut, Users, Zap
 } from 'lucide-react';
 import { ThemeProvider } from './contexts/ThemeContext';

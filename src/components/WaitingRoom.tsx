@@ -1,5 +1,4 @@
-import { motion } from 'framer-motion';
-import { UserPlus, CheckCircle2 } from 'lucide-react';
+import { UserPlus } from 'lucide-react';
 
 interface WaitingRoomProps {
     pendingUsers: any[];
@@ -51,9 +50,9 @@ export default function WaitingRoom({ pendingUsers, onPlace, isPlacing, selected
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                                     fontWeight: 900, fontSize: 12
                                 }}>
-                                    {p.full_name.charAt(0)}
+                                    {p.full_name?.charAt(0) || 'U'}
                                 </div>
-                                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-navy)' }}>{p.full_name.split(' ')[0]}</span>
+                                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-navy)' }}>{p.full_name?.split(' ')[0] || 'Socio'}</span>
                             </div>
 
                             <button

@@ -72,13 +72,18 @@ export default function WaitingRoom({ pendingUsers, onPlace, isPlacing, selected
                                     <span style={{ fontSize: 10, color: 'var(--color-text-muted)' }}>Cierra ciclo + rápido</span>
                                 </div>
                                 <button
-                                    onClick={() => onPlace(p.id)}
+                                    onClick={() => {
+                                        onPlace(p.id);
+                                        // Scroll suave a la matriz
+                                        const matrixEl = document.getElementById('gift-matrix');
+                                        if (matrixEl) matrixEl.scrollIntoView({ behavior: 'smooth' });
+                                    }}
                                     disabled={isPlacing}
                                     className={`btn ${isSelected ? 'btn-marketplace' : 'btn-wallet'} btn-sm`}
-                                    style={{ padding: '8px 16px', fontSize: 12 }}
+                                    style={{ padding: '8px 16px', fontSize: 12, display: 'flex', alignItems: 'center', gap: 6 }}
                                 >
-                                    <CheckCircle2 size={14} />
-                                    {isSelected ? 'Ubicar ahora' : 'Elegir'}
+                                    {isSelected ? <Zap size={14} className="animate-pulse" /> : <CheckCircle2 size={14} />}
+                                    {isSelected ? 'Ubicando...' : 'Elegir'}
                                 </button>
                             </div>
                         </motion.div>

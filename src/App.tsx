@@ -230,12 +230,6 @@ function Header({
             <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--color-wallet)' }}>{balance} TC</span>
           </div>
         )}
-        {isLoggedIn && isAdmin && (
-          <div>
-            <h3 style={{ fontSize: 24, fontWeight: 900, color: 'var(--color-navy)', margin: 0, letterSpacing: '-0.02em' }}>SALA DE ESPERA (Bandeja de Entrada)</h3>
-            <p style={{ fontSize: 14, color: 'var(--color-text-muted)', margin: '4px 0 0 0', fontWeight: 600 }}>Cuentas listas para ser activadas en tu red de regalos</p>
-          </div>
-        )}
 
         <button
           onClick={onOpenCart}

@@ -1,10 +1,10 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     Award,
     Info, Cpu,
-    TrendingUp, UserPlus
+    TrendingUp, UserPlus, Zap
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -52,12 +52,40 @@ export default function GiftMatrix({
     const nextRank = currentLevel < 12 ? RANKS[currentLevel] : null;
 
     return (
-        <div className="card-lg" style={{
+        <div id="gift-matrix" className="card-lg" style={{
             padding: '32px 28px',
             background: 'var(--color-bg)',
             position: 'relative',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            border: isPlacing ? '2px solid var(--color-wallet)' : 'none',
+            transition: 'all 0.3s'
         }}>
+            {/* Banner de Instrucción si está Ubicando */}
+            <AnimatePresence>
+                {isPlacing && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        style={{
+                            background: 'var(--color-wallet)',
+                            color: 'white',
+                            padding: '12px',
+                            borderRadius: 12,
+                            marginBottom: 24,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 12,
+                            fontWeight: 700,
+                            fontSize: 14,
+                            boxShadow: '0 8px 20px -5px rgba(245, 158, 11, 0.4)'
+                        }}
+                    >
+                        <Zap size={18} className="animate-pulse" />
+                        ¡MODO UBICACIÓN ACTIVO! Haz clic en cualquiera de los cuadros pulsantes debajo para colocar al socio.
+                    </motion.div>
+                )}
+            </AnimatePresence>
             {/* Fondo decorativo sutil */}
             <div style={{
                 position: 'absolute', top: -50, right: -50, width: 200, height: 200,

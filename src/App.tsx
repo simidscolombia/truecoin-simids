@@ -17,8 +17,9 @@ import Paywall from './components/Paywall';
 import { userService } from './services/userService';
 import { Product } from './services/businessService';
 import ShoppingCart from './components/ShoppingCart';
-
 import { useState, useEffect } from 'react';
+import { FULL_VERSION_STRING } from './constants';
+
 type AppView = 'dashboard' | 'marketplace' | 'pos' | 'admin' | 'shopyfam' | 'prospects' | 'landing';
 
 function Header({
@@ -66,7 +67,7 @@ function Header({
         </div>
         <span className="header-logo-text" style={{ fontSize: 20, fontWeight: 800, color: 'var(--color-navy)', letterSpacing: -0.5 }}>
           Shopy<span style={{ color: 'var(--color-wallet)' }}>Brands</span>
-          <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', background: 'var(--color-surface-2)', padding: '2px 6px', borderRadius: 6, marginLeft: 8, verticalAlign: 'middle', display: 'inline-block' }}>V3.6.0 — MASTER EXPANSION PLAN (12 LEVELS)</span>
+          <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', background: 'var(--color-surface-2)', padding: '2px 6px', borderRadius: 6, marginLeft: 8, verticalAlign: 'middle', display: 'inline-block' }}>{FULL_VERSION_STRING}</span>
         </span>
       </div>
 

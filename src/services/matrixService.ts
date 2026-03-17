@@ -82,6 +82,24 @@ export const matrixService = {
 
         if (error) throw error;
 
+        // 4. Verificar si completó la matriz para subir de nivel
+        const { count } = await supabase
+            .from('matrix_slots')
+            .select('*', { count: 'exact', head: true })
+            .eq('matrix_owner_id', params.matrixOwnerId)
+            .eq('level', params.level);
+
+        if (count === 4) {
+            // Subir al siguiente nivel en el perfil
+            const nextLevel = params.level + 1;
+            await supabase
+                .from('profiles')
+                .update({ current_level: nextLevel })
+                .eq('id', params.matrixOwnerId);
+
+            console.log(`🚀 Usuario ${params.matrixOwnerId} subió al Nivel ${nextLevel}`);
+        }
+
         return true;
     },
 
@@ -119,42 +137,65 @@ export const matrixService = {
             .single();
 
         if (!profile || !profile.referred_by) {
-            console.log("Usuario sin reclutador, no se puede auto-ubicar.");
+            console.log("Usuario sin mentor, no se puede auto-ubicar.");
             return false;
         }
 
-        const recruiterId = profile.referred_by;
+        const mentorId = profile.referred_by;
 
-        // 2. Buscar slots ocupados en la matriz del reclutador
-        const { data: existingSlots } = await supabase
-            .from('matrix_slots')
-            .select('position')
-            .eq('matrix_owner_id', recruiterId)
-            .eq('level', level);
+        // 2. Función interna para buscar el "Mejor Lugar" (Búsqueda por niveles - Spillover)
+        const findBestSlot = async (rootId: string): Promise<{ ownerId: string, pos: number } | null> => {
+            // Nivel A: Buscar en la matriz directa del Mentor
+            const { data: rootSlots } = await supabase
+                .from('matrix_slots')
+                .select('position, occupant_id')
+                .eq('matrix_owner_id', rootId)
+                .eq('level', level);
 
-        const takenPositions = new Set(existingSlots?.map(s => s.position) || []);
-
-        // 3. Encontrar la primera posición libre (1-4)
-        let freePos = -1;
-        for (let i = 1; i <= 4; i++) {
-            if (!takenPositions.has(i)) {
-                freePos = i;
-                break;
+            const rootTaken = new Set(rootSlots?.map(s => s.position) || []);
+            for (let i = 1; i <= 4; i++) {
+                if (!rootTaken.has(i)) return { ownerId: rootId, pos: i };
             }
-        }
 
-        if (freePos === -1) {
-            console.log("Matriz del reclutador llena, queda en sala de espera manual.");
+            // Nivel B: Si el mentor está lleno, buscar en las matrices de sus 4 directos (Derrame)
+            // Ordenamos por posición para ser consistentes (Izquierda a Derecha)
+            const directs = rootSlots?.sort((a, b) => a.position - b.position) || [];
+
+            for (const d of directs) {
+                if (!d.occupant_id) continue;
+
+                const { data: subSlots } = await supabase
+                    .from('matrix_slots')
+                    .select('position')
+                    .eq('matrix_owner_id', d.occupant_id)
+                    .eq('level', level);
+
+                const subTaken = new Set(subSlots?.map(s => s.position) || []);
+                for (let i = 1; i <= 4; i++) {
+                    if (!subTaken.has(i)) return { ownerId: d.occupant_id, pos: i };
+                }
+            }
+
+            // Si llegamos aquí, los dos primeros niveles están llenos (Mentor + sus 4 directos)
+            // Se podría seguir profundizando, pero por ahora queda en Sala de Espera para el mentor
+            return null;
+        };
+
+        const target = await findBestSlot(mentorId);
+
+        if (!target) {
+            console.log("Estructura de equipo llena en 2 niveles, requiere ubicación manual.");
             return false;
         }
 
-        // 4. Ubicar
+        // 3. Ubicar conservando siempre al mentor original como 'recruiter_id'
+        // pero cambiando el 'matrix_owner_id' si es por derrame
         return await this.placeUser({
-            matrixOwnerId: recruiterId,
+            matrixOwnerId: target.ownerId,
             occupantId: userId,
-            recruiterId: recruiterId,
+            recruiterId: mentorId,
             level: level,
-            position: freePos
+            position: target.pos
         });
     }
 };

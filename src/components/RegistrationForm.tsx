@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, Phone, Mail, Ticket, ArrowRight, CheckCircle2, Zap } from 'lucide-react';
 import { userService } from '../services/userService';
+import { FULL_VERSION_STRING } from '../constants';
 
 interface RegistrationFormProps {
     onSuccess: (userData: any) => void;
@@ -431,6 +432,10 @@ Prepárate para crecer en red 1x4 y ganar TrueCoins. ¡Nos vemos dentro! ✨`;
                             >
                                 ← Regresar a mis datos
                             </button>
+                            {/* App Version Footer */}
+                            <div style={{ marginTop: 32, textAlign: 'center', opacity: 0.5, fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)' }}>
+                                {FULL_VERSION_STRING} — TECNOLOGÍA EN RED 1X4
+                            </div>
                         </motion.div>
                     )}
 

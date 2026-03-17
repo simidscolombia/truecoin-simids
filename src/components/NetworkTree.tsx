@@ -26,11 +26,15 @@ const LEVEL_VALUES: Record<number, number> = {
 export default function NetworkTree({ userId, mentor }: NetworkTreeProps) {
     const [network, setNetwork] = useState<{ l1: any[], l2: any[], l3: any[], l4: any[] }>({ l1: [], l2: [], l3: [], l4: [] });
     const [loading, setLoading] = useState(true);
+    const [mode, setMode] = useState<'sponsorship' | 'placement'>('placement');
 
     useEffect(() => {
         const fetchNetwork = async () => {
+            setLoading(true);
             try {
-                const data = await userService.getNetworkDetailed(userId);
+                const data = mode === 'sponsorship'
+                    ? await userService.getNetworkDetailed(userId)
+                    : await userService.getPlacementNetwork(userId);
                 setNetwork(data);
             } catch (error) {
                 console.error("Error fetching network:", error);
@@ -39,7 +43,7 @@ export default function NetworkTree({ userId, mentor }: NetworkTreeProps) {
             }
         };
         fetchNetwork();
-    }, [userId]);
+    }, [userId, mode]);
 
     const ProgressDots = ({ count }: { count: number }) => (
         <div style={{ display: 'flex', gap: 3 }}>
@@ -173,16 +177,41 @@ export default function NetworkTree({ userId, mentor }: NetworkTreeProps) {
             background: 'var(--color-bg)',
             minHeight: 600
         }}>
-            <div style={{ marginBottom: 40 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                    <div style={{ width: 12, height: 12, borderRadius: 3, background: 'var(--color-wallet)' }}></div>
-                    <h2 style={{ fontSize: 24, fontWeight: 950, color: 'var(--color-navy)', letterSpacing: -0.5 }}>
-                        Ecosistema de Red
-                    </h2>
+            <div style={{ marginBottom: 40, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                        <div style={{ width: 12, height: 12, borderRadius: 3, background: 'var(--color-wallet)' }}></div>
+                        <h2 style={{ fontSize: 24, fontWeight: 950, color: 'var(--color-navy)', letterSpacing: -0.5 }}>
+                            Ecosistema de Red
+                        </h2>
+                    </div>
+                    <p style={{ fontSize: 14, color: 'var(--color-text-muted)', lineHeight: 1.6, maxWidth: 600 }}>
+                        {mode === 'placement'
+                            ? "Visualiza la estructura real de posicionamiento (IA) en la matriz 1x4."
+                            : "Supervisa la expansión de tus referidos directos y su genealogía."}
+                    </p>
                 </div>
-                <p style={{ fontSize: 14, color: 'var(--color-text-muted)', lineHeight: 1.6, maxWidth: 600 }}>
-                    Supervisa la expansión de tu red tecnológica. Cada nodo completado impulsa tu energía de ascensión y desbloquea nuevas capacidades de ingresos.
-                </p>
+
+                <div style={{ display: 'flex', gap: 8, background: 'var(--color-surface-2)', padding: 6, borderRadius: 14 }}>
+                    <button
+                        onClick={() => setMode('placement')}
+                        style={{
+                            padding: '8px 16px', borderRadius: 10, border: 'none', cursor: 'pointer',
+                            fontSize: 12, fontWeight: 800, transition: 'all 0.2s',
+                            background: mode === 'placement' ? 'white' : 'transparent',
+                            color: mode === 'placement' ? 'var(--color-navy)' : 'var(--color-text-muted)',
+                            boxShadow: mode === 'placement' ? '0 4px 12px rgba(0,0,0,0.05)' : 'none'
+                        }}>Estructura IA</button>
+                    <button
+                        onClick={() => setMode('sponsorship')}
+                        style={{
+                            padding: '8px 16px', borderRadius: 10, border: 'none', cursor: 'pointer',
+                            fontSize: 12, fontWeight: 800, transition: 'all 0.2s',
+                            background: mode === 'sponsorship' ? 'white' : 'transparent',
+                            color: mode === 'sponsorship' ? 'var(--color-navy)' : 'var(--color-text-muted)',
+                            boxShadow: mode === 'sponsorship' ? '0 4px 12px rgba(0,0,0,0.05)' : 'none'
+                        }}>Mis Directos</button>
+                </div>
             </div>
 
             {/* Mentor Section (Card Premium) */}

@@ -254,52 +254,80 @@ export const userService = {
     },
 
     async getNetworkDetailed(userId: string) {
-        // Fetch profiles levels to build the tree and counts
+        // [Existing sponsorship tree logic]
         const { data: allNetwork } = await supabase
             .from('profiles')
             .select('id, full_name, referred_by, current_level, created_at')
             .eq('referred_by', userId);
 
         if (!allNetwork) return { l1: [], l2: [], l3: [], l4: [] };
-
-        // For deeper levels, we need recursive or multi-step fetching. 
-        // Let's do it in 4 steps to ensure we get exactly L1-L4 and can count their children.
-
-        // L1
         const l1 = allNetwork;
         const l1Ids = l1.map(u => u.id);
-
-        // L2
         const { data: l2 } = await supabase.from('profiles').select('id, full_name, referred_by, current_level').in('referred_by', l1Ids);
         const l2Ids = l2?.map(u => u.id) || [];
-
-        // L3
         const { data: l3 } = await supabase.from('profiles').select('id, full_name, referred_by, current_level').in('referred_by', l2Ids);
         const l3Ids = l3?.map(u => u.id) || [];
-
-        // L4
         const { data: l4 } = await supabase.from('profiles').select('id, full_name, referred_by, current_level').in('referred_by', l3Ids);
         const l4Ids = l4?.map(u => u.id) || [];
-
-        // L5 (just to count L4 children)
         const { data: l5 } = await supabase.from('profiles').select('referred_by').in('referred_by', l4Ids);
 
-        const countChildren = (memberId: string, nextLevel: any[]) => {
-            return nextLevel.filter(child => child.referred_by === memberId).length;
-        };
-
-        const enrich = (list: any[], nextLevel: any[]) => {
-            return list.map(m => ({
-                ...m,
-                referralCount: countChildren(m.id, nextLevel)
-            }));
-        };
+        const countChildren = (memberId: string, nextLevel: any[]) => nextLevel.filter(child => child.referred_by === memberId).length;
+        const enrich = (list: any[], nextLevel: any[]) => list.map(m => ({ ...m, referralCount: countChildren(m.id, nextLevel) }));
 
         return {
             l1: enrich(l1, l2 || []),
             l2: enrich(l2 || [], l3 || []),
             l3: enrich(l3 || [], l4 || []),
             l4: enrich(l4 || [], l5 || [])
+        };
+    },
+
+    /**
+     * Obtiene la red basada en UBICACIÓN (Matriz)
+     */
+    async getPlacementNetwork(userId: string, level: number = 1) {
+        // L1: Quiénes están en la matriz de este user
+        const { data: l1Slots } = await supabase
+            .from('matrix_slots')
+            .select('occupant_id, profiles!occupant_id(id, full_name, current_level, referred_by)')
+            .eq('matrix_owner_id', userId)
+            .eq('level', level);
+
+        const l1 = l1Slots?.map(s => s.profiles) || [];
+        const l1Ids = l1.map((u: any) => u.id);
+
+        // L2: Quiénes están en las matrices de los de L1
+        const { data: l2Slots } = await supabase
+            .from('matrix_slots')
+            .select('occupant_id, matrix_owner_id, profiles!occupant_id(id, full_name, current_level, referred_by)')
+            .in('matrix_owner_id', l1Ids)
+            .eq('level', level);
+
+        const l2 = l2Slots?.map(s => s.profiles) || [];
+        const l2Ids = l2.map((u: any) => u.id);
+
+        // L3: Quiénes están en las matrices de L2
+        const { data: l3Slots } = await supabase
+            .from('matrix_slots')
+            .select('occupant_id, matrix_owner_id, profiles!occupant_id(id, full_name, current_level, referred_by)')
+            .in('matrix_owner_id', l2Ids)
+            .eq('level', level);
+
+        const l3 = l3Slots?.map(s => s.profiles) || [];
+
+        // Enriquecer con conteos de referidos para visualización
+        const enrichWithSlots = (list: any[], slots: any[]) => {
+            return list.map(u => ({
+                ...u,
+                referralCount: slots.filter((s: any) => s.matrix_owner_id === u.id).length
+            }));
+        };
+
+        return {
+            l1: enrichWithSlots(l1, l2Slots || []),
+            l2: enrichWithSlots(l2, l3Slots || []),
+            l3: l3,
+            l4: []
         };
     },
 

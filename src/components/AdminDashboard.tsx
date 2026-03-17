@@ -11,6 +11,8 @@ import { adminService } from '../services/adminService';
 import ThemeCustomizer from './ThemeCustomizer';
 import ApiSettings from './ApiSettings';
 
+import { FULL_VERSION_STRING } from '../constants';
+
 export default function AdminDashboard({ onBack }: { onBack: () => void }) {
     const [activeTab, setActiveTab] = useState<'stats' | 'users' | 'directory' | 'expansion' | 'themes' | 'banks'>('stats');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -250,6 +252,9 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                 <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--color-border)' }}>
                     <p style={{ fontSize: 11, fontWeight: 800, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>
                         Panel de Control
+                    </p>
+                    <p style={{ fontSize: 9, fontWeight: 700, color: 'var(--color-admin)', marginTop: 4, opacity: 0.8 }}>
+                        {FULL_VERSION_STRING}
                     </p>
                 </div>
 

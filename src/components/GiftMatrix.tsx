@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Award, UserPlus, Zap } from 'lucide-react';
 import { useState } from 'react';
 import { MatrixSlot } from '../services/giftService';
@@ -140,7 +140,7 @@ export default function GiftMatrix({
                                 <motion.div
                                     key={slot.pos}
                                     onClick={() => {
-                                        if (isActive) onSelectUser?.({ ...slot.data, id: slot.data.occupant_id, full_name: slot.data.occupant_name });
+                                        if (isActive && slot.data) onSelectUser?.({ ...slot.data, id: slot.data.occupant_id, full_name: slot.data.occupant_name });
                                         else if (isPlacing && isActiveLevel) onSelectPosition?.(slot.pos);
                                     }}
                                     whileHover={{ y: isActive || (isPlacing && isActiveLevel) ? -8 : 0 }}
@@ -155,7 +155,7 @@ export default function GiftMatrix({
                                         position: 'relative',
                                         transition: 'all 0.3s'
                                     }}>
-                                        {isActive ? (
+                                        {isActive && slot.data ? (
                                             <div style={{ fontSize: 40, fontWeight: 950, color: 'var(--color-wallet)' }}>{slot.data.occupant_name?.charAt(0)}</div>
                                         ) : (
                                             <div style={{ position: 'relative' }}>
@@ -169,7 +169,7 @@ export default function GiftMatrix({
                                                 )}
                                             </div>
                                         )}
-                                        {isActive && (
+                                        {isActive && slot.data && (
                                             <div style={{
                                                 position: 'absolute', bottom: -5, right: -5, background: 'var(--color-navy)', color: 'white',
                                                 padding: '4px 10px', borderRadius: 10, fontSize: 11, fontWeight: 950, border: '3px solid white',
@@ -181,7 +181,7 @@ export default function GiftMatrix({
                                     </div>
                                     <div style={{ textAlign: 'center' }}>
                                         <p style={{ fontSize: 15, fontWeight: 800, color: isActive ? 'var(--color-navy)' : '#94A3B8', margin: 0 }}>
-                                            {isActive ? slot.data.occupant_name.split(' ')[0] : (isPlacing && isActiveLevel ? 'Disponible' : `Puesto ${slot.pos}`)}
+                                            {(isActive && slot.data) ? slot.data.occupant_name?.split(' ')[0] : (isPlacing && isActiveLevel ? 'Disponible' : `Puesto ${slot.pos}`)}
                                         </p>
                                         <p style={{ fontSize: 11, fontWeight: 700, color: isActive ? 'var(--color-wallet)' : '#94A3B8', textTransform: 'uppercase', marginTop: 2 }}>
                                             {isActive ? 'Miembro Activo' : (isPlacing && isActiveLevel ? '¡Haz clic aquí!' : 'Vacío')}
@@ -242,7 +242,7 @@ export default function GiftMatrix({
                 </div>
 
                 <div className="card" style={{ padding: 24, borderRadius: 32, border: '1px solid var(--color-border)' }}>
-                    <h4 style={{ fontSize: 13, fontWeight: 950, marginBottom: 20, color: 'var(--color-navy)', letterSpacing: 0.5, borderBottom: '1px solid #F1F5F9', pb: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <h4 style={{ fontSize: 13, fontWeight: 950, color: 'var(--color-navy)', letterSpacing: 0.5, borderBottom: '1px solid #F1F5F9', paddingBottom: 12, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
                         MONITOREO DE HIJOS
                     </h4>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -254,9 +254,9 @@ export default function GiftMatrix({
                             }} onClick={() => onSelectUser?.({ ...s, id: s.occupant_id, full_name: s.occupant_name })}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                                     <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--color-navy)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 900 }}>
-                                        {s.occupant_name.charAt(0)}
+                                        {s.occupant_name?.charAt(0)}
                                     </div>
-                                    <span style={{ fontSize: 13, fontWeight: 800 }}>{s.occupant_name.split(' ')[0]}</span>
+                                    <span style={{ fontSize: 13, fontWeight: 800 }}>{s.occupant_name?.split(' ')[0]}</span>
                                 </div>
                                 <span style={{ fontSize: 10, fontWeight: 950, color: 'var(--color-wallet)', background: 'white', padding: '4px 10px', borderRadius: 8, border: '1px solid rgba(245, 158, 11, 0.2)' }}>
                                     NIVEL {s.current_level || 1}

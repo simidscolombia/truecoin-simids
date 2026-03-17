@@ -170,7 +170,7 @@ export default function GiftMatrix({
                                 </div>
                                 <div style={{ textAlign: 'center' }}>
                                     <p style={{ fontSize: 15, fontWeight: 900, color: isActive ? 'var(--color-navy)' : '#94A3B8', margin: 0 }}>
-                                        {(isActive && slot.data) ? slot.data.occupant_name.split(' ')[0] : `Puesto ${slot.pos}`}
+                                        {(isActive && slot.data) ? slot.data.occupant_name?.split(' ')[0] : `Puesto ${slot.pos}`}
                                     </p>
                                     <p style={{ fontSize: 10, fontWeight: 700, color: isActive ? 'var(--color-wallet)' : '#94A3B8', textTransform: 'uppercase', marginTop: 3 }}>
                                         {isActive ? 'Activo' : 'Disponible'}

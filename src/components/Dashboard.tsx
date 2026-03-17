@@ -126,7 +126,7 @@ export default function Dashboard({ user, balance }: { user: any; balance: strin
                                 color: view === v ? 'white' : 'var(--color-text-muted)',
                                 transition: 'all 0.2s'
                             }}>
-                                {v === 'ascension' ? 'MI TABLERO 1X4' : 'MI ÁRBOL IA'}
+                                {v === 'ascension' ? 'NIVEL DE REGALOS' : 'MI RED'}
                             </button>
                         ))}
                     </div>

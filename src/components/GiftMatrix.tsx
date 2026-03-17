@@ -53,7 +53,7 @@ export default function GiftMatrix({
 
             <div style={{ marginBottom: 32, textAlign: 'center' }}>
                 <h2 style={{ fontSize: 24, fontWeight: 900, color: 'var(--color-navy)', margin: 0 }}>
-                    Mi Tablero de Galardones
+                    ShopyGift
                 </h2>
                 <p style={{ color: 'var(--color-text-muted)', fontWeight: 600 }}>
                     Nivel Actual: {RANKS[(currentLevel - 1) % 12]} ({referrals}/4 ubicados)

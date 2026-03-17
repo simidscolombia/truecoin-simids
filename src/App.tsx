@@ -66,7 +66,7 @@ function Header({
         </div>
         <span className="header-logo-text" style={{ fontSize: 20, fontWeight: 800, color: 'var(--color-navy)', letterSpacing: -0.5 }}>
           Shopy<span style={{ color: 'var(--color-wallet)' }}>Brands</span>
-          <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', background: 'var(--color-surface-2)', padding: '2px 6px', borderRadius: 6, marginLeft: 8, verticalAlign: 'middle', display: 'inline-block' }}>V3.5.0 — MASTER EXPANSION PLAN (12 LEVELS)</span>
+          <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', background: 'var(--color-surface-2)', padding: '2px 6px', borderRadius: 6, marginLeft: 8, verticalAlign: 'middle', display: 'inline-block' }}>V3.6.0 — MASTER EXPANSION PLAN (12 LEVELS)</span>
         </span>
       </div>
 
@@ -228,6 +228,12 @@ function Header({
           <div className="header-balance" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginRight: 8 }}>
             <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>Tu Saldo</span>
             <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--color-wallet)' }}>{balance} TC</span>
+          </div>
+        )}
+        {isLoggedIn && isAdmin && (
+          <div>
+            <h3 style={{ fontSize: 24, fontWeight: 900, color: 'var(--color-navy)', margin: 0, letterSpacing: '-0.02em' }}>SALA DE ESPERA (Bandeja de Entrada)</h3>
+            <p style={{ fontSize: 14, color: 'var(--color-text-muted)', margin: '4px 0 0 0', fontWeight: 600 }}>Cuentas listas para ser activadas en tu red de regalos</p>
           </div>
         )}
 

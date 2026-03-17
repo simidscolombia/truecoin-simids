@@ -13,6 +13,8 @@ import { giftService, MatrixSlot } from '../services/giftService';
 interface GiftMatrixProps {
     currentLevel?: number;
     slots?: MatrixSlot[];
+    onSelectPosition?: (pos: number) => void;
+    isPlacing?: boolean;
 }
 
 const RANKS = [
@@ -24,7 +26,12 @@ const RANKS = [
 
 
 
-export default function GiftMatrix({ currentLevel = 1, slots = [] }: GiftMatrixProps) {
+export default function GiftMatrix({
+    currentLevel = 1,
+    slots = [],
+    onSelectPosition,
+    isPlacing
+}: GiftMatrixProps) {
     const [hoveredSlot, setHoveredSlot] = useState<number | null>(null);
     const investment = giftService.getLevelValue(currentLevel);
     const referrals = slots.length;
@@ -108,7 +115,12 @@ export default function GiftMatrix({ currentLevel = 1, slots = [] }: GiftMatrixP
                                 key={slot.pos}
                                 onMouseEnter={() => setHoveredSlot(slot.pos)}
                                 onMouseLeave={() => setHoveredSlot(null)}
+                                onClick={() => !isActive && isPlacing && onSelectPosition?.(slot.pos)}
                                 whileHover={{ y: -5 }}
+                                animate={!isActive && isPlacing ? {
+                                    boxShadow: ["0 0 0px #3B82F600", "0 0 15px #3B82F680", "0 0 0px #3B82F600"]
+                                } : {}}
+                                transition={!isActive && isPlacing ? { duration: 2, repeat: Infinity } : {}}
                                 style={{
                                     padding: '20px 16px',
                                     borderRadius: 20,
@@ -119,7 +131,8 @@ export default function GiftMatrix({ currentLevel = 1, slots = [] }: GiftMatrixP
                                     alignItems: 'center',
                                     gap: 12,
                                     position: 'relative',
-                                    transition: 'all 0.3s'
+                                    transition: 'all 0.3s',
+                                    cursor: !isActive && isPlacing ? 'pointer' : 'default'
                                 }}
                             >
                                 <div style={{
@@ -133,14 +146,14 @@ export default function GiftMatrix({ currentLevel = 1, slots = [] }: GiftMatrixP
                                 </div>
                                 <div style={{ textAlign: 'center' }}>
                                     <p style={{ fontSize: 12, fontWeight: 800, color: isActive ? 'var(--color-navy)' : 'var(--color-text-muted)', marginBottom: 2 }}>
-                                        {isActive ? slot.data?.occupant_name : `Posición ${slot.pos}`}
+                                        {isActive ? slot.data?.occupant_name : (isPlacing && hoveredSlot === slot.pos ? 'UBICAR AQUÍ' : `Posición ${slot.pos}`)}
                                     </p>
                                     <div style={{
                                         fontSize: 10, fontWeight: 700,
                                         color: color,
                                         textTransform: 'uppercase', letterSpacing: '0.04em'
                                     }}>
-                                        {isActive ? (slot.dist?.isSpillover ? 'Derrame IA' : 'Directo') : 'Pendiente'}
+                                        {isActive ? (slot.dist?.isSpillover ? 'Derrame IA' : 'Directo') : (isPlacing ? 'DISPONIBLE' : 'Pendiente')}
                                     </div>
                                 </div>
 

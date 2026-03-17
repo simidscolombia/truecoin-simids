@@ -85,6 +85,7 @@ export default function Dashboard({
     const [pendingReferrals, setPendingReferrals] = useState<any[]>([]);
     const [isPlacing, setIsPlacing] = useState(false);
     const [matrixSlots, setMatrixSlots] = useState<any[]>([]);
+    const [selectedUserToPlace, setSelectedUserToPlace] = useState<any | null>(null);
 
     useEffect(() => {
         if (user?.id) {
@@ -101,7 +102,7 @@ export default function Dashboard({
             await matrixService.placeUser({
                 matrixOwnerId: user.id,
                 occupantId: userId,
-                recruiterId: user.id, // En este caso el mismo dueño lo ubica
+                recruiterId: user.id,
                 level: stats.currentLevel,
                 position
             });
@@ -110,8 +111,9 @@ export default function Dashboard({
             const updatedSlots = await matrixService.getMatrixSlots(user.id, stats.currentLevel);
             setPendingReferrals(updatedPending);
             setMatrixSlots(updatedSlots);
-            // Opcional: Notificar éxito
-            alert("✅ Usuario ubicado exitosamente en la matriz.");
+            setSelectedUserToPlace(null);
+            // Notificación elegante (opcionalmente podrías usar un toast)
+            console.log("✅ Usuario ubicado exitosamente");
         } catch (err: any) {
             console.error("Error al ubicar:", err);
             alert("Error: " + err.message);
@@ -168,7 +170,7 @@ export default function Dashboard({
                         Hola, <span style={{ color: 'var(--color-cloud-blue)' }}>{user.fullName.split(' ')[0]}</span> 👋
                     </h1>
                     <p style={{ fontSize: 'clamp(12px, 3.5vw, 14px)', color: 'var(--color-text-muted)' }}>
-                        Bienvenido a tu ecosistema ShopyBrands · {new Date().toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        Bienvenido a tu ecosistema ShopyBrands <span style={{ fontSize: 10, background: 'var(--color-wallet)', color: 'white', padding: '2px 8px', borderRadius: 20, verticalAlign: 'middle', marginLeft: 8 }}>VERSION 3.6.0</span> · {new Date().toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' })}
                     </p>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
@@ -323,7 +325,12 @@ export default function Dashboard({
                 <div style={{ marginBottom: 24 }}>
                     <WaitingRoom
                         pendingUsers={pendingReferrals}
-                        onPlace={handlePlaceUser}
+                        onPlace={(userId) => {
+                            const found = pendingReferrals.find(p => p.id === userId);
+                            setSelectedUserToPlace(found);
+                            setView('ascension'); // Asegurar que vea la matriz
+                        }}
+                        selectedUserId={selectedUserToPlace?.id}
                         isPlacing={isPlacing}
                     />
                 </div>
@@ -385,6 +392,12 @@ export default function Dashboard({
                                 <GiftMatrix
                                     currentLevel={stats.currentLevel}
                                     slots={matrixSlots}
+                                    onSelectPosition={(pos) => {
+                                        if (selectedUserToPlace) {
+                                            handlePlaceUser(selectedUserToPlace.id, pos);
+                                        }
+                                    }}
+                                    isPlacing={!!selectedUserToPlace}
                                 />
                             </motion.div>
                         )}

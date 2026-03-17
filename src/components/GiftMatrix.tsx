@@ -14,10 +14,10 @@ interface GiftMatrixProps {
 }
 
 const RANKS = [
-    "Vip Bronce", "Vip Cobre", "Vip Plata", "Vip Oro",
-    "Platino", "Zafiro", "Esmeralda",
-    "Diamante", "Diamante Azul", "Corona",
-    "Embajador", "Embajador Real", "Leyenda"
+    "VIP BRONCE", "VIP PLATA", "VIP ORO",
+    "PLATINO I", "PLATINO II", "PLATINO III",
+    "ESMERALDA I", "ESMERALDA II", "ESMERALDA III",
+    "ZAFIRO", "DIAMANTE", "LEYENDA SIMID"
 ];
 
 export default function GiftMatrix({
@@ -30,16 +30,17 @@ export default function GiftMatrix({
     const [browsingLevel, setBrowsingLevel] = useState(currentLevel);
 
     const levels = Array.from({ length: 12 }, (_, i) => i + 1);
+    const entryCost = 50 * Math.pow(2, browsingLevel - 1);
+    const totalGross = entryCost * 4;
     const isLevelUnlocked = browsingLevel <= currentLevel;
     const isActiveLevel = browsingLevel === currentLevel;
-    const pointsForLevel = browsingLevel * 100;
     const fillingPercentage = isActiveLevel ? (slots.length / 4) * 100 : (isLevelUnlocked ? 100 : 0);
 
-    // Distribución del premio (80% Socio, 10% Red/Hijos, 10% Sistema)
+    // Distribución ShopyBrands Oficial (25% Tú, 25% Sostenibilidad, 50% Salto de Nivel)
     const distribution = {
-        propia: pointsForLevel * 0.8,
-        red: pointsForLevel * 0.1,
-        sistema: pointsForLevel * 0.1
+        propia: entryCost,       // 25% (1 entrada)
+        sistema: entryCost,      // 25% (1 entrada para plataforma)
+        salto: entryCost * 2     // 50% (2 entradas para reinversión)
     };
 
     const displaySlots = [1, 2, 3, 4].map(pos => {
@@ -104,7 +105,7 @@ export default function GiftMatrix({
                     <div style={{ maxWidth: 400, margin: '28px auto 0' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10, fontSize: 12, fontWeight: 900, color: 'var(--color-text-muted)' }}>
                             <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                <Zap size={14} color="var(--color-wallet)" /> PROGRESO DEL NIVEL
+                                <Zap size={14} color="var(--color-wallet)" /> PROGRESO DEL CICLO
                             </span>
                             <span>{Math.round(fillingPercentage)}% COMPLETADO</span>
                         </div>
@@ -170,10 +171,10 @@ export default function GiftMatrix({
                                 </div>
                                 <div style={{ textAlign: 'center' }}>
                                     <p style={{ fontSize: 15, fontWeight: 900, color: isActive ? 'var(--color-navy)' : '#94A3B8', margin: 0 }}>
-                                        {(isActive && slot.data) ? slot.data.occupant_name?.split(' ')[0] : `Puesto ${slot.pos}`}
+                                        {(isActive && slot.data) ? slot.data.occupant_name?.split(' ')[0] : `Espacio ${slot.pos}`}
                                     </p>
                                     <p style={{ fontSize: 10, fontWeight: 700, color: isActive ? 'var(--color-wallet)' : '#94A3B8', textTransform: 'uppercase', marginTop: 3 }}>
-                                        {isActive ? 'Activo' : 'Disponible'}
+                                        {isActive ? 'Miembro' : 'Vacío'}
                                     </p>
                                 </div>
                             </motion.div>
@@ -181,34 +182,44 @@ export default function GiftMatrix({
                     })}
                 </div>
 
-                {/* ── REWARD & DISTRIBUTION (Unified Banner) ── */}
+                {/* ── REWARD & DISTRIBUTION (OFFICIAL 25/25/50) ── */}
                 <div style={{
-                    marginTop: 52, padding: 32, background: 'var(--color-navy)', borderRadius: 32, color: 'white',
+                    marginTop: 52, padding: '32px 40px', background: 'var(--color-navy)', borderRadius: 32, color: 'white',
                     boxShadow: '0 15px 40px rgba(15, 23, 42, 0.2)',
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 32
                 }}>
                     <div>
-                        <p style={{ fontSize: 11, fontWeight: 800, opacity: 0.6, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>PREMIO DE NIVEL</p>
+                        <p style={{ fontSize: 11, fontWeight: 800, opacity: 0.6, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>PREMIO TOTAL DEL CICLO</p>
                         <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-                            <span style={{ fontSize: 44, fontWeight: 950, color: 'var(--color-wallet)' }}>{pointsForLevel}</span>
-                            <span style={{ fontSize: 16, fontWeight: 800 }}>PUNTOS</span>
+                            <span style={{ fontSize: 44, fontWeight: 950, color: 'var(--color-wallet)' }}>{totalGross.toLocaleString()}</span>
+                            <span style={{ fontSize: 16, fontWeight: 800 }}>TC</span>
                         </div>
                     </div>
 
-                    <div style={{ display: 'flex', gap: 32, paddingLeft: 32, borderLeft: '1px solid rgba(255,255,255,0.1)' }}>
+                    <div style={{ display: 'flex', gap: 40, paddingLeft: 32, borderLeft: '1px solid rgba(255,255,255,0.1)' }}>
                         <div style={{ textAlign: 'center' }}>
-                            <p style={{ fontSize: 18, fontWeight: 950, color: 'white', margin: 0 }}>{distribution.propia}</p>
-                            <p style={{ fontSize: 10, fontWeight: 800, color: 'var(--color-wallet)', opacity: 0.8 }}>TÚ (80%)</p>
+                            <p style={{ fontSize: 20, fontWeight: 950, color: 'var(--color-wallet)', margin: 0 }}>{distribution.propia.toLocaleString()}</p>
+                            <p style={{ fontSize: 10, fontWeight: 800, opacity: 0.8 }}>PREMIO (25%)</p>
                         </div>
                         <div style={{ textAlign: 'center' }}>
-                            <p style={{ fontSize: 18, fontWeight: 950, color: 'white', margin: 0 }}>{distribution.red}</p>
-                            <p style={{ fontSize: 10, fontWeight: 800, opacity: 0.6 }}>RED (10%)</p>
+                            <p style={{ fontSize: 20, fontWeight: 950, color: 'white', margin: 0 }}>{distribution.sistema.toLocaleString()}</p>
+                            <p style={{ fontSize: 10, fontWeight: 800, opacity: 0.6 }}>SISTEMA (25%)</p>
                         </div>
                         <div style={{ textAlign: 'center' }}>
-                            <p style={{ fontSize: 18, fontWeight: 950, color: 'white', margin: 0 }}>{distribution.sistema}</p>
-                            <p style={{ fontSize: 10, fontWeight: 800, opacity: 0.6 }}>IA (10%)</p>
+                            <p style={{ fontSize: 20, fontWeight: 950, color: 'white', margin: 0 }}>{distribution.salto.toLocaleString()}</p>
+                            <p style={{ fontSize: 10, fontWeight: 800, opacity: 0.6 }}>PROGRESIÓN (50%)</p>
                         </div>
                     </div>
+                </div>
+
+                {/* ── FOOTER INFO ── */}
+                <div style={{ marginTop: 32, textAlign: 'center' }}>
+                    <p style={{ fontSize: 12, fontWeight: 600, color: '#94A3B8', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                        <Zap size={14} color="var(--color-wallet)" />
+                        {isActiveLevel
+                            ? `Al completar este ciclo de 4 personas, recibes ${distribution.propia} TC y saltas gratis al Nivel ${browsingLevel + 1}.`
+                            : `Este nivel genera un movimiento total de ${totalGross} TC entre premios y progresión.`}
+                    </p>
                 </div>
 
             </div>

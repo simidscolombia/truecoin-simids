@@ -3,18 +3,19 @@
 import {
     Users, Wallet, TrendingUp, ArrowLeft, Search, Edit3, ShieldAlert,
     Database, LayoutDashboard, Save, BarChart3, SearchCode,
-    Globe, Sparkles, Palette, Trash2, Zap
+    Globe, Sparkles, Palette, Trash2, Zap, BrainCircuit
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { adminService } from '../services/adminService';
 import ThemeCustomizer from './ThemeCustomizer';
 import ApiSettings from './ApiSettings';
+import CerebroIA from './CerebroIA';
 
 import { APP_VERSION } from '../constants';
 
 export default function AdminDashboard({ onBack }: { onBack: () => void }) {
-    const [activeTab, setActiveTab] = useState<'stats' | 'users' | 'directory' | 'expansion' | 'themes' | 'banks'>('stats');
+    const [activeTab, setActiveTab] = useState<'stats' | 'users' | 'directory' | 'expansion' | 'themes' | 'banks' | 'cerebro'>('stats');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [stats, setStats] = useState<any>(null);
     const [users, setUsers] = useState<any[]>([]);
@@ -267,6 +268,7 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                     <div style={{ height: 1, background: 'var(--color-border)', margin: '12px 8px' }} />
 
                     <TabBtn id="expansion" icon={Globe} label="Expansión IA" customColor="#4F46E5" />
+                    <TabBtn id="cerebro" icon={BrainCircuit} label="Cerebro IA" customColor="var(--color-admin)" />
                     <TabBtn id="themes" icon={Palette} label="Personalización" />
                     <TabBtn id="banks" icon={Wallet} label="Ajustes de Pago" customColor="#16A34A" />
                 </nav>
@@ -544,6 +546,12 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                     {activeTab === 'banks' && (
                         <motion.div key="banks" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
                             <ApiSettings />
+                        </motion.div>
+                    )}
+
+                    {activeTab === 'cerebro' && (
+                        <motion.div key="cerebro" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                            <CerebroIA />
                         </motion.div>
                     )}
 

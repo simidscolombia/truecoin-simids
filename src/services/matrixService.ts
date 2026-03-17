@@ -89,9 +89,6 @@ export const matrixService = {
      * Obtiene referidos directos que NO han sido ubicados en ninguna matriz de nivel 1
      */
     async getUnplacedReferrals(userId: string) {
-        // Esta consulta es un poco más compleja porque necesitamos saber quiénes no están en matrix_slots
-        // Por ahora, traemos todos los directos y filtramos en JS o con una subquery si es posible
-
         const { data: directs, error } = await supabase
             .from('profiles')
             .select('id, full_name, email, created_at')
@@ -108,5 +105,56 @@ export const matrixService = {
         const placedIds = new Set(placed?.map(p => p.occupant_id) || []);
 
         return directs.filter(d => !placedIds.has(d.id));
+    },
+
+    /**
+     * Ubica AUTOMÁTICAMENTE a un usuario en el primer hueco libre de su reclutador
+     */
+    async autoPlaceUser(userId: string, level: number = 1) {
+        // 1. Obtener quién lo recomendó
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('referred_by')
+            .eq('id', userId)
+            .single();
+
+        if (!profile || !profile.referred_by) {
+            console.log("Usuario sin reclutador, no se puede auto-ubicar.");
+            return false;
+        }
+
+        const recruiterId = profile.referred_by;
+
+        // 2. Buscar slots ocupados en la matriz del reclutador
+        const { data: existingSlots } = await supabase
+            .from('matrix_slots')
+            .select('position')
+            .eq('matrix_owner_id', recruiterId)
+            .eq('level', level);
+
+        const takenPositions = new Set(existingSlots?.map(s => s.position) || []);
+
+        // 3. Encontrar la primera posición libre (1-4)
+        let freePos = -1;
+        for (let i = 1; i <= 4; i++) {
+            if (!takenPositions.has(i)) {
+                freePos = i;
+                break;
+            }
+        }
+
+        if (freePos === -1) {
+            console.log("Matriz del reclutador llena, queda en sala de espera manual.");
+            return false;
+        }
+
+        // 4. Ubicar
+        return await this.placeUser({
+            matrixOwnerId: recruiterId,
+            occupantId: userId,
+            recruiterId: recruiterId,
+            level: level,
+            position: freePos
+        });
     }
 };

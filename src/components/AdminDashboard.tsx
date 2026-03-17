@@ -3,7 +3,7 @@
 import {
     Users, Wallet, TrendingUp, ArrowLeft, Search, Edit3, ShieldAlert,
     Database, LayoutDashboard, Save, BarChart3, SearchCode,
-    Globe, Sparkles, Palette, Trash2
+    Globe, Sparkles, Palette, Trash2, Zap
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -29,7 +29,8 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
         currentLevel: 1,
         balance: '0',
         email: '',
-        password: ''
+        password: '',
+        isVip: false
     });
 
     // Expansion Scanner States
@@ -76,7 +77,8 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
             referredBy: u.referred_by || '',
             currentLevel: u.current_level || 1,
             balance: u.balance_tc?.toString() || '0',
-            password: u.password || ''
+            password: u.password || '',
+            isVip: u.is_vip || false
         });
     };
 
@@ -84,6 +86,9 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
         if (!editingUser) return;
         setLoading(true);
         try {
+            // Determinar si hay un cambio de NO-VIP a VIP para gatillar la ubicación auto
+            const becomingVip = editData.isVip && !editingUser.is_vip;
+
             // 1. Actualizar Perfil
             await adminService.updateUserProfile(editingUser.id, {
                 full_name: editData.fullName,
@@ -91,10 +96,17 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                 referral_code: editData.referralCode,
                 referred_by: editData.referredBy || null,
                 current_level: editData.currentLevel,
-                password: editData.password
+                password: editData.password,
+                is_vip: editData.isVip
             });
 
-            // 2. Ajustar Saldo
+            // 2. Si se activó VIP, ubicar en la matriz del reclutador automáticamente
+            if (becomingVip) {
+                const { matrixService } = await import('../services/matrixService');
+                await matrixService.autoPlaceUser(editingUser.id);
+            }
+
+            // 3. Ajustar Saldo
             await adminService.adjustUserBalance(editingUser.id, parseFloat(editData.balance));
 
             // 3. Notificar por WhatsApp (Opcional, no bloqueante)
@@ -655,7 +667,32 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                                         {[...Array(12)].map((_, i) => <option key={i + 1} value={i + 1}>Nivel {i + 1}</option>)}
                                     </select>
                                 </div>
-                                <div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                    <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>Estatus de Membresía</label>
+                                    <button
+                                        onClick={() => setEditData({ ...editData, isVip: !editData.isVip })}
+                                        style={{
+                                            padding: '12px',
+                                            borderRadius: 12,
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            fontWeight: 800,
+                                            fontSize: 13,
+                                            background: editData.isVip ? '#DCFCE7' : 'var(--color-surface-2)',
+                                            color: editData.isVip ? '#166534' : 'var(--color-text-muted)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: 8,
+                                            transition: 'all 0.2s'
+                                        }}
+                                    >
+                                        <Zap size={16} fill={editData.isVip ? '#166534' : 'transparent'} />
+                                        {editData.isVip ? 'MEMBRESÍA VIP ACTIVA' : 'MEMBRESÍA INACTIVA'}
+                                    </button>
+                                </div>
+
+                                <div style={{ gridColumn: 'span 2' }}>
                                     <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', marginBottom: 8 }}>Saldo TrueCoin (TC)</label>
                                     <input type="number" value={editData.balance} onChange={e => setEditData({ ...editData, balance: e.target.value })} className="input" style={{ fontWeight: 800, color: 'var(--color-admin)' }} />
                                 </div>

@@ -48,6 +48,26 @@ export default function Paywall({ user }: PaywallProps) {
         window.open(paymentUrl, '_blank');
     };
 
+    const handleVerifyStatus = async () => {
+        setIsLoading(true);
+        try {
+            const freshProfile = await userService.getProfile(user.id);
+            if (freshProfile.is_vip) {
+                // EXCLUSIVO: Ubicación Automática al activar VIP
+                const { matrixService } = await import('../services/matrixService');
+                await matrixService.autoPlaceUser(user.id);
+
+                window.location.reload(); // Recargar para entrar al Dashboard
+            } else {
+                alert("Aún no detectamos tu pago. Wompi puede tardar unos minutos en confirmar.");
+            }
+        } catch (e) {
+            console.error("Error verificando estatus:", e);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     if (isLoading) return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '80vh' }}><div className="shopy-spinner" /></div>;
 
     return (
@@ -101,7 +121,7 @@ export default function Paywall({ user }: PaywallProps) {
 
                     <div style={{ marginTop: 32, textAlign: 'center' }}>
                         <button
-                            onClick={() => window.location.reload()}
+                            onClick={handleVerifyStatus}
                             style={{ background: 'none', border: 'none', color: 'var(--color-navy)', fontWeight: 700, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, margin: '0 auto' }}
                         >
                             ¿Ya pagaste? Clic aquí para verificar <CheckCircle2 size={16} />

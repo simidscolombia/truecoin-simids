@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Wallet, Users, Copy, Share2, ArrowUpRight,
-    Clock, Send, CheckCircle2, Award, Zap
+    Clock, Send, CheckCircle2, Award, Zap, Activity
 } from 'lucide-react';
 import GiftMatrix from './GiftMatrix';
 import NetworkTree from './NetworkTree';
@@ -22,66 +22,36 @@ const RANKS = [
     "EMBAJADOR", "EMBAJADOR REAL", "LEYENDA"
 ];
 
-function StatCard({
-    label, value, unit, icon, color, sub,
-}: {
-    label: string; value: string; unit?: string; icon: React.ReactNode;
-    color: string; sub?: string;
-}) {
+function StatCard({ label, value, unit, icon, color }: { label: string; value: string; unit?: string; icon: React.ReactNode; color: string; }) {
     return (
-        <motion.div
-            whileHover={{ y: -4, boxShadow: '0 12px 30px rgba(0,0,0,0.08)' }}
-            className="stat-card"
-            style={{
-                borderTop: `4px solid ${color}`,
-                background: 'rgba(255,255,255,0.9)',
-                backdropFilter: 'blur(10px)',
-                borderRadius: '24px',
-                padding: '24px',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.03)'
-            }}
-        >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</span>
-                <div style={{
-                    width: 40, height: 40, borderRadius: 12,
-                    background: `color-mix(in srgb, ${color} 10%, white)`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color,
-                }}>
-                    {icon}
-                </div>
+        <div style={{
+            background: 'white',
+            borderRadius: 20,
+            padding: '20px',
+            boxShadow: '0 4px 15px rgba(0,0,0,0.03)',
+            border: '1px solid var(--color-border)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 16
+        }}>
+            <div style={{ width: 44, height: 44, borderRadius: 12, background: `${color}10`, color: color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {icon}
             </div>
-            <div style={{ fontSize: 32, fontWeight: 900, color: 'var(--color-navy)', letterSpacing: -1 }}>
-                {value}
-                {unit && <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--color-text-muted)', marginLeft: 6 }}>{unit}</span>}
+            <div>
+                <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', marginBottom: 2 }}>{label}</p>
+                <p style={{ fontSize: 20, fontWeight: 900, color: 'var(--color-navy)', margin: 0 }}>{value} <span style={{ fontSize: 12, fontWeight: 700 }}>{unit}</span></p>
             </div>
-            {sub && <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-text-muted)', marginTop: 8, opacity: 0.8 }}>{sub}</p>}
-        </motion.div>
+        </div>
     );
 }
 
-
-export default function Dashboard({
-    user,
-    balance,
-    onUpdateBalance
-}: {
-    user: { fullName: string; referralCode: string; id?: string };
-    balance: string;
-    onUpdateBalance: (balance: string) => void;
-}) {
+export default function Dashboard({ user, balance, onUpdateBalance }: { user: any; balance: string; onUpdateBalance: (b: string) => void; }) {
     const [showTransfer, setShowTransfer] = useState(false);
     const [showRecharge, setShowRecharge] = useState(false);
     const [localBalance, setLocalBalance] = useState(balance);
     const [copied, setCopied] = useState(false);
     const [view, setView] = useState<'ascension' | 'network' | 'expansion'>('ascension');
-    const [stats, setStats] = useState<{ directReferrals: number, currentLevel: number, isVip: boolean, mentor?: any }>({
-        directReferrals: 0,
-        currentLevel: 1,
-        isVip: false,
-        mentor: null
-    });
+    const [stats, setStats] = useState<any>({ directReferrals: 0, currentLevel: 1, isVip: false });
     const [pendingReferrals, setPendingReferrals] = useState<any[]>([]);
     const [isPlacing, setIsPlacing] = useState(false);
     const [matrixSlots, setMatrixSlots] = useState<any[]>([]);
@@ -89,11 +59,24 @@ export default function Dashboard({
 
     useEffect(() => {
         if (user?.id) {
-            userService.getDashboardStats(user.id).then(setStats).catch(console.error);
-            matrixService.getUnplacedReferrals(user.id).then(setPendingReferrals).catch(console.error);
-            matrixService.getMatrixSlots(user.id, stats.currentLevel).then(setMatrixSlots).catch(console.error);
+            fetchDashboardData();
         }
     }, [user?.id, stats.currentLevel]);
+
+    const fetchDashboardData = async () => {
+        try {
+            const [s, p, m] = await Promise.all([
+                userService.getDashboardStats(user.id),
+                matrixService.getUnplacedReferrals(user.id),
+                matrixService.getMatrixSlots(user.id, stats.currentLevel)
+            ]);
+            setStats(s);
+            setPendingReferrals(p);
+            setMatrixSlots(m);
+        } catch (e) {
+            console.error(e);
+        }
+    };
 
     const handlePlaceUser = async (userId: string, position: number) => {
         if (!user.id) return;
@@ -106,328 +89,105 @@ export default function Dashboard({
                 level: stats.currentLevel,
                 position
             });
-            // Refrescar datos
-            const updatedPending = await matrixService.getUnplacedReferrals(user.id);
-            const updatedSlots = await matrixService.getMatrixSlots(user.id, stats.currentLevel);
-            setPendingReferrals(updatedPending);
-            setMatrixSlots(updatedSlots);
             setSelectedUserToPlace(null);
-            // Notificación elegante (opcionalmente podrías usar un toast)
-            console.log("✅ Usuario ubicado exitosamente");
+            await fetchDashboardData();
         } catch (err: any) {
-            console.error("Error al ubicar:", err);
-            alert("Error: " + err.message);
+            alert(err.message);
         } finally {
             setIsPlacing(false);
         }
     };
 
-    const copyReferral = () => {
-        const link = `${window.location.origin}/?ref=${user.referralCode}`;
-        navigator.clipboard.writeText(link);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
-
-    const shareToWhatsApp = () => {
-        const link = `${window.location.origin}/?ref=${user.referralCode}`;
-        const message = encodeURIComponent(`🚀 ¡Únete a ShopyBrands conmigo! \n\nAccede a precios de mayorista, gana puntos y sé parte del primer club VIP con IA. \n\nRegístrate aquí: ${link}`);
-        window.open(`https://wa.me/?text=${message}`, '_blank');
-    };
-
-    const handleTransferSuccess = (amount: number) => {
-        const newBal = (Number(localBalance) - amount).toFixed(2);
-        setLocalBalance(newBal);
-        onUpdateBalance(newBal);
-    };
-
-    const handleRechargeSuccess = (amount: number) => {
-        const newBal = (Number(localBalance) + amount).toFixed(2);
-        setLocalBalance(newBal);
-        onUpdateBalance(newBal);
-        alert(`¡Pago confirmado! Se han acreditado ${amount} TC a tu saldo.`);
-    };
-
     return (
-        <div className="module-page animate-in">
-            <TransferModal
-                isOpen={showTransfer}
-                onClose={() => setShowTransfer(false)}
-                user={user}
-                onSuccess={handleTransferSuccess}
-            />
-            <RechargeModal
-                isOpen={showRecharge}
-                onClose={() => setShowRecharge(false)}
-                user={user}
-                onRechargeRequestSubmit={handleRechargeSuccess}
-            />
+        <div className="module-page animate-in" style={{ background: 'var(--color-surface-2)', minHeight: '100vh', paddingBottom: 60 }}>
+            <TransferModal isOpen={showTransfer} onClose={() => setShowTransfer(false)} user={user} onSuccess={(amt) => setLocalBalance((prev) => (Number(prev) - amt).toFixed(2))} />
+            <RechargeModal isOpen={showRecharge} onClose={() => setShowRecharge(false)} user={user} onSuccess={(amt) => setLocalBalance((prev) => (Number(prev) + amt).toFixed(2))} />
 
-            {/* Page Header */}
-            <div className="module-page-header">
-                <div>
-                    <h1 style={{ fontSize: 'clamp(20px, 5vw, 24px)', fontWeight: 800, color: 'var(--color-navy)', marginBottom: 2 }}>
-                        Hola, <span style={{ color: 'var(--color-cloud-blue)' }}>{user.fullName.split(' ')[0]}</span> 👋
-                    </h1>
-                    <p style={{ fontSize: 'clamp(12px, 3.5vw, 14px)', color: 'var(--color-text-muted)' }}>
-                        Bienvenido a tu ecosistema ShopyBrands <span style={{ fontSize: 10, background: 'var(--color-wallet)', color: 'white', padding: '2px 8px', borderRadius: 20, verticalAlign: 'middle', marginLeft: 8 }}>VERSION 3.6.0</span> · {new Date().toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' })}
-                    </p>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                    <span className="badge" style={{ background: 'var(--color-navy)', color: 'white', border: 'none' }}>
-                        ⭐ VIP {stats.currentLevel === 1 ? 'BRONCE' : stats.currentLevel === 2 ? 'PLATA' : 'ORO'} (L{stats.currentLevel})
-                    </span>
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 6,
-                        background: '#e6fcf5',
-                        padding: '4px 10px',
-                        borderRadius: 20,
-                        border: '1px solid #20c997'
-                    }}>
-                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#20c997' }}></div>
-                        <span style={{ fontSize: 11, fontWeight: 700, color: '#099268' }}>PIONERO VELOZ</span>
+            <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 20px' }}>
+
+                {/* 1. Header Row */}
+                <div style={{ padding: '40px 0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                        <h1 style={{ fontSize: 28, fontWeight: 900, color: 'var(--color-navy)', margin: 0 }}>Hola, {user.fullName.split(' ')[0]} 👋</h1>
+                        <p style={{ color: 'var(--color-text-muted)', fontWeight: 600 }}>Bienvenido a tu Centro de Control VIP</p>
+                    </div>
+                    <div style={{ display: 'flex', gap: 12 }}>
+                        <button onClick={() => setShowRecharge(true)} className="btn btn-wallet btn-sm"><Zap size={16} /> Recargar</button>
+                        <button onClick={() => setShowTransfer(true)} className="btn btn-outline btn-sm"><Send size={16} /> Enviar</button>
                     </div>
                 </div>
-            </div>
 
-            <div className="module-page-content" style={{ maxWidth: 1200, margin: '0 auto' }}>
-
-                {/* Stats Row */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 28 }}>
-                    <StatCard
-                        label="Saldo Disponible"
-                        value={localBalance}
-                        unit="TC"
-                        icon={<Wallet size={18} />}
-                        color="var(--color-wallet)"
-                        sub="1 TC = $1,000 COP"
-                    />
-                    <StatCard
-                        label="En Espera (24h)"
-                        value="0.00"
-                        unit="TC"
-                        icon={<Clock size={18} />}
-                        color="var(--color-text-muted)"
-                        sub="Sin transferencias pendientes"
-                    />
-                    <StatCard
-                        label="Referidos Activos"
-                        value={stats.directReferrals.toString()}
-                        icon={<Users size={18} />}
-                        color="var(--color-cloud-blue)"
-                        sub={`Nivel ${stats.currentLevel} · ${stats.directReferrals}/4 cupos`}
-                    />
-                    <StatCard
-                        label="Rango Actual"
-                        value={stats.currentLevel === 1 ? 'VIP Bronce' : stats.currentLevel === 2 ? 'VIP Cobre' : 'VIP Plata'}
-                        icon={<Award size={18} />}
-                        color="var(--color-directorio)"
-                        sub={`Siguiente: ${stats.currentLevel === 1 ? 'VIP Cobre' : stats.currentLevel === 2 ? 'VIP Plata' : 'VIP Oro'}`}
-                    />
+                {/* 2. Stats Grid */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16, marginBottom: 32 }}>
+                    <StatCard label="Mi Saldo" value={localBalance} unit="TC" icon={<Wallet size={20} />} color="var(--color-wallet)" />
+                    <StatCard label="Equipo Directo" value={stats.directReferrals.toString()} unit="Socios" icon={<Users size={20} />} color="var(--color-cloud-blue)" />
+                    <StatCard label="Nivel Actual" value={RANKS[(stats.currentLevel - 1) % 12]} icon={<Award size={20} />} color="var(--color-directorio)" />
                 </div>
 
-                {/* Wallet + Referral */}
-                <div className="dashboard-grid-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20, marginBottom: 28 }}>
+                {/* 3. Main Action Center (Two Columns) */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 24, alignItems: 'start', marginBottom: 32 }}>
 
-                    {/* Wallet Card */}
-                    <div className="card-lg" style={{ padding: 28 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-                            <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--color-navy)' }}>
-                                <Wallet size={18} style={{ display: 'inline', marginRight: 8, color: 'var(--color-wallet)' }} />
-                                Shopy Wallet
-                            </h2>
-                            <span className="badge badge-wallet">Activa</span>
-                        </div>
+                    {/* Left: Waiting Room */}
+                    <div style={{ position: 'sticky', top: 100 }}>
+                        <WaitingRoom
+                            pendingUsers={pendingReferrals}
+                            onPlace={userId => setSelectedUserToPlace(pendingReferrals.find(p => p.id === userId))}
+                            selectedUserId={selectedUserToPlace?.id}
+                            isPlacing={isPlacing}
+                        />
 
-                        <div style={{ marginBottom: 24 }}>
-                            <p style={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--color-text-muted)', marginBottom: 6 }}>
-                                Saldo Disponible
-                            </p>
-                            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                                <span style={{ fontSize: 48, fontWeight: 800, color: 'var(--color-wallet)', letterSpacing: -2, lineHeight: 1 }}>
-                                    {localBalance}
-                                </span>
-                                <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--color-wallet)', opacity: 0.7 }}>TC</span>
+                        {/* Referral Link Card */}
+                        <div className="card" style={{ marginTop: 24, padding: 24 }}>
+                            <h4 style={{ fontSize: 13, fontWeight: 800, color: 'var(--color-navy)', marginBottom: 12 }}>MI CÓDIGO DE INVITACIÓN</h4>
+                            <div style={{ background: 'var(--color-surface-2)', padding: '12px 16px', borderRadius: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid var(--color-border)' }}>
+                                <code style={{ fontWeight: 900, letterSpacing: 1, color: 'var(--color-wallet)' }}>{user.referralCode}</code>
+                                <button onClick={() => { navigator.clipboard.writeText(user.referralCode); setCopied(true); setTimeout(() => setCopied(false), 2000); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-navy)' }}>
+                                    {copied ? <CheckCircle2 size={16} color="var(--color-marketplace)" /> : <Copy size={16} />}
+                                </button>
                             </div>
-                            <p style={{ fontSize: 13, color: 'var(--color-text-muted)', marginTop: 6 }}>
-                                ≈ ${(Number(localBalance) * 1000).toLocaleString('es-CO')} COP
-                            </p>
-                        </div>
-
-                        <div style={{ display: 'flex', gap: 10 }}>
-                            <button
-                                className="btn btn-wallet"
-                                style={{ flex: 1 }}
-                                onClick={() => setShowRecharge(true)}
-                            >
-                                <ArrowUpRight size={16} /> Comprar TC
-                            </button>
-                            <button
-                                className="btn btn-outline"
-                                style={{ flex: 1 }}
-                                onClick={() => setShowTransfer(true)}
-                            >
-                                <Send size={16} /> Enviar
-                            </button>
                         </div>
                     </div>
 
-                    {/* Referral Card */}
-                    <div className="card-lg" style={{ padding: 28 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-                            <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--color-navy)' }}>
-                                <Users size={18} style={{ display: 'inline', marginRight: 8, color: 'var(--color-cloud-blue)' }} />
-                                Tu Red
-                            </h2>
-                            <span className="badge badge-navy">
-                                <Zap size={10} /> {RANKS[(stats.currentLevel - 1) % 12]}
-                            </span>
+                    {/* Right: The Board / Matrix */}
+                    <div>
+                        {/* Tab Switcher */}
+                        <div style={{ display: 'flex', gap: 8, marginBottom: 20, background: 'rgba(0,0,0,0.05)', padding: 6, borderRadius: 16, width: 'fit-content' }}>
+                            {['ascension', 'network'].map((v: any) => (
+                                <button key={v} onClick={() => setView(v)} style={{
+                                    padding: '8px 20px', borderRadius: 12, border: 'none', cursor: 'pointer', fontWeight: 800, fontSize: 12,
+                                    background: view === v ? 'var(--color-navy)' : 'transparent',
+                                    color: view === v ? 'white' : 'var(--color-text-muted)',
+                                    transition: 'all 0.2s'
+                                }}>
+                                    {v === 'ascension' ? 'Mi Tablero 1x4' : 'Mi Árbol Completo'}
+                                </button>
+                            ))}
                         </div>
 
-                        <p style={{ fontSize: 13, color: 'var(--color-text-muted)', marginBottom: 20, lineHeight: 1.6 }}>
-                            Comparte tu código y acelera tu camino a <strong>VIP PLATA</strong>. Cada ciclo completo te otorga 25% en puntos y te impulsa al siguiente nivel.
-                        </p>
-
-                        {/* Referral Code */}
-                        <div style={{
-                            background: 'var(--color-bg)',
-                            border: '1.5px dashed var(--color-border-strong)',
-                            borderRadius: 12,
-                            padding: '14px 18px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            marginBottom: 14,
-                        }}>
-                            <code style={{ fontSize: 18, fontWeight: 800, color: 'var(--color-navy)', letterSpacing: 2 }}>
-                                {user.referralCode}
-                            </code>
-                            <button
-                                onClick={copyReferral}
-                                className="btn btn-sm"
-                                style={{ background: copied ? 'var(--color-marketplace)' : 'var(--color-navy)', color: 'white' }}
-                            >
-                                {copied ? <CheckCircle2 size={14} /> : <Copy size={14} />}
-                                {copied ? 'Copiado' : 'Copiar'}
-                            </button>
-                        </div>
-
-                        <button onClick={shareToWhatsApp} className="btn btn-outline btn-full">
-                            <Share2 size={16} /> Compartir por WhatsApp
-                        </button>
+                        <AnimatePresence mode="wait">
+                            {view === 'ascension' ? (
+                                <motion.div key="m" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }}>
+                                    <GiftMatrix
+                                        currentLevel={stats.currentLevel}
+                                        slots={matrixSlots}
+                                        isPlacing={!!selectedUserToPlace}
+                                        onSelectPosition={pos => selectedUserToPlace && handlePlaceUser(selectedUserToPlace.id, pos)}
+                                    />
+                                </motion.div>
+                            ) : (
+                                <motion.div key="n" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }}>
+                                    <div className="card" style={{ padding: 32 }}>
+                                        <h3 style={{ fontSize: 18, fontWeight: 900, color: 'var(--color-navy)', marginBottom: 24 }}>Vista de Red Jerárquica</h3>
+                                        <NetworkTree userId={user.id} mentor={stats.mentor} />
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
 
                 </div>
 
-                {/* SALA DE ESPERA (IA DRIVEN) */}
-                <div style={{ marginBottom: 24 }}>
-                    <WaitingRoom
-                        pendingUsers={pendingReferrals}
-                        onPlace={(userId) => {
-                            const found = pendingReferrals.find(p => p.id === userId);
-                            setSelectedUserToPlace(found);
-                            setView('ascension'); // Asegurar que vea la matriz
-                        }}
-                        selectedUserId={selectedUserToPlace?.id}
-                        isPlacing={isPlacing}
-                    />
-                </div>
-
-                {/* View Toggle (Glassmorphism) */}
-                <div style={{
-                    display: 'flex', gap: 6, marginBottom: 32,
-                    background: 'rgba(255,255,255,0.5)',
-                    backdropFilter: 'blur(10px)',
-                    padding: '6px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.8)',
-                    width: 'fit-content',
-                    boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
-                }}>
-                    <button
-                        onClick={() => setView('ascension')}
-                        style={{
-                            padding: '10px 24px', borderRadius: 12, fontSize: 13, fontWeight: 800,
-                            background: view === 'ascension' ? 'var(--color-navy)' : 'transparent',
-                            color: view === 'ascension' ? 'white' : 'var(--color-text-muted)',
-                            border: 'none', cursor: 'pointer', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                        }}
-                    >
-                        Mi Ascensión
-                    </button>
-                    <button
-                        onClick={() => setView('network')}
-                        style={{
-                            padding: '10px 24px', borderRadius: 12, fontSize: 13, fontWeight: 800,
-                            background: view === 'network' ? 'var(--color-navy)' : 'transparent',
-                            color: view === 'network' ? 'white' : 'var(--color-text-muted)',
-                            border: 'none', cursor: 'pointer', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                        }}
-                    >
-                        Escalabilidad
-                    </button>
-                    <button
-                        onClick={() => setView('expansion')}
-                        style={{
-                            padding: '10px 24px', borderRadius: 12, fontSize: 13, fontWeight: 800,
-                            background: view === 'expansion' ? 'var(--color-navy)' : 'transparent',
-                            color: view === 'expansion' ? 'white' : 'var(--color-text-muted)',
-                            border: 'none', cursor: 'pointer', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                        }}
-                    >
-                        Plan Maestro
-                    </button>
-                </div>
-
-                <div style={{ marginBottom: 28 }}>
-                    <AnimatePresence mode="wait">
-                        {view === 'ascension' && (
-                            <motion.div
-                                key="ascension"
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -10 }}
-                                transition={{ duration: 0.2 }}
-                            >
-                                <GiftMatrix
-                                    currentLevel={stats.currentLevel}
-                                    slots={matrixSlots}
-                                    onSelectPosition={(pos) => {
-                                        if (selectedUserToPlace) {
-                                            handlePlaceUser(selectedUserToPlace.id, pos);
-                                        }
-                                    }}
-                                    isPlacing={!!selectedUserToPlace}
-                                />
-                            </motion.div>
-                        )}
-                        {view === 'network' && (
-                            <motion.div
-                                key="network"
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -10 }}
-                                transition={{ duration: 0.2 }}
-                            >
-                                <NetworkTree userId={user.id || ''} mentor={stats.mentor} />
-                            </motion.div>
-                        )}
-                        {view === 'expansion' && (
-                            <motion.div
-                                key="expansion"
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -10 }}
-                                transition={{ duration: 0.2 }}
-                            >
-                                <ExpansionMap />
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
-
-
-            </div >
-        </div >
+            </div>
+        </div>
     );
 }

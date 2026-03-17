@@ -8,7 +8,14 @@ export const matrixService = {
     async getMatrixSlots(ownerId: string, level: number = 1): Promise<MatrixSlot[]> {
         const { data, error } = await supabase
             .from('matrix_slots')
-            .select('*')
+            .select(`
+                position,
+                occupant_id,
+                recruiter_id,
+                profiles!occupant_id (
+                    full_name
+                )
+            `)
             .eq('matrix_owner_id', ownerId)
             .eq('level', level)
             .order('position', { ascending: true });
@@ -18,11 +25,10 @@ export const matrixService = {
             return [];
         }
 
-        // Mapear al tipo MatrixSlot definido en giftService
-        return data.map(item => ({
+        return data.map((item: any) => ({
             position: item.position,
             occupant_id: item.occupant_id,
-            occupant_name: item.occupant_name, // Suponiendo que lo guardamos o lo traemos vía join
+            occupant_name: item.profiles?.full_name || 'Desconocido',
             recruiter_id: item.recruiter_id
         }));
     },

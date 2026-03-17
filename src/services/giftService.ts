@@ -25,36 +25,37 @@ export const giftService = {
         return values[level] || 50;
     },
 
-    // Calcular Reparto de un Slot de forma dinámica
+    // Calcular Reparto de un Slot de forma dinámica (Plan Maestro V3.6.5)
     calculateRewardDistribution(level: number, matrixOwnerId: string, actualRecruiterId: string) {
         const totalValue = this.getLevelValue(level);
 
-        // 50% para el Salto de Nivel (Bloqueado)
-        const nextLevelFund = totalValue * 0.50;
+        if (level < 12) {
+            // Lógica Niveles 1-11: 25% Tú, 25% Sistema, 50% Salto
+            const nextLevelFund = totalValue * 0.50;
+            const platformFee = totalValue * 0.25;
+            const humanRewardBase = totalValue * 0.25;
 
-        // 25% para ShopyBrands (Operación)
-        const platformFee = totalValue * 0.25;
-
-        // 25% es la Recompensa Humana (Se puede dividir por mérito)
-        const humanRewardBase = totalValue * 0.25;
-
-        if (matrixOwnerId === actualRecruiterId) {
-            // Caso Normal: El dueño trajo a su propio referido
             return {
                 nextLevelFund,
                 platformFee,
-                ownerGain: humanRewardBase,
-                recruiterBonus: 0,
-                isSpillover: false
+                ownerGain: matrixOwnerId === actualRecruiterId ? humanRewardBase : humanRewardBase * 0.5,
+                recruiterBonus: matrixOwnerId === actualRecruiterId ? 0 : humanRewardBase * 0.5,
+                tsunamiFund: 0,
+                isSpillover: matrixOwnerId !== actualRecruiterId
             };
         } else {
-            // Caso Mérito (Efecto Shannon): El líder puso a alguien debajo de otro
+            // Lógica NIVEL 12 (SOY LEYENDA): 50% Tú, 10% Sistema, 40% Tsunami
+            const platformFee = totalValue * 0.10;
+            const tsunamiFund = totalValue * 0.40;
+            const humanRewardBase = totalValue * 0.50;
+
             return {
-                nextLevelFund,
+                nextLevelFund: 0, // No hay nivel 13
                 platformFee,
-                ownerGain: humanRewardBase * 0.50,    // 50% del premio para el dueño de la matriz
-                recruiterBonus: humanRewardBase * 0.50, // 50% del premio para el Líder que trajo al cliente
-                isSpillover: true
+                ownerGain: matrixOwnerId === actualRecruiterId ? humanRewardBase : humanRewardBase * 0.5,
+                recruiterBonus: matrixOwnerId === actualRecruiterId ? 0 : humanRewardBase * 0.5,
+                tsunamiFund,
+                isSpillover: matrixOwnerId !== actualRecruiterId
             };
         }
     },

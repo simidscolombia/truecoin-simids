@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
-import { MatrixSlot } from './giftService';
+import { MatrixSlot, giftService } from './giftService';
+import { userService } from './userService';
 
 export const matrixService = {
     /**
@@ -90,7 +91,27 @@ export const matrixService = {
 
         if (error) throw error;
 
-        // 4. Verificar si completó la matriz para subir de nivel
+        // 4. Distribuir Recompensas (Plan Maestro V3.6.5)
+        const distribution = giftService.calculateRewardDistribution(params.level, params.matrixOwnerId, params.recruiterId);
+
+        // Verificar si el dueño es un BOT del sistema (no se le paga TC real)
+        const { data: ownerProfile } = await supabase.from('profiles').select('is_system_bot').eq('id', params.matrixOwnerId).single();
+        const isOwnerBot = ownerProfile?.is_system_bot || false;
+
+        // Pago al dueño (solo si no es bot)
+        if (distribution.ownerGain > 0 && !isOwnerBot) {
+            await userService.updateBalance(params.matrixOwnerId, distribution.ownerGain);
+        }
+
+        // Pago al reclutador (si es bono por mérito/derrame)
+        if (distribution.recruiterBonus > 0) {
+            const { data: recruiterProfile } = await supabase.from('profiles').select('is_system_bot').eq('id', params.recruiterId).single();
+            if (!recruiterProfile?.is_system_bot) {
+                await userService.updateBalance(params.recruiterId, distribution.recruiterBonus);
+            }
+        }
+
+        // 5. Verificar si completó la matriz para subir de nivel
         const { count } = await supabase
             .from('matrix_slots')
             .select('*', { count: 'exact', head: true })
@@ -98,14 +119,36 @@ export const matrixService = {
             .eq('level', params.level);
 
         if (count === 4) {
-            // Subir al siguiente nivel en el perfil
-            const nextLevel = params.level + 1;
-            await supabase
-                .from('profiles')
-                .update({ current_level: nextLevel })
-                .eq('id', params.matrixOwnerId);
+            if (params.level < 12) {
+                // Subir al siguiente nivel (Consumo de 50% reinversión)
+                const nextLevel = params.level + 1;
+                await supabase
+                    .from('profiles')
+                    .update({ current_level: nextLevel })
+                    .eq('id', params.matrixOwnerId);
 
-            console.log(`🚀 Usuario ${params.matrixOwnerId} subió al Nivel ${nextLevel}`);
+                console.log(`🚀 Usuario ${params.matrixOwnerId} subió al Nivel ${nextLevel}`);
+
+                // OPCIONAL: Auto-ubicación en el siguiente nivel (Follow-me)
+                // await this.autoPlaceUser(params.matrixOwnerId, nextLevel);
+            } else {
+                // NIVEL 12 COMPLETADO (SOY LEYENDA)
+                // 1. Resetear nivel a 1 (Reinicia el juego)
+                await supabase
+                    .from('profiles')
+                    .update({ current_level: 1 })
+                    .eq('id', params.matrixOwnerId);
+
+                // 2. Cobrar 50 TC (de la ganancia del L12) para la re-entrada si no es bot
+                if (!isOwnerBot) {
+                    await userService.updateBalance(params.matrixOwnerId, -50);
+                }
+
+                // 3. Auto-ubicar en Nivel 1 (Re-entrada pagada)
+                await this.autoPlaceUser(params.matrixOwnerId, 1);
+
+                console.log(`🌀 CICLO LEYENDA COMPLETADO: Usuario ${params.matrixOwnerId} re-entró al Nivel 1.`);
+            }
         }
 
         return true;
@@ -208,5 +251,40 @@ export const matrixService = {
             level: level,
             position: target.pos
         });
+    },
+
+    /**
+     * Crea un AGENTE DE INVERSIÓN (Discreto) para empujar la red
+     */
+    async createSystemAgent(fullName: string, email: string) {
+        const generateCode = () => {
+            const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ';
+            let result = 'SB-';
+            for (let i = 0; i < 4; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
+            return result;
+        };
+
+        const { data, error } = await supabase
+            .from('profiles')
+            .insert([{
+                full_name: fullName,
+                email: email,
+                referral_code: generateCode(),
+                current_level: 1,
+                is_vip: true,
+                is_system_bot: true
+            }])
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        // Crear Billetera (Simulada para el sistema)
+        await supabase.from('wallets').insert([{
+            user_id: data.id,
+            balance_tc: 0
+        }]);
+
+        return data;
     }
 };

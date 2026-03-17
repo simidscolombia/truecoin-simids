@@ -3,12 +3,10 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Wallet, Users, Copy, Share2, ArrowUpRight,
-    Clock, Send, CheckCircle2, Award, Zap, Activity
+    Wallet, Users, Copy, Send, CheckCircle2, Award, Zap
 } from 'lucide-react';
 import GiftMatrix from './GiftMatrix';
 import NetworkTree from './NetworkTree';
-import ExpansionMap from './ExpansionMap';
 import TransferModal from './TransferModal';
 import RechargeModal from './RechargeModal';
 import { userService } from '../services/userService';
@@ -45,12 +43,12 @@ function StatCard({ label, value, unit, icon, color }: { label: string; value: s
     );
 }
 
-export default function Dashboard({ user, balance, onUpdateBalance }: { user: any; balance: string; onUpdateBalance: (b: string) => void; }) {
+export default function Dashboard({ user, balance }: { user: any; balance: string; onUpdateBalance?: (b: string) => void; }) {
     const [showTransfer, setShowTransfer] = useState(false);
     const [showRecharge, setShowRecharge] = useState(false);
     const [localBalance, setLocalBalance] = useState(balance);
     const [copied, setCopied] = useState(false);
-    const [view, setView] = useState<'ascension' | 'network' | 'expansion'>('ascension');
+    const [view, setView] = useState<'ascension' | 'network'>('ascension');
     const [stats, setStats] = useState<any>({ directReferrals: 0, currentLevel: 1, isVip: false });
     const [pendingReferrals, setPendingReferrals] = useState<any[]>([]);
     const [isPlacing, setIsPlacing] = useState(false);
@@ -100,15 +98,15 @@ export default function Dashboard({ user, balance, onUpdateBalance }: { user: an
 
     return (
         <div className="module-page animate-in" style={{ background: 'var(--color-surface-2)', minHeight: '100vh', paddingBottom: 60 }}>
-            <TransferModal isOpen={showTransfer} onClose={() => setShowTransfer(false)} user={user} onSuccess={(amt) => setLocalBalance((prev) => (Number(prev) - amt).toFixed(2))} />
-            <RechargeModal isOpen={showRecharge} onClose={() => setShowRecharge(false)} user={user} onSuccess={(amt) => setLocalBalance((prev) => (Number(prev) + amt).toFixed(2))} />
+            <TransferModal isOpen={showTransfer} onClose={() => setShowTransfer(false)} user={user} onSuccess={(amt: number) => setLocalBalance((prev) => (Number(prev) - amt).toFixed(2))} />
+            <RechargeModal isOpen={showRecharge} onClose={() => setShowRecharge(false)} user={user} onRechargeRequestSubmit={() => { }} />
 
             <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 20px' }}>
 
                 {/* 1. Header Row */}
                 <div style={{ padding: '40px 0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
-                        <h1 style={{ fontSize: 28, fontWeight: 900, color: 'var(--color-navy)', margin: 0 }}>Hola, {user.fullName.split(' ')[0]} 👋</h1>
+                        <h1 style={{ fontSize: 28, fontWeight: 900, color: 'var(--color-navy)', margin: 0 }}>Hola, {user.fullName?.split(' ')[0]} 👋</h1>
                         <p style={{ color: 'var(--color-text-muted)', fontWeight: 600 }}>Bienvenido a tu Centro de Control VIP</p>
                     </div>
                     <div style={{ display: 'flex', gap: 12 }}>
@@ -159,7 +157,7 @@ export default function Dashboard({ user, balance, onUpdateBalance }: { user: an
                                     color: view === v ? 'white' : 'var(--color-text-muted)',
                                     transition: 'all 0.2s'
                                 }}>
-                                    {v === 'ascension' ? 'Mi Tablero 1x4' : 'Mi Árbol Completo'}
+                                    {v === 'ascension' ? 'Mi Tablero 1x4' : 'Mi Árbol Completado'}
                                 </button>
                             ))}
                         </div>
@@ -171,7 +169,7 @@ export default function Dashboard({ user, balance, onUpdateBalance }: { user: an
                                         currentLevel={stats.currentLevel}
                                         slots={matrixSlots}
                                         isPlacing={!!selectedUserToPlace}
-                                        onSelectPosition={pos => selectedUserToPlace && handlePlaceUser(selectedUserToPlace.id, pos)}
+                                        onSelectPosition={(pos: number) => selectedUserToPlace && handlePlaceUser(selectedUserToPlace.id, pos)}
                                     />
                                 </motion.div>
                             ) : (

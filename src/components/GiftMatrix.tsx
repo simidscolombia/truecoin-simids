@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Award, UserPlus, Zap, User } from 'lucide-react';
+import { Award, UserPlus, Zap } from 'lucide-react';
 import { useState } from 'react';
 import { MatrixSlot } from '../services/giftService';
 

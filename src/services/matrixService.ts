@@ -107,6 +107,7 @@ export const matrixService = {
      * Obtiene referidos directos que NO han sido ubicados en ninguna matriz de nivel 1
      */
     async getUnplacedReferrals(userId: string) {
+        // 1. Obtener todos los referidos directos
         const { data: directs, error } = await supabase
             .from('profiles')
             .select('id, full_name, email, created_at')
@@ -114,14 +115,16 @@ export const matrixService = {
 
         if (error) throw error;
 
+        // 2. Obtener los IDs de socios que ya tienen un lugar en el sistema (Nivel 1)
+        // Buscamos en toda la tabla de slots, sin importar quién sea el dueño
         const { data: placed } = await supabase
             .from('matrix_slots')
             .select('occupant_id')
-            .eq('matrix_owner_id', userId)
             .eq('level', 1);
 
         const placedIds = new Set(placed?.map(p => p.occupant_id) || []);
 
+        // 3. Solo mostrar los que NO están en ninguna silla todavía
         return directs.filter(d => !placedIds.has(d.id));
     },
 

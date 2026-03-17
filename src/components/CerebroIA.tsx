@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 // Removed motion imports as they are unused in this version
 import {
-    Zap, ShieldCheck, BrainCircuit, Activity, Users, Plus,
+    Zap, ShieldCheck, Cpu, Activity, Users, Plus,
     AlertCircle, TrendingUp
 } from 'lucide-react';
 import { adminService } from '../services/adminService';
@@ -66,12 +66,21 @@ export default function CerebroIA() {
         return <div style={{ padding: 40, textAlign: 'center', color: 'var(--color-text-muted)' }}>Cargando Red Neuronal...</div>;
     }
 
+    if (!metrics) {
+        return (
+            <div style={{ padding: 40, textAlign: 'center' }}>
+                <p style={{ color: '#DC2626', fontWeight: 700 }}>⚠️ Error al conectar con el Cerebro IA</p>
+                <button onClick={fetchData} className="btn btn-outline btn-sm" style={{ marginTop: 12 }}>Reintentar Sincronización</button>
+            </div>
+        );
+    }
+
     return (
         <div className="cerebro-container animate-in">
             <div style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
                     <h1 style={{ fontSize: 28, fontWeight: 950, color: 'var(--color-navy)', letterSpacing: -1, display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <BrainCircuit size={32} color="var(--color-admin)" />
+                        <Cpu size={32} color="var(--color-admin)" />
                         Cerebro IA Admin
                     </h1>
                     <p style={{ fontSize: 14, color: 'var(--color-text-muted)', marginTop: 4 }}>Control financiero y expansión autónoma del sistema.</p>

@@ -214,38 +214,59 @@ export const adminService = {
 
     // ── CEREBRO IA (Fase 2) ─────────────────────────────
     async getCerebroMetrics() {
-        // 1. Fondos de Progresión (Salto)
-        const { data: matrixSlots } = await supabaseAdmin.from('matrix_slots').select('level');
-        const jumpFunds = (matrixSlots || []).reduce((sum, s) => {
-            const val = 50 * Math.pow(2, s.level - 1);
-            return sum + (val * 0.50); // El 50% de cada slot va a progesion
-        }, 0);
+        try {
+            // 1. Fondos de Progresión (Salto)
+            const { data: matrixSlots, error: mError } = await supabaseAdmin.from('matrix_slots').select('level');
+            if (mError) throw mError;
 
-        // 2. Fondos Tsunami (Específicos del L12)
-        // Por ahora simulado o extraido de una tabla de auditoria si existiera
-        const tsunamiTotal = 0;
+            const jumpFunds = (matrixSlots || []).reduce((sum, s) => {
+                const val = 50 * Math.pow(2, s.level - 1);
+                return sum + (val * 0.50); // El 50% de cada slot va a progesion
+            }, 0);
 
-        // 3. Métricas de Agentes IA
-        const { data: agents } = await supabaseAdmin.from('profiles').select('*').eq('is_system_bot', true);
-        const agentCount = agents?.length || 0;
+            // 2. Fondos Tsunami (Específicos del L12)
+            const tsunamiTotal = 0;
 
-        return {
-            jumpFunds: jumpFunds.toFixed(2),
-            tsunamiTotal: tsunamiTotal.toFixed(2),
-            agentCount,
-            auditDate: new Date().toISOString()
-        };
+            // 3. Métricas de Agentes IA (Protegiendo contra columna inexistente)
+            let agentCount = 0;
+            const { data: agents, error: aError } = await supabaseAdmin.from('profiles').select('id').eq('is_system_bot', true);
+
+            if (!aError) {
+                agentCount = agents?.length || 0;
+            }
+
+            return {
+                jumpFunds: jumpFunds.toFixed(2),
+                tsunamiTotal: tsunamiTotal.toFixed(2),
+                agentCount,
+                auditDate: new Date().toISOString()
+            };
+        } catch (err) {
+            console.error("Cerebro Metrics Error:", err);
+            return {
+                jumpFunds: "0.00",
+                tsunamiTotal: "0.00",
+                agentCount: 0,
+                auditDate: new Date().toISOString(),
+                error: true
+            };
+        }
     },
 
     async getAiAgents() {
-        const { data, error } = await supabaseAdmin
-            .from('profiles')
-            .select('*, wallets(balance_tc)')
-            .eq('is_system_bot', true)
-            .order('created_at', { ascending: false });
+        try {
+            const { data, error } = await supabaseAdmin
+                .from('profiles')
+                .select('*, wallets(balance_tc)')
+                .eq('is_system_bot', true)
+                .order('created_at', { ascending: false });
 
-        if (error) throw error;
-        return data;
+            if (error) throw error;
+            return data || [];
+        } catch (err) {
+            console.error("Get AI Agents error:", err);
+            return [];
+        }
     },
 
     // SISTEMA DE NOTIFICACIONES (WhatsApp Bridge)

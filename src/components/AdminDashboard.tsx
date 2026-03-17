@@ -3,7 +3,7 @@
 import {
     Users, Wallet, TrendingUp, ArrowLeft, Search, Edit3, ShieldAlert,
     Database, LayoutDashboard, Save, BarChart3, SearchCode,
-    Globe, Sparkles, Palette, Trash2, Zap, BrainCircuit
+    Globe, Sparkles, Palette, Trash2, Zap, Cpu
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -268,7 +268,7 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                     <div style={{ height: 1, background: 'var(--color-border)', margin: '12px 8px' }} />
 
                     <TabBtn id="expansion" icon={Globe} label="Expansión IA" customColor="#4F46E5" />
-                    <TabBtn id="cerebro" icon={BrainCircuit} label="Cerebro IA" customColor="var(--color-admin)" />
+                    <TabBtn id="cerebro" icon={Cpu} label="Cerebro IA" customColor="var(--color-admin)" />
                     <TabBtn id="themes" icon={Palette} label="Personalización" />
                     <TabBtn id="banks" icon={Wallet} label="Ajustes de Pago" customColor="#16A34A" />
                 </nav>

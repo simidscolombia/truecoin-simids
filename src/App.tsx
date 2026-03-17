@@ -61,14 +61,18 @@ function Header({
       zIndex: 100,
     }}>
       {/* Logo Left */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div style={{ width: 36, height: 36, background: 'var(--color-navy)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Coins size={20} color="white" />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }} onClick={() => onNavigate('landing')}>
+        <img
+          src="/assets/logo.png"
+          alt="ShopyBrands Logo"
+          style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover' }}
+        />
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <span className="header-logo-text" style={{ fontSize: 18, fontWeight: 950, color: 'var(--color-navy)', letterSpacing: -0.8, lineHeight: 1 }}>
+            Shopy<span style={{ color: 'var(--color-wallet)' }}>Brands</span>
+          </span>
+          <span style={{ fontSize: 9, fontWeight: 800, color: 'var(--color-text-muted)', letterSpacing: 0.2, marginTop: 2 }}>{FULL_VERSION_STRING}</span>
         </div>
-        <span className="header-logo-text" style={{ fontSize: 20, fontWeight: 800, color: 'var(--color-navy)', letterSpacing: -0.5 }}>
-          Shopy<span style={{ color: 'var(--color-wallet)' }}>Brands</span>
-          <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', background: 'var(--color-surface-2)', padding: '2px 6px', borderRadius: 6, marginLeft: 8, verticalAlign: 'middle', display: 'inline-block' }}>{FULL_VERSION_STRING}</span>
-        </span>
       </div>
 
       {/* Navigation Tabs - Integrated */}

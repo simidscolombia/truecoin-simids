@@ -79,15 +79,33 @@ export default function Dashboard({ user, balance }: { user: any; balance: strin
 
             <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 20px' }}>
 
-                {/* 1. Header Row */}
-                <div style={{ padding: '40px 0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                        <h1 style={{ fontSize: 28, fontWeight: 900, color: 'var(--color-navy)', margin: 0 }}>Hola, {user.fullName?.split(' ')[0]} 👋</h1>
-                        <p style={{ color: 'var(--color-text-muted)', fontWeight: 600 }}>Bienvenido a tu Centro de Control VIP</p>
+                <div style={{ padding: '40px 0 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 20 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+                        <div>
+                            <h1 style={{ fontSize: 28, fontWeight: 950, color: 'var(--color-navy)', margin: 0, letterSpacing: -0.5 }}>Hola, {user.fullName?.split(' ')[0]} 👋</h1>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 4 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(16, 185, 129, 0.1)', color: '#10B981', padding: '4px 10px', borderRadius: 8, fontSize: 11, fontWeight: 800 }}>
+                                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#10B981', animation: 'pulse 2s infinite' }}></div>
+                                    IA SPILLOVER 3.6 ACTIVA
+                                </div>
+                                <div style={{
+                                    display: 'flex', alignItems: 'center', gap: 8, background: 'white', border: '1px solid var(--color-border)',
+                                    padding: '4px 12px', borderRadius: 10, cursor: 'pointer', transition: 'all 0.2s'
+                                }}
+                                    onClick={() => { navigator.clipboard.writeText(user.referralCode); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+                                    onMouseOver={(e) => e.currentTarget.style.borderColor = 'var(--color-wallet)'}
+                                    onMouseOut={(e) => e.currentTarget.style.borderColor = 'var(--color-border)'}
+                                >
+                                    <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>Código:</span>
+                                    <code style={{ fontSize: 13, fontWeight: 950, color: 'var(--color-wallet)', letterSpacing: 0.5 }}>{user.referralCode}</code>
+                                    {copied ? <CheckCircle2 size={14} color="#10B981" /> : <Copy size={14} color="var(--color-navy)" />}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div style={{ display: 'flex', gap: 12 }}>
-                        <button onClick={() => setShowRecharge(true)} className="btn btn-wallet btn-sm"><Zap size={16} /> Recargar</button>
-                        <button onClick={() => setShowTransfer(true)} className="btn btn-outline btn-sm"><Send size={16} /> Enviar</button>
+                        <button onClick={() => setShowRecharge(true)} className="btn btn-wallet btn-sm" style={{ padding: '10px 20px', borderRadius: 12, fontWeight: 900 }}><Zap size={16} /> Recargar</button>
+                        <button onClick={() => setShowTransfer(true)} className="btn btn-outline btn-sm" style={{ padding: '10px 20px', borderRadius: 12, fontWeight: 900 }}><Send size={16} /> Enviar</button>
                     </div>
                 </div>
 
@@ -115,39 +133,12 @@ export default function Dashboard({ user, balance }: { user: any; balance: strin
 
                     <AnimatePresence mode="wait">
                         {view === 'ascension' ? (
-                            <motion.div key="m" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-                                style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 24 }}>
-
+                            <motion.div key="m" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
                                 <GiftMatrix
                                     currentLevel={stats.currentLevel}
                                     slots={matrixSlots}
                                     onSelectUser={(u: any) => setSelectedDetailUser(u)}
                                 />
-
-                                {/* Secondary info / Referral link */}
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                                    <div className="card" style={{ padding: 24, border: '1px solid var(--color-border)', background: 'white' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                                            <Copy size={18} color="var(--color-wallet)" />
-                                            <h4 style={{ fontSize: 13, fontWeight: 900, color: 'var(--color-navy)', margin: 0, textTransform: 'uppercase' }}>TU ENLACE DE EXPANSIÓN</h4>
-                                        </div>
-                                        <p style={{ fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 16, fontWeight: 600 }}>Copia tu código y compártelo para que la IA ubique a tus socios automáticamente.</p>
-                                        <div style={{ background: 'var(--color-surface-2)', padding: '14px 18px', borderRadius: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid var(--color-border)' }}>
-                                            <code style={{ fontWeight: 950, fontSize: 16, letterSpacing: 1, color: 'var(--color-wallet)' }}>{user.referralCode}</code>
-                                            <button onClick={() => { navigator.clipboard.writeText(user.referralCode); setCopied(true); setTimeout(() => setCopied(false), 2000); }} style={{ background: 'white', border: '1px solid var(--color-border)', borderRadius: 8, padding: 8, cursor: 'pointer', color: 'var(--color-navy)', display: 'flex', alignItems: 'center' }}>
-                                                {copied ? <CheckCircle2 size={16} color="var(--color-marketplace)" /> : <Copy size={16} />}
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div className="card" style={{ padding: 24, background: 'linear-gradient(135deg, var(--color-navy) 0%, #1e293b 100%)', color: 'white' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-                                            <Zap size={18} color="var(--color-wallet)" />
-                                            <h4 style={{ fontSize: 13, fontWeight: 900, margin: 0 }}>PODER DE IA ACTIVO</h4>
-                                        </div>
-                                        <p style={{ fontSize: 12, opacity: 0.8, fontWeight: 500, lineHeight: 1.6 }}>El motor "Spillover 3.6" está gestionando tus 12 niveles. Cada nuevo socio será ubicado en la posición óptima para maximizar tus TrueCoins.</p>
-                                    </div>
-                                </div>
                             </motion.div>
                         ) : (
                             <motion.div key="n" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>

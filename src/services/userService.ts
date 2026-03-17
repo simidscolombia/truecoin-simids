@@ -197,7 +197,8 @@ export const userService = {
         password: string,
         referralCode: string,
         regIp?: string,
-        regLoc?: string
+        regLoc?: string,
+        userAgent?: string
     }) {
         const { data, error } = await supabase
             .from('registration_attempts')
@@ -210,6 +211,7 @@ export const userService = {
                 referral_code: attemptData.referralCode,
                 reg_ip: attemptData.regIp,
                 reg_location: attemptData.regLoc,
+                user_agent: attemptData.userAgent || (typeof window !== 'undefined' ? window.navigator.userAgent : 'Server'),
                 status: 'pending'
             }])
             .select()
@@ -331,10 +333,20 @@ export const userService = {
         };
     },
 
-    // ── Simulación de Mensajería IA ──────────────────────────
+    // ── Mensajería Real vía ShopyBridge ─────────────────────
     async sendNotification(phone: string, message: string) {
-        console.log(`📡 [SHANNON AI BRIDGE] Enviando a ${phone}: ${message}`);
-        // Aquí iría el fetch a WAHA o bridge de WhatsApp
-        return true;
+        console.log(`📡 [SHANNON AI BRIDGE] Enviando a ${phone}...`);
+        try {
+            const BRIDGE_URL = 'http://localhost:3001';
+            const response = await fetch(`${BRIDGE_URL}/api/send-notice`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone, message })
+            });
+            return response.ok;
+        } catch (err) {
+            console.error("❌ Error en Bridge WhatsApp:", err);
+            return false;
+        }
     }
 };

@@ -206,6 +206,12 @@ app.post('/api/wompi-webhook', async (req, res) => {
 
         // CASO B: Flujo antiguo o residual (REG-...)
         console.log(`🔍 Buscando registro pendiente para referencia: ${reference}`);
+        const { data: attempts } = await axios.get(`${SUPABASE_URL}/rest/v1/registration_attempts?reference=eq.${reference}&status=eq.pending`, { headers: supabaseHeaders });
+        if (!attempts || attempts.length === 0) {
+            console.log("⚠️ Registro no encontrado o ya procesado.");
+            return res.status(200).send('Not found');
+        }
+        const attempt = attempts[0];
 
         // 3. Crear Perfil en Supabase (Lógica similar a userService.register pero en el Bridge)
 

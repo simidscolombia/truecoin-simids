@@ -8,6 +8,7 @@ import { userService } from '../services/userService';
 interface NetworkTreeProps {
     userId: string;
     mentor?: { full_name: string, email: string } | null;
+    onSelectUser?: (user: any) => void;
 }
 
 const RANKS = [
@@ -23,7 +24,7 @@ const LEVEL_VALUES: Record<number, number> = {
     10: 25600, 11: 51200, 12: 102400,
 };
 
-export default function NetworkTree({ userId, mentor }: NetworkTreeProps) {
+export default function NetworkTree({ userId, mentor, onSelectUser }: NetworkTreeProps) {
     const [network, setNetwork] = useState<{ l1: any[], l2: any[], l3: any[], l4: any[] }>({ l1: [], l2: [], l3: [], l4: [] });
     const [loading, setLoading] = useState(true);
     const [mode, setMode] = useState<'sponsorship' | 'placement'>('placement');
@@ -108,13 +109,14 @@ export default function NetworkTree({ userId, mentor }: NetworkTreeProps) {
                                 key={item.id}
                                 initial={{ opacity: 0, x: -10 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                whileHover={{ scale: 1.01, boxShadow: '0 8px 20px rgba(0,0,0,0.05)' }}
+                                onClick={() => onSelectUser?.(item)}
+                                whileHover={{ scale: 1.01, boxShadow: '0 8px 20px rgba(0,0,0,0.05)', backgroundColor: 'var(--color-surface-2)' }}
                                 style={{
                                     padding: '14px 20px', borderRadius: 20, background: 'white',
                                     border: '1px solid var(--color-border)', display: 'flex',
                                     alignItems: 'center', justifyContent: 'space-between',
                                     transition: 'all 0.2s',
-                                    cursor: 'default'
+                                    cursor: 'pointer'
                                 }}
                             >
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>

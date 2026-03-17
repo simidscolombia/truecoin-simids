@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Wallet, Users, Copy, Send, CheckCircle2, Award, Zap
+    Wallet, Users, Copy, Send, CheckCircle2, Award, Zap, Shield
 } from 'lucide-react';
 import GiftMatrix from './GiftMatrix';
 import NetworkTree from './NetworkTree';
@@ -11,7 +11,6 @@ import TransferModal from './TransferModal';
 import RechargeModal from './RechargeModal';
 import { userService } from '../services/userService';
 import { matrixService } from '../services/matrixService';
-import WaitingRoom from './WaitingRoom';
 
 const RANKS = [
     "VIP BRONCE", "VIP COBRE", "VIP PLATA", "VIP ORO",
@@ -50,10 +49,8 @@ export default function Dashboard({ user, balance }: { user: any; balance: strin
     const [copied, setCopied] = useState(false);
     const [view, setView] = useState<'ascension' | 'network'>('ascension');
     const [stats, setStats] = useState<any>({ directReferrals: 0, currentLevel: 1, isVip: false });
-    const [pendingReferrals, setPendingReferrals] = useState<any[]>([]);
-    const [isPlacing, setIsPlacing] = useState(false);
     const [matrixSlots, setMatrixSlots] = useState<any[]>([]);
-    const [selectedUserToPlace, setSelectedUserToPlace] = useState<any | null>(null);
+    const [selectedDetailUser, setSelectedDetailUser] = useState<any | null>(null);
 
     useEffect(() => {
         if (user?.id) {
@@ -63,38 +60,17 @@ export default function Dashboard({ user, balance }: { user: any; balance: strin
 
     const fetchDashboardData = async () => {
         try {
-            const [s, p, m] = await Promise.all([
+            const [s, m] = await Promise.all([
                 userService.getDashboardStats(user.id),
-                matrixService.getUnplacedReferrals(user.id),
                 matrixService.getMatrixSlots(user.id, stats.currentLevel)
             ]);
             setStats(s);
-            setPendingReferrals(p);
             setMatrixSlots(m);
         } catch (e) {
             console.error(e);
         }
     };
 
-    const handlePlaceUser = async (userId: string, position: number) => {
-        if (!user.id) return;
-        setIsPlacing(true);
-        try {
-            await matrixService.placeUser({
-                matrixOwnerId: user.id,
-                occupantId: userId,
-                recruiterId: user.id,
-                level: stats.currentLevel,
-                position
-            });
-            setSelectedUserToPlace(null);
-            await fetchDashboardData();
-        } catch (err: any) {
-            alert(err.message);
-        } finally {
-            setIsPlacing(false);
-        }
-    };
 
     return (
         <div className="module-page animate-in" style={{ background: 'var(--color-surface-2)', minHeight: '100vh', paddingBottom: 60 }}>
@@ -122,68 +98,127 @@ export default function Dashboard({ user, balance }: { user: any; balance: strin
                     <StatCard label="Nivel Actual" value={RANKS[(stats.currentLevel - 1) % 12]} icon={<Award size={20} />} color="var(--color-directorio)" />
                 </div>
 
-                {/* 3. Main Action Center (Flexible Flow) */}
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 24, alignItems: 'start', marginBottom: 32 }}>
-
-                    {/* Left: Waiting Room */}
-                    <div style={{ flex: '1 1 340px' }}>
-                        <WaitingRoom
-                            pendingUsers={pendingReferrals}
-                            onPlace={userId => setSelectedUserToPlace(pendingReferrals.find(p => p.id === userId))}
-                            selectedUserId={selectedUserToPlace?.id}
-                            isPlacing={isPlacing}
-                        />
-
-                        {/* Referral Link Card */}
-                        <div className="card" style={{ marginTop: 24, padding: 24 }}>
-                            <h4 style={{ fontSize: 13, fontWeight: 800, color: 'var(--color-navy)', marginBottom: 12 }}>MI CÓDIGO DE INVITACIÓN</h4>
-                            <div style={{ background: 'var(--color-surface-2)', padding: '12px 16px', borderRadius: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid var(--color-border)' }}>
-                                <code style={{ fontWeight: 900, letterSpacing: 1, color: 'var(--color-wallet)' }}>{user.referralCode}</code>
-                                <button onClick={() => { navigator.clipboard.writeText(user.referralCode); setCopied(true); setTimeout(() => setCopied(false), 2000); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-navy)' }}>
-                                    {copied ? <CheckCircle2 size={16} color="var(--color-marketplace)" /> : <Copy size={16} />}
-                                </button>
-                            </div>
-                        </div>
+                {/* 3. Main Center - Tab Switching */}
+                <div style={{ marginBottom: 32 }}>
+                    <div style={{ display: 'flex', gap: 8, marginBottom: 20, background: 'rgba(0,0,0,0.05)', padding: 6, borderRadius: 16, width: 'fit-content' }}>
+                        {['ascension', 'network'].map((v: any) => (
+                            <button key={v} onClick={() => setView(v)} style={{
+                                padding: '10px 24px', borderRadius: 12, border: 'none', cursor: 'pointer', fontWeight: 900, fontSize: 13,
+                                background: view === v ? 'var(--color-navy)' : 'transparent',
+                                color: view === v ? 'white' : 'var(--color-text-muted)',
+                                transition: 'all 0.2s'
+                            }}>
+                                {v === 'ascension' ? 'MI TABLERO 1X4' : 'MI ÁRBOL IA'}
+                            </button>
+                        ))}
                     </div>
 
-                    {/* Right: The Board / Matrix */}
-                    <div style={{ flex: '2 1 600px', minWidth: '320px' }}>
-                        {/* Tab Switcher */}
-                        <div style={{ display: 'flex', gap: 8, marginBottom: 20, background: 'rgba(0,0,0,0.05)', padding: 6, borderRadius: 16, width: 'fit-content' }}>
-                            {['ascension', 'network'].map((v: any) => (
-                                <button key={v} onClick={() => setView(v)} style={{
-                                    padding: '8px 20px', borderRadius: 12, border: 'none', cursor: 'pointer', fontWeight: 800, fontSize: 12,
-                                    background: view === v ? 'var(--color-navy)' : 'transparent',
-                                    color: view === v ? 'white' : 'var(--color-text-muted)',
-                                    transition: 'all 0.2s'
-                                }}>
-                                    {v === 'ascension' ? 'Mi Tablero 1x4' : 'Mi Árbol Completado'}
-                                </button>
-                            ))}
-                        </div>
+                    <AnimatePresence mode="wait">
+                        {view === 'ascension' ? (
+                            <motion.div key="m" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+                                style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 24 }}>
 
-                        <AnimatePresence mode="wait">
-                            {view === 'ascension' ? (
-                                <motion.div key="m" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }}>
-                                    <GiftMatrix
-                                        currentLevel={stats.currentLevel}
-                                        slots={matrixSlots}
-                                        isPlacing={!!selectedUserToPlace}
-                                        onSelectPosition={(pos: number) => selectedUserToPlace && handlePlaceUser(selectedUserToPlace.id, pos)}
-                                    />
-                                </motion.div>
-                            ) : (
-                                <motion.div key="n" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }}>
-                                    <div className="card" style={{ padding: 32 }}>
-                                        <h3 style={{ fontSize: 18, fontWeight: 900, color: 'var(--color-navy)', marginBottom: 24 }}>Vista de Red Jerárquica</h3>
-                                        <NetworkTree userId={user.id} mentor={stats.mentor} />
+                                <GiftMatrix
+                                    currentLevel={stats.currentLevel}
+                                    slots={matrixSlots}
+                                    onSelectUser={(u: any) => setSelectedDetailUser(u)}
+                                />
+
+                                {/* Secondary info / Referral link */}
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                                    <div className="card" style={{ padding: 24, border: '1px solid var(--color-border)', background: 'white' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                                            <Copy size={18} color="var(--color-wallet)" />
+                                            <h4 style={{ fontSize: 13, fontWeight: 900, color: 'var(--color-navy)', margin: 0, textTransform: 'uppercase' }}>TU ENLACE DE EXPANSIÓN</h4>
+                                        </div>
+                                        <p style={{ fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 16, fontWeight: 600 }}>Copia tu código y compártelo para que la IA ubique a tus socios automáticamente.</p>
+                                        <div style={{ background: 'var(--color-surface-2)', padding: '14px 18px', borderRadius: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid var(--color-border)' }}>
+                                            <code style={{ fontWeight: 950, fontSize: 16, letterSpacing: 1, color: 'var(--color-wallet)' }}>{user.referralCode}</code>
+                                            <button onClick={() => { navigator.clipboard.writeText(user.referralCode); setCopied(true); setTimeout(() => setCopied(false), 2000); }} style={{ background: 'white', border: '1px solid var(--color-border)', borderRadius: 8, padding: 8, cursor: 'pointer', color: 'var(--color-navy)', display: 'flex', alignItems: 'center' }}>
+                                                {copied ? <CheckCircle2 size={16} color="var(--color-marketplace)" /> : <Copy size={16} />}
+                                            </button>
+                                        </div>
                                     </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
 
+                                    <div className="card" style={{ padding: 24, background: 'linear-gradient(135deg, var(--color-navy) 0%, #1e293b 100%)', color: 'white' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                                            <Zap size={18} color="var(--color-wallet)" />
+                                            <h4 style={{ fontSize: 13, fontWeight: 900, margin: 0 }}>PODER DE IA ACTIVO</h4>
+                                        </div>
+                                        <p style={{ fontSize: 12, opacity: 0.8, fontWeight: 500, lineHeight: 1.6 }}>El motor "Spillover 3.6" está gestionando tus 12 niveles. Cada nuevo socio será ubicado en la posición óptima para maximizar tus TrueCoins.</p>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ) : (
+                            <motion.div key="n" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                                <div className="card" style={{ padding: 40, border: '1px solid var(--color-border)', borderRadius: 24 }}>
+                                    <h3 style={{ fontSize: 20, fontWeight: 950, color: 'var(--color-navy)', marginBottom: 32, display: 'flex', alignItems: 'center', gap: 12 }}>
+                                        <Users size={24} color="var(--color-wallet)" />
+                                        Genealogía de Red 12 Niveles
+                                    </h3>
+                                    <NetworkTree userId={user.id} mentor={stats.mentor} onSelectUser={(u: any) => setSelectedDetailUser(u)} />
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
+
+                {/* 4. User Detail Modal (Anti-Dummy Experience) */}
+                <AnimatePresence>
+                    {selectedDetailUser && (
+                        <div style={{ position: 'fixed', inset: 0, zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+                            <motion.div
+                                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                                onClick={() => setSelectedDetailUser(null)}
+                                style={{ position: 'absolute', inset: 0, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(8px)' }}
+                            />
+                            <motion.div
+                                initial={{ scale: 0.9, y: 20, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.9, y: 20, opacity: 0 }}
+                                style={{
+                                    width: '100%', maxWidth: 440, background: 'white', borderRadius: 32, overflow: 'hidden', position: 'relative',
+                                    boxShadow: '0 30px 60px rgba(0,0,0,0.2)', border: '1px solid var(--color-border)'
+                                }}
+                            >
+                                <div style={{ height: 120, background: 'linear-gradient(135deg, var(--color-navy) 0%, #334155 100%)', position: 'relative' }}>
+                                    <button onClick={() => setSelectedDetailUser(null)} style={{ position: 'absolute', right: 20, top: 20, background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', width: 32, height: 32, borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>✕</button>
+                                    <div style={{ position: 'absolute', bottom: -50, left: '50%', transform: 'translateX(-50%)', width: 100, height: 100, borderRadius: '50%', border: '5px solid white', background: 'var(--color-surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 20px rgba(0,0,0,0.1)' }}>
+                                        <Users size={48} color="var(--color-navy)" />
+                                    </div>
+                                </div>
+                                <div style={{ paddingTop: 60, paddingBottom: 40, paddingLeft: 40, paddingRight: 40, textAlign: 'center' }}>
+                                    <h3 style={{ fontSize: 22, fontWeight: 950, color: 'var(--color-navy)', margin: '0 0 4px 0' }}>{selectedDetailUser.full_name}</h3>
+                                    <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--color-wallet)', textTransform: 'uppercase', letterSpacing: 1 }}>{RANKS[(selectedDetailUser.current_level || 1) - 1]}</span>
+
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 32, textAlign: 'left' }}>
+                                        <div style={{ padding: 16, background: 'var(--color-surface-2)', borderRadius: 20 }}>
+                                            <p style={{ fontSize: 10, fontWeight: 800, color: 'var(--color-text-muted)', textTransform: 'uppercase', marginBottom: 4 }}>ID SOCIO</p>
+                                            <p style={{ fontSize: 14, fontWeight: 900, color: 'var(--color-navy)', margin: 0 }}>#{selectedDetailUser.id.substring(0, 8)}</p>
+                                        </div>
+                                        <div style={{ padding: 16, background: 'var(--color-surface-2)', borderRadius: 20 }}>
+                                            <p style={{ fontSize: 10, fontWeight: 800, color: 'var(--color-text-muted)', textTransform: 'uppercase', marginBottom: 4 }}>ENERGÍA</p>
+                                            <p style={{ fontSize: 14, fontWeight: 900, color: 'var(--color-wallet)', margin: 0 }}>400 TC</p>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ marginTop: 24, padding: 20, background: 'var(--color-surface-2)', borderRadius: 24, display: 'flex', alignItems: 'center', gap: 14 }}>
+                                        <div style={{ width: 40, height: 40, borderRadius: 12, background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--color-border)' }}>
+                                            <Shield size={20} color="var(--color-directorio)" />
+                                        </div>
+                                        <div style={{ textAlign: 'left' }}>
+                                            <p style={{ fontSize: 10, fontWeight: 800, color: 'var(--color-text-muted)', margin: 0 }}>ESTADO DEL NODO</p>
+                                            <p style={{ fontSize: 13, fontWeight: 900, color: 'var(--color-navy)', margin: 0 }}>Activo Proyectando Red</p>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        onClick={() => setSelectedDetailUser(null)}
+                                        style={{ marginTop: 32, width: '100%', padding: '16px', borderRadius: 16, border: 'none', background: 'var(--color-navy)', color: 'white', fontWeight: 900, cursor: 'pointer', transition: 'all 0.2s' }}
+                                    >CERRAR FICHA</button>
+                                </div>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
 
             </div>
         </div>

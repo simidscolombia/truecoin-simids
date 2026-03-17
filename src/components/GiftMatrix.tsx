@@ -9,6 +9,7 @@ interface GiftMatrixProps {
     currentLevel?: number;
     slots?: MatrixSlot[];
     onSelectPosition?: (pos: number) => void;
+    onSelectUser?: (user: any) => void;
     isPlacing?: boolean;
 }
 
@@ -23,6 +24,7 @@ export default function GiftMatrix({
     currentLevel = 1,
     slots = [],
     onSelectPosition,
+    onSelectUser,
     isPlacing
 }: GiftMatrixProps) {
     const [hoveredSlot, setHoveredSlot] = useState<number | null>(null);
@@ -96,14 +98,20 @@ export default function GiftMatrix({
                             key={slot.pos}
                             onMouseEnter={() => setHoveredSlot(slot.pos)}
                             onMouseLeave={() => setHoveredSlot(null)}
-                            onClick={() => !isActive && isPlacing && onSelectPosition?.(slot.pos)}
-                            whileHover={{ y: isActive ? 0 : -5 }}
+                            onClick={() => {
+                                if (isActive) {
+                                    onSelectUser?.({ id: slot.data?.occupant_id, full_name: slot.data?.occupant_name });
+                                } else if (isPlacing) {
+                                    onSelectPosition?.(slot.pos);
+                                }
+                            }}
+                            whileHover={{ y: isActive ? -2 : -5 }}
                             style={{
                                 display: 'flex',
                                 flexDirection: 'column',
                                 alignItems: 'center',
                                 gap: 12,
-                                cursor: !isActive && isPlacing ? 'pointer' : 'default',
+                                cursor: isActive || isPlacing ? 'pointer' : 'default',
                                 position: 'relative'
                             }}
                         >

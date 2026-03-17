@@ -13,10 +13,10 @@ import { userService } from '../services/userService';
 import { matrixService } from '../services/matrixService';
 
 const RANKS = [
-    "VIP BRONCE", "VIP COBRE", "VIP PLATA", "VIP ORO",
-    "PLATINO", "ZAFIRO", "ESMERALDA",
-    "DIAMANTE", "DIAMANTE AZUL", "CORONA",
-    "EMBAJADOR", "EMBAJADOR REAL", "LEYENDA"
+    "VIP BRONCE", "VIP PLATA", "VIP ORO",
+    "PLATINO I", "PLATINO II", "PLATINO III",
+    "ESMERALDA I", "ESMERALDA II", "ESMERALDA III",
+    "ZAFIRO", "DIAMANTE", "LEYENDA SIMID"
 ];
 
 function StatCard({ label, value, unit, icon, color }: { label: string; value: string; unit?: string; icon: React.ReactNode; color: string; }) {

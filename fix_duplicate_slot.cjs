@@ -24,16 +24,22 @@ function httpsReq(url, method, headers, body) {
     });
 }
 
-async function checkProfiles() {
+async function fixDuplicate() {
+    const slotIdToDelete = '3b882daa-7d8e-4f8f-9fc3-4eae2678caeb'; // ID del slot repetido en pos 4
+
+    console.log("Deleting duplicate slot ID:", slotIdToDelete);
+
     const res = await httpsReq(
-        SUPABASE_URL + '/rest/v1/profiles?select=id,email,full_name',
-        'GET',
+        SUPABASE_URL + '/rest/v1/matrix_slots?id=eq.' + slotIdToDelete,
+        'DELETE',
         {
             'apikey': SERVICE_ROLE,
-            'Authorization': 'Bearer ' + SERVICE_ROLE
+            'Authorization': 'Bearer ' + SERVICE_ROLE,
+            'Prefer': 'return=representation'
         }
     );
-    console.log("Profiles check:", res.status, res.body);
+
+    console.log("Delete result:", res.status, res.body);
 }
 
-checkProfiles();
+fixDuplicate();

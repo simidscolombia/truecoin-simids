@@ -44,7 +44,7 @@ export const matrixService = {
         position: number
     }) {
         // 1. Verificar si la posición ya está ocupada
-        const { data: existing } = await supabase
+        const { data: posTaken } = await supabase
             .from('matrix_slots')
             .select('id')
             .eq('matrix_owner_id', params.matrixOwnerId)
@@ -52,11 +52,24 @@ export const matrixService = {
             .eq('position', params.position)
             .single();
 
-        if (existing) {
+        if (posTaken) {
             throw new Error(`La posición ${params.position} ya está ocupada.`);
         }
 
-        // 2. Insertar el slot
+        // 2. Verificar si el usuario ya está ubicado en este tablero (nivel)
+        const { data: userAlreadyPlaced } = await supabase
+            .from('matrix_slots')
+            .select('id')
+            .eq('matrix_owner_id', params.matrixOwnerId)
+            .eq('level', params.level)
+            .eq('occupant_id', params.occupantId)
+            .single();
+
+        if (userAlreadyPlaced) {
+            throw new Error(`Este socio ya está ubicado en tu tablero de nivel ${params.level}.`);
+        }
+
+        // 3. Insertar el slot
         const { error } = await supabase
             .from('matrix_slots')
             .insert([{

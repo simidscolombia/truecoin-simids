@@ -24,16 +24,26 @@ function httpsReq(url, method, headers, body) {
     });
 }
 
-async function checkProfiles() {
-    const res = await httpsReq(
-        SUPABASE_URL + '/rest/v1/profiles?select=id,email,full_name',
+async function checkMatrix() {
+    // Primero buscar a Elkin para estar seguros de su ID
+    const profRes = await httpsReq(
+        SUPABASE_URL + '/rest/v1/profiles?full_name=ilike.elkin*&select=id,full_name',
         'GET',
-        {
-            'apikey': SERVICE_ROLE,
-            'Authorization': 'Bearer ' + SERVICE_ROLE
-        }
+        { 'apikey': SERVICE_ROLE, 'Authorization': 'Bearer ' + SERVICE_ROLE }
     );
-    console.log("Profiles check:", res.status, res.body);
+    const profiles = JSON.parse(profRes.body);
+    console.log("Elkin profiles:", profiles);
+
+    if (profiles.length === 0) return;
+    const elkinId = profiles[0].id;
+
+    // Buscar sus slots en la matriz
+    const matrixRes = await httpsReq(
+        SUPABASE_URL + '/rest/v1/matrix_slots?matrix_owner_id=eq.' + elkinId + '&select=*',
+        'GET',
+        { 'apikey': SERVICE_ROLE, 'Authorization': 'Bearer ' + SERVICE_ROLE }
+    );
+    console.log("Elkin Matrix Slots:", JSON.parse(matrixRes.body));
 }
 
-checkProfiles();
+checkMatrix();

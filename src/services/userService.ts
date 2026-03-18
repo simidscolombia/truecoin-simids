@@ -337,7 +337,7 @@ export const userService = {
     async sendNotification(phone: string, message: string) {
         console.log(`📡 [SHANNON AI BRIDGE] Enviando a ${phone}...`);
         try {
-            const BRIDGE_URL = 'http://localhost:3001';
+            const BRIDGE_URL = import.meta.env.VITE_BRIDGE_URL || 'http://localhost:3001';
             const response = await fetch(`${BRIDGE_URL}/api/send-notice`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

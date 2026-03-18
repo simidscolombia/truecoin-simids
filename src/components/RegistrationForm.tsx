@@ -24,7 +24,19 @@ export default function RegistrationForm({ onSuccess, initialReferralCode }: Reg
     const [privacyAccepted, setPrivacyAccepted] = useState(false);
     const [error, setError] = useState('');
 
+    const [paymentSettings, setPaymentSettings] = useState<any>(null);
+
     useEffect(() => {
+        async function loadSettings() {
+            try {
+                const { data } = await userService.getPaymentSettings();
+                setPaymentSettings(data);
+            } catch (e) {
+                console.error("Error loading payment settings:", e);
+            }
+        }
+        loadSettings();
+
         // Cargar IP (Auditoría básica)
         fetch('https://api.ipify.org?format=json').then(r => r.json()).then(() => {
             // IP fetched
@@ -72,8 +84,12 @@ export default function RegistrationForm({ onSuccess, initialReferralCode }: Reg
         setError('');
 
         try {
-            // 1. Crear el perfil de inmediato
-            const profile = await userService.register({
+            // 1. Generar Referencia Única para este intento de registro
+            const reference = `REG-${Date.now().toString(36).toUpperCase()}`;
+
+            // 2. Guardar el intento de registro (Pendiente de pago)
+            await userService.createRegistrationAttempt({
+                reference,
                 fullName: formData.fullName,
                 email: formData.email,
                 phone: formData.phone,
@@ -81,21 +97,31 @@ export default function RegistrationForm({ onSuccess, initialReferralCode }: Reg
                 referralCode: referralCode
             });
 
-            // 2. Notificar por IA (Simulado)
-            if (profile.phone) {
-                const welcomeMsg = `🚀 *¡Bienvenido a ShopyBrands, ${profile.full_name}!* 
-Tu cuenta VIP ha sido activada. Tu código de socio es: *${profile.referral_code}*. 
-Prepárate para crecer en red 1x4 y ganar TrueCoins. ¡Nos vemos dentro! ✨`;
-                userService.sendNotification(profile.phone, welcomeMsg);
+            // 3. Preparar Redirección a Wompi
+            if (!paymentSettings) {
+                throw new Error("No se pudo cargar la configuración de pago. Intenta de nuevo.");
             }
 
-            // 3. Notificar éxito local y pasar al flujo de App
-            onSuccess(profile);
+            const amountInCents = (paymentSettings.reg_fee || 5000) * 100;
+            const wompiPublic = paymentSettings.wompi_public;
+            const integritySecret = paymentSettings.wompi_integrity;
+
+            let paymentUrl = `https://checkout.wompi.co/p/?public-key=${wompiPublic}&currency=COP&amount-in-cents=${amountInCents}&reference=${reference}&redirect_url=${encodeURIComponent(window.location.origin)}`;
+
+            // 4. Firmar si hay secreto de integridad (Seguridad extra)
+            if (integritySecret && typeof crypto !== 'undefined') {
+                const text = `${reference}${amountInCents}COP${integritySecret}`;
+                const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+                const signature = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+                paymentUrl += `&signature:integrity=${signature}`;
+            }
+
+            // 5. Redirigir al usuario al Checkout
+            window.location.href = paymentUrl;
 
         } catch (err: any) {
-            console.error("Error en registro:", err);
-            setError(err.message || 'Error al crear la cuenta. Intenta con otro correo.');
-        } finally {
+            console.error("Error en pre-registro:", err);
+            setError(err.message || 'Error al iniciar el pago. Intenta de nuevo.');
             setIsLoading(false);
         }
     };
@@ -388,11 +414,11 @@ Prepárate para crecer en red 1x4 y ganar TrueCoins. ¡Nos vemos dentro! ✨`;
                                     Total a Pagar
                                 </p>
                                 <p style={{ fontSize: 32, fontWeight: 800, color: 'var(--color-navy)' }}>
-                                    ${(0).toLocaleString()} <span style={{ fontSize: 14, opacity: 0.6 }}>COP</span>
+                                    ${(paymentSettings?.reg_fee || 5000).toLocaleString()} <span style={{ fontSize: 14, opacity: 0.6 }}>COP</span>
                                 </p>
                                 <div style={{ height: 1, background: 'var(--color-border)', margin: '14px 0' }}></div>
                                 <p style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>
-                                    Recibirás <strong>{Math.floor(0 / 1000)} TC</strong> para participar en la Red de Regalos.
+                                    Recibirás <strong>{Math.floor((paymentSettings?.reg_fee || 5000) / 1000)} TC</strong> para participar en la Red de Regalos.
                                 </p>
                             </div>
 

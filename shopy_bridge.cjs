@@ -17,6 +17,18 @@ const SUPABASE_SERVICE_ROLE = process.env.VITE_SUPABASE_SERVICE_ROLE || process.
 let WOMPI_INTEGRITY = process.env.WOMPI_INTEGRITY;
 const crypto = require('crypto');
 
+// Helper to format phone for WAHA
+function formatPhoneForWAHA(phone) {
+    if (!phone) return '';
+    if (phone.includes('@')) return phone;
+    let clean = phone.replace(/\+/g, '');
+    // Asumir Colombia (+57) si tiene 10 dígitos (ej: 3001234567)
+    if (clean.length === 10 && clean.startsWith('3')) {
+        clean = '57' + clean;
+    }
+    return `${clean}@c.us`;
+}
+
 // Cargar WOMPI_INTEGRITY dinámicamente desde la DB si no está en el .env
 async function loadDynamicConfig() {
     try {
@@ -108,7 +120,7 @@ app.post('/api/send-notice', async (req, res) => {
     }
 
     // Normalizar formato de teléfono para WAHA (ej: 57300... -> 57300...@c.us)
-    const chatId = phone.includes('@') ? phone : `${phone.replace('+', '')}@c.us`;
+    const chatId = formatPhoneForWAHA(phone);
 
     console.log(`📢 Enviando notificación a ${chatId}...`);
 
@@ -198,8 +210,8 @@ app.post('/api/wompi-webhook', async (req, res) => {
             console.log(`✅ Usuario ${profile.full_name} activado con ${rewardTC} TC`);
 
             // 4. Notificar
-            const welcomeMsg = `¡Felicidades ${profile.full_name}! 🚀 Tu pago ha sido confirmado y tu oficina virtual ShopyBrands ya está ACTIVA. ✅\n\n💎 Recibiste: ${rewardTC.toFixed(2)} TC\n\nYa puedes entrar y expander tu red: https://truecoin-simids.vercel.app`;
-            await axios.post(`${WAHA_URL}/api/sendText`, { chatId: profile.phone.includes('@') ? profile.phone : `${profile.phone.replace('+', '')}@c.us`, text: welcomeMsg, session: 'default' }).catch(() => { });
+            const welcomeMsg = `¡Felicidades ${profile.full_name}! 🚀 Tu pago ha sido confirmado y tu oficina virtual ShopyBrands ya está ACTIVA. ✅\n\n💎 Recibiste: ${rewardTC.toFixed(2)} TC\n\nYa puedes entrar y expander tu red: https://shopybrands.com`;
+            await axios.post(`${WAHA_URL}/api/sendText`, { chatId: formatPhoneForWAHA(profile.phone), text: welcomeMsg, session: 'default' }).catch(() => { });
 
             return res.status(200).send('Activated');
         }
@@ -271,11 +283,11 @@ app.post('/api/wompi-webhook', async (req, res) => {
         console.log(`✅ Usuario creado y activado: ${newProfile.id}`);
 
         // 5. Notificar por WhatsApp vía Shopy
-        const welcomeMessage = `¡Hola ${attempt.full_name}! 🚀 Bienvenido a la elite de ShopyBrands.\n\nTu pago de membresía ha sido confirmado y tu cuenta ya está ACTIVA. ✅\n\n💎 Recibiste: ${rewardTC.toFixed(2)} TC\n🎟️ Tu código de referido: ${newCode}\n\nYa puedes ingresar con tu correo y contraseña: ${process.env.APP_URL || 'https://truecoin-simids.vercel.app'}\n\n¡Estoy lista para ayudarte a crecer! 🤖`;
+        const welcomeMessage = `¡Hola ${attempt.full_name}! 🚀 Bienvenido a la elite de ShopyBrands.\n\nTu pago de membresía ha sido confirmado y tu cuenta ya está ACTIVA. ✅\n\n💎 Recibiste: ${rewardTC.toFixed(2)} TC\n🎟️ Tu código de referido: ${newCode}\n\nYa puedes ingresar con tu correo y contraseña: ${process.env.APP_URL || 'https://shopybrands.com'}\n\n¡Estoy lista para ayudarte a crecer! 🤖`;
 
         try {
             await axios.post(`${WAHA_URL}/api/sendText`, {
-                chatId: attempt.phone.includes('@') ? attempt.phone : `${attempt.phone.replace('+', '')}@c.us`,
+                chatId: formatPhoneForWAHA(attempt.phone),
                 text: welcomeMessage,
                 session: 'default'
             });

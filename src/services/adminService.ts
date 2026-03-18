@@ -272,7 +272,7 @@ export const adminService = {
     // SISTEMA DE NOTIFICACIONES (WhatsApp Bridge)
     async notifyUser(phone: string, message: string) {
         try {
-            const BRIDGE_URL = 'http://localhost:3001';
+            const BRIDGE_URL = import.meta.env.VITE_BRIDGE_URL || 'http://localhost:3001';
             await fetch(`${BRIDGE_URL}/api/send-notice`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

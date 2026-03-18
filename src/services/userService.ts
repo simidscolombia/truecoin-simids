@@ -211,7 +211,6 @@ export const userService = {
                 referral_code: attemptData.referralCode,
                 reg_ip: attemptData.regIp,
                 reg_location: attemptData.regLoc,
-                user_agent: attemptData.userAgent || (typeof window !== 'undefined' ? window.navigator.userAgent : 'Server'),
                 status: 'pending'
             }])
             .select()

@@ -45,21 +45,21 @@ export default function LandingHero({ onGetStarted }: { onGetStarted: () => void
                                 fontSize: 13, fontWeight: 700, marginBottom: 24, backdropFilter: 'blur(10px)'
                             }}>
                                 <Zap size={14} fill="var(--color-wallet)" color="var(--color-wallet)" />
-                                Ecosistema de Consumo Inteligente
+                                El Ecosistema VIP de Ahorro
                             </span>
 
                             <h1 style={{
                                 fontSize: 'clamp(32px, 5vw, 56px)', fontWeight: 900, color: 'white',
                                 lineHeight: 1.1, marginBottom: 24, letterSpacing: '-0.03em'
                             }}>
-                                Gana mientras <br />
+                                Bienvenido a <br />
                                 <span style={{ color: 'var(--color-wallet)', background: 'linear-gradient(to right, #FFD700, #FCD34D)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                                    compras lo de siempre
+                                    ShopyBrands VIP
                                 </span>
                             </h1>
 
                             <p style={{ fontSize: 18, color: 'rgba(255,255,255,0.8)', lineHeight: 1.6, marginBottom: 40, maxWidth: 500 }}>
-                                ShopyBrands une el poder del comercio real con una red inteligente de beneficios. Obtén Precios VIP exclusivos y construye una red de regalos infinita.
+                                La plataforma exclusiva para quienes buscan una manera diferente de comprar, ahorrar y ganar. Hemos unido el comercio electrónico con el poder de crecer en equipo.
                             </p>
 
                             <div style={{ display: 'flex', gap: 16 }}>
@@ -95,27 +95,33 @@ export default function LandingHero({ onGetStarted }: { onGetStarted: () => void
                         }}
                     >
                         <h3 style={{ color: 'white', fontSize: 20, fontWeight: 800, marginBottom: 32, display: 'flex', alignItems: 'center', gap: 12 }}>
-                            <TrendingUp size={24} color="var(--color-wallet)" /> Paso a Paso al Éxito
+                            <TrendingUp size={24} color="var(--color-wallet)" /> 4 Pasos para Ganar
                         </h3>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                             <StepItem
                                 number="01"
-                                title="Regístrate y Actívate"
-                                desc="Crea tu perfil y activa tu membresía VIP para desbloquear Precios VIP exclusivos y beneficios."
+                                title="Actívate como VIP"
+                                desc="Inscríbete pagando tu membresía, un paso que abre el Ecosistema VIP a tu favor."
                                 icon={ShieldCheck}
                             />
                             <StepItem
                                 number="02"
-                                title="Consume y Ahorra"
-                                desc="Compra en el Marketplace o en negocios aliados usando TrueCoins y obten Puntos Acumulables."
+                                title="Precios Exclusivos"
+                                desc="Accede a tarifas reales con descuento en nuestra Tienda en Línea o comercios aliados."
                                 icon={ShoppingCart}
                             />
                             <StepItem
                                 number="03"
-                                title="Expande tu Red"
-                                desc="Invita a 4 socios directos y activa la Cascada Inteligente de 12 niveles."
+                                title="Gana por Compartir"
+                                desc="Recibe Puntos de Regalo por invitar amigos y comisiones por cada compra en tu red."
                                 icon={Users}
+                            />
+                            <StepItem
+                                number="04"
+                                title="Consume Local"
+                                desc="Usa tus TrueCoins acumulados para pagar tus productos favoritos en la red cerca de ti."
+                                icon={Zap}
                             />
                         </div>
                     </motion.div>
@@ -131,7 +137,7 @@ export default function LandingHero({ onGetStarted }: { onGetStarted: () => void
                 <StatSimple label="Precios VIP" value="Exclusivo" />
                 <StatSimple label="Niveles de Red" value="12" />
                 <StatSimple label="Moneda Ecosistema" value="TrueCoin" />
-                <StatSimple label="Estructura Pro" value="1 x 4" />
+                <StatSimple label="Estructura Pro" value="Dinámica" />
             </div>
 
             {/* Visual Master Plan Step-by-Step */}
@@ -140,7 +146,7 @@ export default function LandingHero({ onGetStarted }: { onGetStarted: () => void
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20, position: 'relative' }}>
                     <VisualStep num="1" color="#4ADE80" title="Activación" text="Paga tu membresía y recibe tus primeros TrueCoins." />
                     <VisualStep num="2" color="#FACC15" title="Consumo" text="Accede a Precios VIP y acumula Puntos Acumulables." />
-                    <VisualStep num="3" color="#3B82F6" title="Red 1x4" text="Invita 4 socios y empieza a escalar niveles." />
+                    <VisualStep num="3" color="#3B82F6" title="Expansión" text="Invita a nuevos socios y empieza a escalar niveles." />
                     <VisualStep num="4" color="#A855F7" title="Infinito" text="Completa el nivel 12 y reinicia el ciclo." />
                 </div>
             </div>

@@ -27,12 +27,12 @@ export const aiService = {
                 parts: [{
                     text: `Actúa como 'Shopy', el Coach Maestro de ShopyBrands.
                 REGLAS DE ORO:
-                1. La moneda son TrueCoins (TC). $1,000 COP = 1 TC.
-                2. Red de Ventas: 2%, 2%, 2% y 4% (hasta nivel 4).
-                3. Red de Regalos: 1x4 hasta nivel 12. Reparto: 25% Puntos, 25% Plataforma, 50% Reinversión.
-                4. Nivel 12 tiene Reinicio Automático (Ciclo Infinito).
-                5. Meta: Completar nivel 1 en 1 semana (Emblema Pionero Veloz).
-                6. Sé motivador, profesional y usa un tono de socio estratégico.
+                1. Eres el experto en el Ecosistema VIP ShopyBrands. Nunca hables de matrices ni MLMs rígidos.
+                2. La membresía VIP proporciona descuentos exclusivos en comercios locales y tiendas online.
+                3. Los usuarios ganan 'Puntos de Regalo' (TrueCoins) y suben de Nivel/Rango VIP automáticamente al recomendar amigos.
+                4. Los usuarios ganan Comisiones residuales cada vez que su red realiza compras reales.
+                5. 1 TC = $1,000 COP. Los TC se usan en negocios aliados localmente o se retiran.
+                6. Sé muy amigable, fresco y usa el concepto de 'Cofres de Recompensa', 'Precios VIP' y 'Expansión de Club'.
                 
                 Pregunta del usuario: ${userMessage}`
                 }]
@@ -80,8 +80,8 @@ export const aiService = {
         - Estado actual: ${prospect.status}
         - Notas: ${prospect.notes || 'Sin notas'}
 
-        Dame una estrategia de cierre de 2 líneas muy potente y personalizada para enviarle por WhatsApp. 
-        Enfócate en los TrueCoins y el crecimiento 1x4.`;
+        Dame una estrategia de cierre de 2 líneas muy potente y atractiva para enviarle por WhatsApp. 
+        Enfócate en los beneficios de unirse al Club VIP exclusivo, los descuentos automáticos y la mina de oro que es ganar Puntos de Regalo al expandir.`;
 
         try {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;

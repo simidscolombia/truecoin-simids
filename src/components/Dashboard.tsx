@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Wallet, Users, Copy, Send, CheckCircle2, Award, Zap, Shield, UserPlus
+    Wallet, Users, Copy, Send, CheckCircle2, Award, Zap, Shield, UserPlus, Gift
 } from 'lucide-react';
 import GiftMatrix from './GiftMatrix';
 import NetworkTree from './NetworkTree';
@@ -143,54 +143,63 @@ export default function Dashboard({ user, balance, onUpdateBalance }: { user: an
                     </div>
                 </div>
 
-                {/* 2. Stats Grid */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16, marginBottom: 32 }}>
-                    <StatCard label="Mi Saldo" value={localBalance} unit="TC" icon={<Wallet size={20} />} color="var(--color-wallet)" />
-                    <StatCard label="Equipo Directo" value={stats.directReferrals.toString()} unit="Socios" icon={<Users size={20} />} color="var(--color-cloud-blue)" />
-                    <StatCard label="Nivel Actual" value={RANKS[(stats.currentLevel - 1) % 12]} icon={<Award size={20} />} color="var(--color-directorio)" />
-                </div>
-
-                {/* 3. Main Center - Tab Switching */}
-                <div style={{ marginBottom: 32 }}>
-                    <div style={{ display: 'flex', gap: 8, marginBottom: 20, background: 'rgba(0,0,0,0.05)', padding: 6, borderRadius: 16, width: 'fit-content' }}>
-                        {['ascension', 'network'].map((v: any) => (
-                            <button key={v} onClick={() => setView(v)} style={{
-                                padding: '10px 24px', borderRadius: 12, border: 'none', cursor: 'pointer', fontWeight: 900, fontSize: 13,
-                                background: view === v ? 'var(--color-navy)' : 'transparent',
-                                color: view === v ? 'white' : 'var(--color-text-muted)',
-                                transition: 'all 0.2s'
-                            }}>
-                                {v === 'ascension' ? 'NIVEL DE REGALOS' : 'MI RED'}
-                            </button>
-                        ))}
+                {/* 2. Stats Grid Mejorado (Limpio y Ordenado) */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20, marginBottom: 32 }}>
+                    {/* Tarjeta 1: Mis Puntos (Destacada) */}
+                    <div style={{
+                        borderRadius: 24, padding: '24px', display: 'flex', alignItems: 'center', gap: 20,
+                        background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
+                        boxShadow: '0 10px 25px rgba(245, 158, 11, 0.25)', color: 'white'
+                    }}>
+                        <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Gift size={28} />
+                        </div>
+                        <div>
+                            <p style={{ fontSize: 11, fontWeight: 900, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4, opacity: 0.9 }}>Mis Puntos de Regalo</p>
+                            <h3 style={{ fontSize: 26, fontWeight: 950, margin: 0 }}>{localBalance} <span style={{ fontSize: 14 }}>TC</span></h3>
+                        </div>
                     </div>
 
-                    <AnimatePresence mode="wait">
-                        {view === 'ascension' ? (
-                            <motion.div key="m" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
-                                <GiftMatrix
-                                    currentLevel={stats.currentLevel}
-                                    slots={matrixSlots}
-                                    onSelectUser={(u: any) => setSelectedDetailUser(u)}
-                                    isPlacing={pendingReferrals.length > 0}
-                                    onSelectPosition={(pos) => {
-                                        setSelectedPosition(pos);
-                                        setShowPlacementModal(true);
-                                    }}
-                                />
-                            </motion.div>
-                        ) : (
-                            <motion.div key="n" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
-                                <div className="card" style={{ padding: 40, border: '1px solid var(--color-border)', borderRadius: 24 }}>
-                                    <h3 style={{ fontSize: 20, fontWeight: 950, color: 'var(--color-navy)', marginBottom: 32, display: 'flex', alignItems: 'center', gap: 12 }}>
-                                        <Users size={24} color="var(--color-wallet)" />
-                                        Genealogía de Red 12 Niveles
-                                    </h3>
-                                    <NetworkTree userId={user.id} mentor={stats.mentor} onSelectUser={(u: any) => setSelectedDetailUser(u)} />
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+                    {/* Tarjeta 2: Equipo Directo */}
+                    <div style={{
+                        background: 'white', borderRadius: 24, padding: '24px', display: 'flex', alignItems: 'center', gap: 20,
+                        boxShadow: '0 4px 15px rgba(0,0,0,0.03)', border: '1px solid var(--color-border)'
+                    }}>
+                        <div style={{ width: 56, height: 56, borderRadius: 16, background: 'var(--color-surface-2)', color: 'var(--color-navy)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Users size={28} />
+                        </div>
+                        <div>
+                            <p style={{ fontSize: 11, fontWeight: 800, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Mi Equipo Directo</p>
+                            <h3 style={{ fontSize: 26, fontWeight: 950, color: 'var(--color-navy)', margin: 0 }}>{stats.directReferrals} <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-text-muted)' }}>Socios</span></h3>
+                        </div>
+                    </div>
+
+                    {/* Tarjeta 3: Nivel Actual */}
+                    <div style={{
+                        background: 'white', borderRadius: 24, padding: '24px', display: 'flex', alignItems: 'center', gap: 20,
+                        boxShadow: '0 4px 15px rgba(0,0,0,0.03)', border: '1px solid var(--color-border)'
+                    }}>
+                        <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(16, 185, 129, 0.1)', color: '#10B981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Award size={28} />
+                        </div>
+                        <div>
+                            <p style={{ fontSize: 11, fontWeight: 800, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Mi Nivel de Regalo</p>
+                            <h3 style={{ fontSize: 22, fontWeight: 950, color: 'var(--color-navy)', margin: 0 }}>
+                                Nivel {stats.currentLevel} <span style={{ fontSize: 11, fontWeight: 800, background: 'var(--color-surface-2)', padding: '4px 8px', borderRadius: 8, marginLeft: 4 }}>{RANKS[(stats.currentLevel - 1) % 12]}</span>
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+
+                {/* 3. Main Center - Mi Red (Por defecto) */}
+                <div style={{ marginBottom: 32 }}>
+                    <div className="card" style={{ padding: 40, border: '1px solid var(--color-border)', borderRadius: 24 }}>
+                        <h3 style={{ fontSize: 20, fontWeight: 950, color: 'var(--color-navy)', marginBottom: 32, display: 'flex', alignItems: 'center', gap: 12 }}>
+                            <Users size={24} color="var(--color-wallet)" />
+                            Ecosistema de Red
+                        </h3>
+                        <NetworkTree userId={user.id} mentor={stats.mentor} onSelectUser={(u: any) => setSelectedDetailUser(u)} />
+                    </div>
                 </div>
 
                 {/* 4. Modals */}

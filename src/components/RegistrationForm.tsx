@@ -126,6 +126,28 @@ export default function RegistrationForm({ onSuccess, initialReferralCode }: Reg
         }
     };
 
+    const handleSimulatePayment = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setError('');
+        try {
+            const profile = await userService.simulateRegistration({
+                fullName: formData.fullName,
+                email: formData.email,
+                phone: formData.phone,
+                password: formData.password,
+                referralCode: referralCode
+            }, 50); // 50 TC de bono
+            
+            // Avisar también vía puente a WhatsApp (opcional, pero útil para testing)
+            onSuccess(profile);
+        } catch (err: any) {
+            console.error(err);
+            setError(err.message || 'Error al simular pago.');
+            setIsLoading(false);
+        }
+    };
+
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
@@ -449,6 +471,16 @@ export default function RegistrationForm({ onSuccess, initialReferralCode }: Reg
                                     ) : (
                                         <>Pagar y Activar mi Cuenta <CheckCircle2 size={18} /></>
                                     )}
+                                </button>
+                                
+                                <button
+                                    onClick={handleSimulatePayment}
+                                    disabled={isLoading}
+                                    className="btn btn-navy btn-full"
+                                    style={{ justifyContent: 'center', marginTop: 10, background: 'var(--color-surface-2)', color: 'var(--color-navy)', border: '1px dashed var(--color-border)' }}
+                                    title="Exclusivo para pruebas de desarrollo"
+                                >
+                                    Simular Pago (Modo Prueba) 🚀
                                 </button>
                             </div>
 

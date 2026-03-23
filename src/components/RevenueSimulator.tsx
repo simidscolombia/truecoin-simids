@@ -126,9 +126,9 @@ export default function RevenueSimulator() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                         <ResultRow
                             icon={<Award size={18} />}
-                            label="Recompensa Tu Matriz"
+                            label="Comisiones de Red Base"
                             value={`${stats.directGain.toLocaleString()} TC`}
-                            sub={referralCount < 4 ? "Faltan socios para completar" : "Nivel completado"}
+                            sub={referralCount < 4 ? "Bono en construcción" : "Primer bloque completado"}
                         />
                         <ResultRow
                             icon={<Zap size={18} />}

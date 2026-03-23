@@ -90,6 +90,39 @@ export const userService = {
         return profile;
     },
 
+    async simulateRegistration(userData: any, bonusTC: number = 50) {
+        let referredById = null;
+        if (userData.referralCode) {
+            const { data: referrer } = await supabase.from('profiles').select('id').eq('referral_code', userData.referralCode).single();
+            if (referrer) referredById = referrer.id;
+        }
+
+        const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+        let newCode = '';
+        for (let i = 0; i < 6; i++) newCode += chars.charAt(Math.floor(Math.random() * chars.length));
+
+        const { data: profile, error: pError } = await supabase
+            .from('profiles')
+            .insert([{
+                full_name: userData.fullName,
+                email: userData.email,
+                phone: userData.phone,
+                referral_code: newCode,
+                referred_by: referredById,
+                password: userData.password,
+                current_level: 1,
+                is_vip: true // ACTIVADO DIRECTAMENTE
+            }])
+            .select()
+            .single();
+
+        if (pError) throw pError;
+
+        await supabase.from('wallets').insert([{ user_id: profile.id, balance_tc: bonusTC }]);
+
+        return { ...profile, wallets: [{ balance_tc: bonusTC }] };
+    },
+
     async updateBalance(userId: string, amount: number) {
         // En un App real, esto debería ser vía RPC o Función de Postgres por seguridad
         const { data: wallet } = await supabase

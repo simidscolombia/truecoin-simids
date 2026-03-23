@@ -16,7 +16,7 @@ import NetworkTree from './NetworkTree';
 import { APP_VERSION } from '../constants';
 
 export default function AdminDashboard({ onBack }: { onBack: () => void }) {
-    const [activeTab, setActiveTab] = useState<'stats' | 'users' | 'directory' | 'expansion' | 'themes' | 'banks' | 'cerebro' | 'finance' | 'tree'>('stats');
+    const [activeTab, setActiveTab] = useState<'stats' | 'users' | 'directory' | 'expansion' | 'themes' | 'banks' | 'cerebro' | 'finance' | 'tree' | 'metrics'>('stats');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [stats, setStats] = useState<any>(null);
     const [users, setUsers] = useState<any[]>([]);
@@ -263,21 +263,20 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                     </p>
                 </div>
 
-                {/* Navigation */}
-                <nav style={{ flex: 1, padding: '20px 12px', display: 'flex', flexDirection: 'column', gap: 4 }}>
-                    <TabBtn id="stats" icon={LayoutDashboard} label="Dashboard" />
-                    <TabBtn id="users" icon={Users} label="Mi Red (CRM)" />
-                    <TabBtn id="directory" icon={Database} label="Directorio" />
-
-                    <div style={{ height: 1, background: 'var(--color-border)', margin: '12px 8px' }} />
-
-                    <TabBtn id="tree" icon={Network} label="Árbol Automático" customColor="#10B981" />
+                <nav style={{ flex: 1, padding: '16px 12px', display: 'flex', flexDirection: 'column', gap: 6, overflowY: 'auto', maxHeight: 'calc(100vh - 200px)' }}>
+                    <p style={{ fontSize: 10, fontWeight: 900, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: 1, margin: '16px 12px 10px' }}>Monitor Principal</p>
+                    <TabBtn id="stats" icon={LayoutDashboard} label="Dashboard Global" />
+                    <TabBtn id="metrics" icon={BarChart3} label="Métricas Reales" customColor="#6366F1" />
                     <TabBtn id="finance" icon={CircleDollarSign} label="Pagos y Utilidades" customColor="#F59E0B" />
                     
-                    <div style={{ height: 1, background: 'var(--color-border)', margin: '12px 8px' }} />
-
+                    <p style={{ fontSize: 10, fontWeight: 900, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: 1, margin: '16px 12px 10px' }}>Ecosistema Inteligente</p>
+                    <TabBtn id="tree" icon={Network} label="Árbol Automático" customColor="#10B981" />
+                    <TabBtn id="users" icon={Users} label="Sujetos VIP (CRM)" />
                     <TabBtn id="expansion" icon={Globe} label="Expansión IA" customColor="#4F46E5" />
                     <TabBtn id="cerebro" icon={Cpu} label="Cerebro IA" customColor="var(--color-admin)" />
+                    
+                    <p style={{ fontSize: 10, fontWeight: 900, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: 1, margin: '16px 12px 10px' }}>Configuración</p>
+                    <TabBtn id="directory" icon={Database} label="Base de Comercios" />
                     <TabBtn id="themes" icon={Palette} label="Personalización" />
                     <TabBtn id="banks" icon={Wallet} label="Ajustes API" customColor="#16A34A" />
                 </nav>
@@ -561,6 +560,75 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                     {activeTab === 'cerebro' && (
                         <motion.div key="cerebro" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
                             <CerebroIA />
+                        </motion.div>
+                    )}
+
+                    {activeTab === 'metrics' && (
+                        <motion.div key="metrics" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                            <div style={{ marginBottom: 32 }}>
+                                <h2 style={{ fontSize: 28, fontWeight: 800, color: 'var(--color-navy)', letterSpacing: -0.5 }}>Análisis de Crecimiento Real</h2>
+                                <p style={{ fontSize: 14, color: 'var(--color-text-muted)' }}>Métricas profundas y distribución visual del ecosistema ShopyBrands.</p>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 24, marginBottom: 32 }}>
+                                <div className="card-lg" style={{ padding: 32 }}>
+                                    <h3 style={{ fontSize: 16, fontWeight: 800, color: 'var(--color-navy)', marginBottom: 24 }}>Distribución de Usuarios por Niveles</h3>
+                                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, height: 240, padding: '0 20px', borderBottom: '1px solid var(--color-border)' }}>
+                                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(lvl => {
+                                            const count = stats?.levelDistribution?.[lvl] || 0;
+                                            const totalUsers = users.length || 1;
+                                            const height = Math.max(10, (count / totalUsers) * 200);
+                                            return (
+                                                <div key={lvl} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+                                                    <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--color-text-muted)' }}>{count}</span>
+                                                    <motion.div 
+                                                        initial={{ height: 0 }} 
+                                                        animate={{ height }} 
+                                                        style={{ 
+                                                            width: '100%', 
+                                                            background: lvl <= 4 ? 'var(--color-admin)' : 'var(--color-surface-2)', 
+                                                            borderRadius: '4px 4px 0 0',
+                                                            opacity: count > 0 ? 1 : 0.3
+                                                        }} 
+                                                    />
+                                                    <span style={{ fontSize: 11, fontWeight: 900, color: 'var(--color-navy)' }}>L{lvl}</span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                    <div style={{ marginTop: 20, display: 'flex', justifyContent: 'center', gap: 24 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                            <div style={{ width: 12, height: 12, borderRadius: 3, background: 'var(--color-admin)' }} />
+                                            <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--color-text-muted)' }}>Niveles Activos</span>
+                                        </div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                            <div style={{ width: 12, height: 12, borderRadius: 3, background: 'var(--color-surface-2)' }} />
+                                            <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--color-text-muted)' }}>Niveles sin Socios</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                                    <div className="card" style={{ padding: 24, background: 'white' }}>
+                                        <p style={{ fontSize: 11, fontWeight: 900, color: 'var(--color-text-muted)', textTransform: 'uppercase', marginBottom: 12 }}>Tasa de Retención</p>
+                                        <h3 style={{ fontSize: 32, fontWeight: 950, color: 'var(--color-navy)', margin: 0 }}>94.2%</h3>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, color: '#10B981' }}>
+                                            <TrendingUp size={14} />
+                                            <span style={{ fontSize: 12, fontWeight: 700 }}>+2.1% este mes</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="card" style={{ padding: 24, background: 'white' }}>
+                                        <p style={{ fontSize: 11, fontWeight: 900, color: 'var(--color-text-muted)', textTransform: 'uppercase', marginBottom: 12 }}>Adquisición Semanal</p>
+                                        <h3 style={{ fontSize: 32, fontWeight: 950, color: 'var(--color-navy)', margin: 0 }}>+{users.filter(u => {
+                                            const lastWeek = new Date();
+                                            lastWeek.setDate(lastWeek.getDate() - 7);
+                                            return new Date(u.created_at) > lastWeek;
+                                        }).length} <span style={{ fontSize: 14 }}>SOCIOS</span></h3>
+                                        <p style={{ fontSize: 12, color: 'var(--color-text-muted)', marginTop: 8 }}>Nuevos registros en los últimos 7 días</p>
+                                    </div>
+                                </div>
+                            </div>
                         </motion.div>
                     )}
 

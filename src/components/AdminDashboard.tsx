@@ -3,7 +3,7 @@
 import {
     Users, Wallet, TrendingUp, ArrowLeft, Search, Edit3, ShieldAlert,
     Database, LayoutDashboard, Save, BarChart3, SearchCode,
-    Globe, Sparkles, Palette, Trash2, Zap, Cpu
+    Globe, Sparkles, Palette, Trash2, Zap, Cpu, CircleDollarSign, Network
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -11,11 +11,12 @@ import { adminService } from '../services/adminService';
 import ThemeCustomizer from './ThemeCustomizer';
 import ApiSettings from './ApiSettings';
 import CerebroIA from './CerebroIA';
+import NetworkTree from './NetworkTree';
 
 import { APP_VERSION } from '../constants';
 
 export default function AdminDashboard({ onBack }: { onBack: () => void }) {
-    const [activeTab, setActiveTab] = useState<'stats' | 'users' | 'directory' | 'expansion' | 'themes' | 'banks' | 'cerebro'>('stats');
+    const [activeTab, setActiveTab] = useState<'stats' | 'users' | 'directory' | 'expansion' | 'themes' | 'banks' | 'cerebro' | 'finance' | 'tree'>('stats');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [stats, setStats] = useState<any>(null);
     const [users, setUsers] = useState<any[]>([]);
@@ -40,6 +41,9 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
     const [scanQuery, setScanQuery] = useState('');
     const [isScanning, setIsScanning] = useState(false);
     const [scanResults, setScanResults] = useState<any[]>([]);
+
+    // Global Admin States
+    const [treeRootId, setTreeRootId] = useState<string>('');
 
     useEffect(() => { fetchData(); }, []);
 
@@ -267,10 +271,15 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
 
                     <div style={{ height: 1, background: 'var(--color-border)', margin: '12px 8px' }} />
 
+                    <TabBtn id="tree" icon={Network} label="Árbol Automático" customColor="#10B981" />
+                    <TabBtn id="finance" icon={CircleDollarSign} label="Pagos y Utilidades" customColor="#F59E0B" />
+                    
+                    <div style={{ height: 1, background: 'var(--color-border)', margin: '12px 8px' }} />
+
                     <TabBtn id="expansion" icon={Globe} label="Expansión IA" customColor="#4F46E5" />
                     <TabBtn id="cerebro" icon={Cpu} label="Cerebro IA" customColor="var(--color-admin)" />
                     <TabBtn id="themes" icon={Palette} label="Personalización" />
-                    <TabBtn id="banks" icon={Wallet} label="Ajustes de Pago" customColor="#16A34A" />
+                    <TabBtn id="banks" icon={Wallet} label="Ajustes API" customColor="#16A34A" />
                 </nav>
 
                 {/* Footer */}
@@ -552,6 +561,91 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                     {activeTab === 'cerebro' && (
                         <motion.div key="cerebro" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
                             <CerebroIA />
+                        </motion.div>
+                    )}
+
+                    {activeTab === 'tree' && (
+                        <motion.div key="tree" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                             <div style={{ marginBottom: 32 }}>
+                                <h2 style={{ fontSize: 28, fontWeight: 800, color: 'var(--color-navy)', letterSpacing: -0.5 }}>Visor del Ecosistema VIP</h2>
+                                <p style={{ fontSize: 14, color: 'var(--color-text-muted)' }}>Audita visualmente la red y asignaciones generadas automáticamente por el algoritmo.</p>
+                            </div>
+                            
+                            <div className="card" style={{ padding: 24, marginBottom: 24 }}>
+                                <label style={{ fontSize: 12, fontWeight: 800, color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>SELECCIONA EL NODO RAÍZ A EXPLORAR</label>
+                                <select 
+                                    className="input" 
+                                    onChange={(e) => setTreeRootId(e.target.value)} 
+                                    style={{ marginTop: 8 }}
+                                    value={treeRootId}
+                                >
+                                    <option value="">-- Elige un usuario para ver su matriz y ramificaciones --</option>
+                                    {users.map(u => (
+                                        <option key={u.id} value={u.id}>{u.full_name} ({u.email})</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {treeRootId ? (
+                                <div className="card" style={{ overflow: 'hidden', padding: '0', background: 'var(--color-surface)', marginTop: 24 }}>
+                                    <NetworkTree userId={treeRootId} />
+                                </div>
+                            ) : (
+                                <div style={{ textAlign: 'center', padding: 80, background: 'var(--color-surface-2)', borderRadius: 24, border: '2px dashed var(--color-border)' }}>
+                                    <Network size={48} color="var(--color-text-muted)" style={{ marginBottom: 16 }} />
+                                    <h3 style={{ fontSize: 18, color: 'var(--color-navy)' }}>Selecciona un nodo para comenzar el rastreo</h3>
+                                    <p style={{ fontSize: 14, color: 'var(--color-text-muted)' }}>Cargará la estructura en vivo de todos sus sub-niveles hasta profundidad 4.</p>
+                                </div>
+                            )}
+                        </motion.div>
+                    )}
+
+                    {activeTab === 'finance' && (
+                        <motion.div key="finance" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                            <div style={{ marginBottom: 32 }}>
+                                <h2 style={{ fontSize: 28, fontWeight: 800, color: 'var(--color-navy)', letterSpacing: -0.5 }}>Tesorería y Utilidades</h2>
+                                <p style={{ fontSize: 14, color: 'var(--color-text-muted)' }}>Panel de control financiero de ingresos de membresías, retiros de TC y ganancias ShopyBrands.</p>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24, marginBottom: 32 }}>
+                                <div className="card" style={{ padding: 24, background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', color: 'white', boxShadow: '0 10px 25px rgba(16, 185, 129, 0.3)' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                                        <p style={{ fontSize: 11, fontWeight: 900, opacity: 0.9, textTransform: 'uppercase', margin: 0 }}>Caja Bruta (Ingresos Wompi)</p>
+                                        <CircleDollarSign opacity={0.5} />
+                                    </div>
+                                    <h3 style={{ fontSize: 32, fontWeight: 950, margin: '0' }}>$0 <span style={{ fontSize: 14, fontWeight: 700 }}>COP</span></h3>
+                                    <p style={{ fontSize: 12, opacity: 0.8, marginTop: 12, fontWeight: 600 }}>Total por venta de las membresías VIP</p>
+                                </div>
+
+                                <div className="card" style={{ padding: 24, background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)', color: 'white', boxShadow: '0 10px 25px rgba(245, 158, 11, 0.3)' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                                        <p style={{ fontSize: 11, fontWeight: 900, opacity: 0.9, textTransform: 'uppercase', margin: 0 }}>Pasivo de Retiros (Comisiones)</p>
+                                        <Users opacity={0.5} />
+                                    </div>
+                                    <h3 style={{ fontSize: 32, fontWeight: 950, margin: '0' }}>{stats?.totalTC || '0.00'} <span style={{ fontSize: 14, fontWeight: 700 }}>TC</span></h3>
+                                    <p style={{ fontSize: 12, opacity: 0.8, marginTop: 12, fontWeight: 600 }}>Costo equivalente aprox. ${(Number(stats?.totalTC || 0)*1000).toLocaleString()} COP</p>
+                                </div>
+
+                                <div className="card" style={{ padding: 24, background: 'linear-gradient(135deg, #312E81 0%, #1e1b4b 100%)', color: 'white', boxShadow: '0 10px 25px rgba(49, 46, 129, 0.3)' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                                        <p style={{ fontSize: 11, fontWeight: 900, opacity: 0.9, textTransform: 'uppercase', margin: 0 }}>Utilidad Neta (ShopyBrands)</p>
+                                        <TrendingUp opacity={0.5} />
+                                    </div>
+                                    <h3 style={{ fontSize: 32, fontWeight: 950, margin: '0' }}>$0 <span style={{ fontSize: 14, fontWeight: 700 }}>COP</span></h3>
+                                    <p style={{ fontSize: 12, opacity: 0.8, marginTop: 12, fontWeight: 600 }}>Margen de ganancia de la plataforma</p>
+                                </div>
+                            </div>
+
+                            <div className="card-lg" style={{ padding: 32 }}>
+                                <h3 style={{ fontSize: 18, fontWeight: 800, color: 'var(--color-navy)', marginBottom: 20 }}>Bandeja de Pagos a Ejecutar (Retiros Solicitados)</h3>
+                                <div style={{ border: '2px dashed var(--color-border)', textAlign: 'center', padding: '60px 0', background: 'var(--color-surface-2)', borderRadius: 20 }}>
+                                    <CircleDollarSign size={48} color="var(--color-text-muted)" style={{ marginBottom: 16, opacity: 0.5 }} />
+                                    <p style={{ fontSize: 18, fontWeight: 900, color: 'var(--color-navy)', margin: '0 0 8px 0' }}>Bandeja Limpia</p>
+                                    <p style={{ fontSize: 14, color: 'var(--color-text-muted)', maxWidth: 400, margin: '0 auto' }}>
+                                        Cuando los usuarios soliciten canjear sus Puntos por COP o Transferencias Bancarias, aparecerán en esta tabla para tu aprobación.
+                                    </p>
+                                </div>
+                            </div>
                         </motion.div>
                     )}
 

@@ -52,10 +52,6 @@ export default function NetworkTree({ userId, onSelectUser }: NetworkTreeProps) 
         setHistory(history.slice(0, index + 1));
     };
 
-    // Gamification calc
-    const directCount = network.l1.length;
-    const directCount = network.l1.length;
-    const nextRankTarget = directCount < 2 ? 2 : directCount < 5 ? 5 : directCount < 10 ? 10 : directCount < 20 ? 20 : directCount + 10;
 
     // Get current active list
     const activeList = activeLevel === 1 ? network.l1 : activeLevel === 2 ? network.l2 : activeLevel === 3 ? network.l3 : network.l4;

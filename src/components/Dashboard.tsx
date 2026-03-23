@@ -17,38 +17,12 @@ const RANKS = [
     "ESMERALDA I", "ESMERALDA II", "ESMERALDA III",
     "ZAFIRO", "DIAMANTE", "SOY LEYENDA"
 ];
-
-function StatCard({ label, value, unit, icon, color }: { label: string; value: string; unit?: string; icon: React.ReactNode; color: string; }) {
-    return (
-        <div style={{
-            background: 'white',
-            borderRadius: 20,
-            padding: '20px',
-            boxShadow: '0 4px 15px rgba(0,0,0,0.03)',
-            border: '1px solid var(--color-border)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 16
-        }}>
-            <div style={{ width: 44, height: 44, borderRadius: 12, background: `${color}10`, color: color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {icon}
-            </div>
-            <div>
-                <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', marginBottom: 2 }}>{label}</p>
-                <p style={{ fontSize: 20, fontWeight: 900, color: 'var(--color-navy)', margin: 0 }}>{value} <span style={{ fontSize: 12, fontWeight: 700 }}>{unit}</span></p>
-            </div>
-        </div>
-    );
-}
-
 export default function Dashboard({ user, balance, onUpdateBalance }: { user: any; balance: string; onUpdateBalance?: (b: string) => void; }) {
     const [showTransfer, setShowTransfer] = useState(false);
     const [showRecharge, setShowRecharge] = useState(false);
     const [localBalance, setLocalBalance] = useState(balance);
     const [copied, setCopied] = useState(false);
-    const [view, setView] = useState<'ascension' | 'network'>('ascension');
     const [stats, setStats] = useState<any>({ directReferrals: 0, currentLevel: 1, isVip: false });
-    const [matrixSlots, setMatrixSlots] = useState<any[]>([]);
     const [selectedDetailUser, setSelectedDetailUser] = useState<any | null>(null);
 
     // Placement Logic

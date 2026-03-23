@@ -8,9 +8,19 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
+// Middleware para atrapar errores de "JSON malformado" (ej: token p in JSON) y evitar que se apague el Bridge
+app.use((err, req, res, next) => {
+    if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+        console.error("❌ Alerta roja: Se recibió un mensaje mal formado (No es JSON válido).", err.message);
+        return res.status(400).send({ error: "Estructura JSON mal formada" });
+    }
+    next();
+});
+
 const PORT = process.env.BRIDGE_PORT || 3001;
 const GEMINI_API_KEY = process.env.VITE_GEMINI_API_KEY;
 const WAHA_URL = process.env.WAHA_URL || 'http://localhost:3000';
+const WAHA_API_KEY = process.env.WAHA_API_KEY || '';
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || 'https://rpodcifhgqzfmdbkeinu.supabase.co';
 const SUPABASE_SERVICE_ROLE = process.env.VITE_SUPABASE_SERVICE_ROLE || process.env.SUPABASE_SERVICE_ROLE;
 
@@ -52,7 +62,7 @@ loadDynamicConfig();
 
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
+    model: "gemini-1.5-flash-latest",
     systemInstruction: `Eres 'Shopy', la asistente experta de ShopyBrands. 
     Tu misión es asesorar a prospectos por WhatsApp para que se unan a la red.
     
@@ -93,11 +103,12 @@ app.post('/whatsapp/webhook', async (req, res) => {
         console.log(`🤖 Shopy responde a ${from}: ${responseText}`);
 
         try {
+            const config = WAHA_API_KEY ? { headers: { 'X-Api-Key': WAHA_API_KEY, 'Authorization': `Bearer ${WAHA_API_KEY}` } } : {};
             await axios.post(`${WAHA_URL}/api/sendText`, {
                 chatId: from,
                 text: responseText,
                 session: 'default' // WAHA usa sesiones, 'default' es la estándar
-            });
+            }, config);
             console.log(`✅ Mensaje enviado exitosamente a ${from}`);
         } catch (wahaError) {
             console.error("❌ Error enviando mensaje a WAHA:", wahaError.message);
@@ -125,11 +136,12 @@ app.post('/api/send-notice', async (req, res) => {
     console.log(`📢 Enviando notificación a ${chatId}...`);
 
     try {
+        const config = WAHA_API_KEY ? { headers: { 'X-Api-Key': WAHA_API_KEY, 'Authorization': `Bearer ${WAHA_API_KEY}` } } : {};
         await axios.post(`${WAHA_URL}/api/sendText`, {
             chatId: chatId,
             text: message,
             session: 'default'
-        });
+        }, config);
         res.status(200).json({ success: true });
     } catch (error) {
         console.error("❌ Error enviando notificación:", error.message);
@@ -211,7 +223,8 @@ app.post('/api/wompi-webhook', async (req, res) => {
 
             // 4. Notificar
             const welcomeMsg = `¡Felicidades ${profile.full_name}! 🚀 Tu pago ha sido confirmado y tu oficina virtual ShopyBrands ya está ACTIVA. ✅\n\n💎 Recibiste: ${rewardTC.toFixed(2)} TC\n\nYa puedes entrar y expander tu red: https://shopybrands.com`;
-            await axios.post(`${WAHA_URL}/api/sendText`, { chatId: formatPhoneForWAHA(profile.phone), text: welcomeMsg, session: 'default' }).catch(() => { });
+            const configWAHA = WAHA_API_KEY ? { headers: { 'X-Api-Key': WAHA_API_KEY, 'Authorization': `Bearer ${WAHA_API_KEY}` } } : {};
+            await axios.post(`${WAHA_URL}/api/sendText`, { chatId: formatPhoneForWAHA(profile.phone), text: welcomeMsg, session: 'default' }, configWAHA).catch(() => { });
 
             return res.status(200).send('Activated');
         }
@@ -286,11 +299,12 @@ app.post('/api/wompi-webhook', async (req, res) => {
         const welcomeMessage = `¡Hola ${attempt.full_name}! 🚀 Bienvenido a la elite de ShopyBrands.\n\nTu pago de membresía ha sido confirmado y tu cuenta ya está ACTIVA. ✅\n\n💎 Recibiste: ${rewardTC.toFixed(2)} TC\n🎟️ Tu código de referido: ${newCode}\n\nYa puedes ingresar con tu correo y contraseña: ${process.env.APP_URL || 'https://shopybrands.com'}\n\n¡Estoy lista para ayudarte a crecer! 🤖`;
 
         try {
+            const config = WAHA_API_KEY ? { headers: { 'X-Api-Key': WAHA_API_KEY, 'Authorization': `Bearer ${WAHA_API_KEY}` } } : {};
             await axios.post(`${WAHA_URL}/api/sendText`, {
                 chatId: formatPhoneForWAHA(attempt.phone),
                 text: welcomeMessage,
                 session: 'default'
-            });
+            }, config);
             console.log(`📱 WhatsApp de bienvenida enviado a ${attempt.phone}`);
         } catch (waErr) {
             console.error("❌ Error enviando WhatsApp de bienvenida:", waErr.message);

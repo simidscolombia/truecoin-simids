@@ -226,10 +226,10 @@ export default function RegistrationForm({ onSuccess, initialReferralCode }: Reg
                                     <Ticket size={24} />
                                 </div>
                                 <h2 style={{ fontSize: 22, fontWeight: 800, color: 'var(--color-navy)', marginBottom: 6 }}>
-                                    Únete al Ecosistema
+                                    Únete al Club VIP
                                 </h2>
                                 <p style={{ fontSize: 14, color: 'var(--color-text-muted)' }}>
-                                    Introduce el código exclusivo de quien te invitó.
+                                    Introduce el código de invitación de tu patrocinador.
                                 </p>
                             </div>
 
@@ -395,10 +395,10 @@ export default function RegistrationForm({ onSuccess, initialReferralCode }: Reg
                                     <Zap size={32} />
                                 </div>
                                 <h2 style={{ fontSize: 22, fontWeight: 800, color: 'var(--color-navy)', marginBottom: 4 }}>
-                                    Activación VIP
+                                    Activación Membresía VIP
                                 </h2>
                                 <p style={{ fontSize: 14, color: 'var(--color-text-muted)' }}>
-                                    Paga tu membresía anual para activar tu red.
+                                    Activa tu anualidad para acceder a precios de mayorista y ganar Cashback.
                                 </p>
                             </div>
 
@@ -418,7 +418,7 @@ export default function RegistrationForm({ onSuccess, initialReferralCode }: Reg
                                 </p>
                                 <div style={{ height: 1, background: 'var(--color-border)', margin: '14px 0' }}></div>
                                 <p style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>
-                                    Recibirás <strong>{Math.floor((paymentSettings?.reg_fee || 5000) / 1000)} TC</strong> para participar en la Red de Regalos.
+                                    Recibirás <strong>{Math.floor((paymentSettings?.reg_fee || 50000) / 1000)} TC</strong> de Bienvenida para canjear en el Marketplace.
                                 </p>
                             </div>
 
@@ -460,7 +460,7 @@ export default function RegistrationForm({ onSuccess, initialReferralCode }: Reg
                             </button>
                             {/* App Version Footer */}
                             <div style={{ marginTop: 32, textAlign: 'center', opacity: 0.5, fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)' }}>
-                                {APP_VERSION} — TECNOLOGÍA EN RED 1X4
+                                {APP_VERSION} — CLUB DE AFILIADOS Y DESCUENTOS
                             </div>
                         </motion.div>
                     )}

@@ -187,7 +187,7 @@ function Header({
               gap: 8,
             }}
           >
-            <LayoutDashboard size={16} /> <span className="hide-mobile">CPanel</span>
+            <LayoutDashboard size={16} /> <span className="hide-mobile">Oficina VIP</span>
           </button>
         )}
 

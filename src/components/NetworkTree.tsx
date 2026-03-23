@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Star, ChevronRight, CheckCircle2, AlertCircle, Share2, Zap, UserPlus } from 'lucide-react';
+import { Users, Star, ChevronRight, CheckCircle2, AlertCircle, Share2, Zap, UserPlus, Info, X, TrendingUp } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { userService } from '../services/userService';
 
@@ -23,6 +23,7 @@ export default function NetworkTree({ userId, onSelectUser }: NetworkTreeProps) 
     const [loading, setLoading] = useState(true);
     const [history, setHistory] = useState<{id: string, name: string}[]>([{id: userId, name: 'Tú (Raíz)'}]);
     const [activeLevel, setActiveLevel] = useState<number>(1);
+    const [showCommissionInfo, setShowCommissionInfo] = useState(false);
 
     const currentViewId = history[history.length - 1].id;
 
@@ -59,28 +60,44 @@ export default function NetworkTree({ userId, onSelectUser }: NetworkTreeProps) 
     return (
         <div style={{ padding: '0px', background: 'transparent', minHeight: 600 }}>
             {/* 🍞 Breadcrumbs interactivas */}
-            <div style={{ marginBottom: 24, padding: '16px 24px', background: 'white', borderRadius: 20, display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid var(--color-border)' }}>
-                <Users size={18} color="var(--color-navy)" /> 
-                {history.map((step, idx) => (
-                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <button 
-                            onClick={() => handleBreadcrumbClick(idx)}
-                            style={{
-                                background: idx === history.length - 1 ? 'var(--color-wallet)' : 'var(--color-surface-2)',
-                                color: idx === history.length - 1 ? 'white' : 'var(--color-navy)',
-                                border: 'none', padding: '8px 16px', borderRadius: 12,
-                                fontSize: 13, fontWeight: 900, cursor: 'pointer',
-                                transition: 'all 0.2s',
-                                boxShadow: idx === history.length - 1 ? '0 4px 12px rgba(16, 185, 129, 0.2)' : 'none'
-                            }}
-                            onMouseOver={(e) => idx !== history.length - 1 && (e.currentTarget.style.background = 'rgba(0,0,0,0.05)')}
-                            onMouseOut={(e) => idx !== history.length - 1 && (e.currentTarget.style.background = 'var(--color-surface-2)')}
-                        >
-                            {step.name}
-                        </button>
-                        {idx < history.length - 1 && <ChevronRight size={16} color="var(--color-border)" />}
-                    </div>
-                ))}
+            <div style={{ marginBottom: 24, padding: '16px 24px', background: 'white', borderRadius: 20, display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid var(--color-border)' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
+                    <Users size={18} color="var(--color-navy)" /> 
+                    {history.map((step, idx) => (
+                        <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <button 
+                                onClick={() => handleBreadcrumbClick(idx)}
+                                style={{
+                                    background: idx === history.length - 1 ? 'var(--color-wallet)' : 'var(--color-surface-2)',
+                                    color: idx === history.length - 1 ? 'white' : 'var(--color-navy)',
+                                    border: 'none', padding: '8px 16px', borderRadius: 12,
+                                    fontSize: 13, fontWeight: 900, cursor: 'pointer',
+                                    transition: 'all 0.2s',
+                                    boxShadow: idx === history.length - 1 ? '0 4px 12px rgba(16, 185, 129, 0.2)' : 'none'
+                                }}
+                                onMouseOver={(e) => idx !== history.length - 1 && (e.currentTarget.style.background = 'rgba(0,0,0,0.05)')}
+                                onMouseOut={(e) => idx !== history.length - 1 && (e.currentTarget.style.background = 'var(--color-surface-2)')}
+                            >
+                                {step.name}
+                            </button>
+                            {idx < history.length - 1 && <ChevronRight size={16} color="var(--color-border)" />}
+                        </div>
+                    ))}
+                </div>
+
+                <motion.button 
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setShowCommissionInfo(true)}
+                    style={{
+                        background: 'linear-gradient(135deg, var(--color-wallet) 0%, #059669 100%)',
+                        color: 'white', border: 'none', padding: '10px 20px', borderRadius: 14,
+                        fontSize: 13, fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8,
+                        boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)'
+                    }}
+                >
+                    <Info size={16} /> ¿Cómo Paga mi Ecosistema?
+                </motion.button>
             </div>
 
 
@@ -213,6 +230,98 @@ export default function NetworkTree({ userId, onSelectUser }: NetworkTreeProps) 
                     </motion.div>
                 </AnimatePresence>
             )}
+
+            {/* Modal de Explicación de Comisiones */}
+            <AnimatePresence>
+                {showCommissionInfo && (
+                    <motion.div 
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        onClick={() => setShowCommissionInfo(false)}
+                        style={{
+                            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                            background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(10px)',
+                            zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20
+                        }}
+                    >
+                        <motion.div 
+                            initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
+                            onClick={(e) => e.stopPropagation()}
+                            style={{
+                                background: 'white', borderRadius: 32, padding: 40, width: '100%', maxWidth: 500,
+                                position: 'relative', overflow: 'hidden', boxShadow: '0 25px 50px rgba(0,0,0,0.2)'
+                            }}
+                        >
+                            <button 
+                                onClick={() => setShowCommissionInfo(false)}
+                                style={{
+                                    position: 'absolute', top: 20, right: 20, width: 36, height: 36, borderRadius: '50%',
+                                    background: 'var(--color-surface-2)', border: 'none', cursor: 'pointer',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-muted)'
+                                }}
+                            >
+                                <X size={18} />
+                            </button>
+
+                            <div style={{ textAlign: 'center', marginBottom: 32 }}>
+                                <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(135deg, var(--color-wallet) 0%, #059669 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', margin: '0 auto 16px', boxShadow: '0 10px 25px rgba(16, 185, 129, 0.4)' }}>
+                                    <Zap size={32} />
+                                </div>
+                                <h2 style={{ fontSize: 24, fontWeight: 950, color: 'var(--color-navy)', margin: '0 0 8px 0' }}>El Poder de tu Ecosistema</h2>
+                                <p style={{ fontSize: 15, color: 'var(--color-text-muted)', margin: 0, lineHeight: 1.5 }}>
+                                    Ganas comisiones pasivas cada vez que cualquier persona en tu red hace una compra real.
+                                </p>
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                <CommissionTier level="Nivel 1" desc="Tus Invitados Directos" percent="2%" color="#3B82F6" />
+                                <CommissionTier level="Nivel 2" desc="Invitados de tus Directos" percent="2%" color="#8B5CF6" />
+                                <CommissionTier level="Nivel 3" desc="Su red sigue creciendo" percent="2%" color="#F59E0B" />
+                                <div style={{ 
+                                    background: 'linear-gradient(135deg, var(--color-navy) 0%, #1e293b 100%)', 
+                                    borderRadius: 20, padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                    color: 'white', boxShadow: '0 10px 30px rgba(0,0,0,0.15)', transform: 'scale(1.02)'
+                                }}>
+                                    <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+                                        <div style={{ width: 44, height: 44, borderRadius: 14, background: 'rgba(16, 185, 129, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#34D399' }}>
+                                            <TrendingUp size={24} />
+                                        </div>
+                                        <div>
+                                            <h4 style={{ margin: '0 0 4px 0', fontSize: 16, fontWeight: 900 }}>Nivel 4 (Explosión)</h4>
+                                            <p style={{ margin: 0, fontSize: 12, opacity: 0.8 }}>¡Donde tu red es más masiva!</p>
+                                        </div>
+                                    </div>
+                                    <div style={{ fontSize: 28, fontWeight: 950, color: '#34D399' }}>4%</div>
+                                </div>
+                            </div>
+                            
+                            <p style={{ fontSize: 13, color: 'var(--color-text-muted)', textAlign: 'center', marginTop: 24, fontWeight: 600 }}>
+                                * Estas ganancias se depositan automáticamente en tu billetera como TrueCoins.
+                            </p>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+}
+
+function CommissionTier({ level, desc, percent, color }: any) {
+    return (
+        <div style={{ 
+            background: 'var(--color-surface-2)', borderRadius: 16, padding: '16px 20px', 
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            border: '1px solid rgba(0,0,0,0.03)'
+        }}>
+            <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+                <div style={{ width: 40, height: 40, borderRadius: 12, background: `${color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: color, fontWeight: 900, fontSize: 16 }}>
+                    {level.split(' ')[1]}
+                </div>
+                <div>
+                    <h4 style={{ margin: '0 0 2px 0', fontSize: 14, fontWeight: 800, color: 'var(--color-navy)' }}>{level}</h4>
+                    <p style={{ margin: 0, fontSize: 12, color: 'var(--color-text-muted)' }}>{desc}</p>
+                </div>
+            </div>
+            <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--color-navy)' }}>{percent}</div>
         </div>
     );
 }

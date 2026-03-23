@@ -3,13 +3,12 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Users, Copy, Send, CheckCircle2, Award, Zap, Shield, UserPlus, Gift
+    Users, Copy, Send, CheckCircle2, Award, Zap, Shield, Gift
 } from 'lucide-react';
 import NetworkTree from './NetworkTree';
 import TransferModal from './TransferModal';
 import RechargeModal from './RechargeModal';
 import { userService } from '../services/userService';
-import { matrixService } from '../services/matrixService';
 
 const RANKS = [
     "VIP BRONCE", "VIP PLATA", "VIP ORO",
@@ -25,11 +24,7 @@ export default function Dashboard({ user, balance, onUpdateBalance }: { user: an
     const [stats, setStats] = useState<any>({ directReferrals: 0, currentLevel: 1, isVip: false });
     const [selectedDetailUser, setSelectedDetailUser] = useState<any | null>(null);
 
-    // Placement Logic
-    const [showPlacementModal, setShowPlacementModal] = useState(false);
-    const [selectedPosition, setSelectedPosition] = useState<number | null>(null);
-    const [pendingReferrals, setPendingReferrals] = useState<any[]>([]);
-    const [isPlacing, setIsPlacing] = useState(false);
+
 
     useEffect(() => {
         if (user?.id) {
@@ -39,42 +34,12 @@ export default function Dashboard({ user, balance, onUpdateBalance }: { user: an
 
     const fetchDashboardData = async () => {
         try {
-            const [s, m] = await Promise.all([
-                userService.getDashboardStats(user.id),
-                matrixService.getMatrixSlots(user.id, stats.currentLevel)
-            ]);
+            const s = await userService.getDashboardStats(user.id);
             setStats(s);
-            setMatrixSlots(m);
-
-            // Also fetch pending referrals for placement
-            const pending = await matrixService.getUnplacedReferrals(user.id);
-            setPendingReferrals(pending);
         } catch (e) {
             console.error(e);
         }
     };
-
-    const handlePlaceUser = async (occupantId: string) => {
-        if (!selectedPosition || !user?.id) return;
-        setIsPlacing(true);
-        try {
-            await matrixService.placeUser({
-                matrixOwnerId: user.id,
-                occupantId: occupantId,
-                recruiterId: user.id,
-                level: stats.currentLevel,
-                position: selectedPosition
-            });
-            setShowPlacementModal(false);
-            setSelectedPosition(null);
-            await fetchDashboardData();
-        } catch (e: any) {
-            alert(e.message || "Error al ubicar socio");
-        } finally {
-            setIsPlacing(false);
-        }
-    };
-
     return (
         <div className="module-page animate-in" style={{ background: 'var(--color-surface-2)', minHeight: '100vh', paddingBottom: 60 }}>
             <TransferModal isOpen={showTransfer} onClose={() => setShowTransfer(false)} user={user} onSuccess={(amt: number) => {
@@ -244,70 +209,7 @@ export default function Dashboard({ user, balance, onUpdateBalance }: { user: an
                             </motion.div>
                         </div>
                     )}
-
-                    {/* Placement Selection Modal */}
-                    {showPlacementModal && (
-                        <div style={{ position: 'fixed', inset: 0, zIndex: 2100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-                            <motion.div
-                                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                                onClick={() => !isPlacing && setShowPlacementModal(false)}
-                                style={{ position: 'absolute', inset: 0, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(8px)' }}
-                            />
-                            <motion.div
-                                initial={{ scale: 0.9, y: 20, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.9, y: 20, opacity: 0 }}
-                                style={{
-                                    width: '100%', maxWidth: 440, background: 'white', borderRadius: 32, overflow: 'hidden', position: 'relative',
-                                    boxShadow: '0 30px 60px rgba(0,0,0,0.2)', border: '1px solid var(--color-border)'
-                                }}
-                            >
-                                <div style={{ padding: '32px 32px 24px' }}>
-                                    <h3 style={{ fontSize: 20, fontWeight: 950, color: 'var(--color-navy)', marginBottom: 8 }}>Ubicar Socio Directo</h3>
-                                    <p style={{ fontSize: 13, color: 'var(--color-text-muted)', fontWeight: 600 }}>Selecciona un socio de tu lista de espera para ubicarlo en la posición {selectedPosition}.</p>
-                                </div>
-                                <div style={{ maxHeight: 350, overflowY: 'auto', padding: '0 32px 32px' }}>
-                                    {pendingReferrals.length > 0 ? (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                                            {pendingReferrals.map(ref => (
-                                                <button
-                                                    key={ref.id}
-                                                    disabled={isPlacing}
-                                                    onClick={() => handlePlaceUser(ref.id)}
-                                                    style={{
-                                                        display: 'flex', alignItems: 'center', gap: 14, padding: 16, borderRadius: 20,
-                                                        background: '#F8FAFC', border: '1px solid var(--color-border)', cursor: 'pointer',
-                                                        transition: 'all 0.2s', width: '100%', textAlign: 'left',
-                                                        opacity: isPlacing ? 0.6 : 1
-                                                    }}
-                                                >
-                                                    <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--color-navy)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 900 }}>
-                                                        {ref.full_name?.charAt(0)}
-                                                    </div>
-                                                    <div style={{ flex: 1 }}>
-                                                        <p style={{ fontSize: 15, fontWeight: 900, color: 'var(--color-navy)', margin: 0 }}>{ref.full_name}</p>
-                                                        <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-wallet)', margin: 0 }}>{ref.email}</p>
-                                                    </div>
-                                                    <UserPlus size={18} color="var(--color-wallet)" />
-                                                </button>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div style={{ textAlign: 'center', padding: '40px 0' }}>
-                                            <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-text-muted)' }}>No tienes socios directos pendientes de ubicar.</p>
-                                        </div>
-                                    )}
-                                </div>
-                                <div style={{ padding: 24, borderTop: '1px solid #F1F5F9', textAlign: 'right' }}>
-                                    <button
-                                        onClick={() => setShowPlacementModal(false)}
-                                        disabled={isPlacing}
-                                        style={{ background: 'none', border: 'none', color: 'var(--color-text-muted)', fontWeight: 800, cursor: 'pointer', padding: '8px 16px' }}
-                                    >CANCELAR</button>
-                                </div>
-                            </motion.div>
-                        </div>
-                    )}
                 </AnimatePresence>
-
             </div>
         </div>
     );

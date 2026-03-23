@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Users, Shield, Star, Award, ChevronRight, CheckCircle2, AlertCircle, Share2, Zap, UserPlus } from 'lucide-react';
+import { Users, Star, ChevronRight, CheckCircle2, AlertCircle, Share2, Zap, UserPlus } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { userService } from '../services/userService';
 
@@ -18,13 +18,7 @@ const RANKS = [
     "EMBAJADOR", "EMBAJADOR REAL", "LEYENDA"
 ];
 
-const LEVEL_VALUES: Record<number, number> = {
-    1: 50, 2: 100, 3: 200, 4: 400, 5: 800,
-    6: 1600, 7: 3200, 8: 6400, 9: 12800,
-    10: 25600, 11: 51200, 12: 102400,
-};
-
-export default function NetworkTree({ userId, mentor, onSelectUser }: NetworkTreeProps) {
+export default function NetworkTree({ userId, onSelectUser }: NetworkTreeProps) {
     const [network, setNetwork] = useState<{ l1: any[], l2: any[], l3: any[], l4: any[] }>({ l1: [], l2: [], l3: [], l4: [] });
     const [loading, setLoading] = useState(true);
     const [history, setHistory] = useState<{id: string, name: string}[]>([{id: userId, name: 'Tú (Raíz)'}]);
@@ -60,9 +54,8 @@ export default function NetworkTree({ userId, mentor, onSelectUser }: NetworkTre
 
     // Gamification calc
     const directCount = network.l1.length;
+    const directCount = network.l1.length;
     const nextRankTarget = directCount < 2 ? 2 : directCount < 5 ? 5 : directCount < 10 ? 10 : directCount < 20 ? 20 : directCount + 10;
-    const progressPercent = Math.min((directCount / nextRankTarget) * 100, 100);
-    const currentRankIdx = directCount < 2 ? 0 : directCount < 5 ? 1 : directCount < 10 ? 2 : 3;
 
     // Get current active list
     const activeList = activeLevel === 1 ? network.l1 : activeLevel === 2 ? network.l2 : activeLevel === 3 ? network.l3 : network.l4;

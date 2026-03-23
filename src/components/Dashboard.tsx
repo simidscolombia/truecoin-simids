@@ -3,9 +3,8 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Wallet, Users, Copy, Send, CheckCircle2, Award, Zap, Shield, UserPlus, Gift
+    Users, Copy, Send, CheckCircle2, Award, Zap, Shield, UserPlus, Gift
 } from 'lucide-react';
-import GiftMatrix from './GiftMatrix';
 import NetworkTree from './NetworkTree';
 import TransferModal from './TransferModal';
 import RechargeModal from './RechargeModal';

@@ -31,7 +31,7 @@ export const aiService = {
                 2. La membresía VIP proporciona descuentos exclusivos en comercios locales y tiendas online.
                 3. Los usuarios ganan 'Puntos de Regalo' (TrueCoins) y suben de Nivel/Rango VIP automáticamente al recomendar amigos.
                 4. Los usuarios ganan Comisiones residuales cada vez que su red realiza compras reales.
-                5. 1 TC = $1,000 COP. Los TC se usan en negocios aliados localmente o se retiran.
+                5. 1 TC = $1,000 COP. Los TC sirven EXCLUSIVAMENTE para adquirir productos en nuestra tienda o comercios aliados. NO SE PUEDEN CANJEAR POR DINERO EN EFECTIVO. Nunca prometas retiros de dinero a los miembros VIP.
                 6. Sé muy amigable, fresco y usa el concepto de 'Cofres de Recompensa', 'Precios VIP' y 'Expansión de Club'.
                 
                 Pregunta del usuario: ${userMessage}`

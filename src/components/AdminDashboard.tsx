@@ -619,11 +619,11 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
 
                                 <div className="card" style={{ padding: 24, background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)', color: 'white', boxShadow: '0 10px 25px rgba(245, 158, 11, 0.3)' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                                        <p style={{ fontSize: 11, fontWeight: 900, opacity: 0.9, textTransform: 'uppercase', margin: 0 }}>Pasivo de Retiros (Comisiones)</p>
+                                        <p style={{ fontSize: 11, fontWeight: 900, opacity: 0.9, textTransform: 'uppercase', margin: 0 }}>Puntos Emitidos (Circulante)</p>
                                         <Users opacity={0.5} />
                                     </div>
                                     <h3 style={{ fontSize: 32, fontWeight: 950, margin: '0' }}>{stats?.totalTC || '0.00'} <span style={{ fontSize: 14, fontWeight: 700 }}>TC</span></h3>
-                                    <p style={{ fontSize: 12, opacity: 0.8, marginTop: 12, fontWeight: 600 }}>Costo equivalente aprox. ${(Number(stats?.totalTC || 0)*1000).toLocaleString()} COP</p>
+                                    <p style={{ fontSize: 12, opacity: 0.8, marginTop: 12, fontWeight: 600 }}>Puntos que los usuarios usarán en compras.</p>
                                 </div>
 
                                 <div className="card" style={{ padding: 24, background: 'linear-gradient(135deg, #312E81 0%, #1e1b4b 100%)', color: 'white', boxShadow: '0 10px 25px rgba(49, 46, 129, 0.3)' }}>
@@ -637,12 +637,12 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                             </div>
 
                             <div className="card-lg" style={{ padding: 32 }}>
-                                <h3 style={{ fontSize: 18, fontWeight: 800, color: 'var(--color-navy)', marginBottom: 20 }}>Bandeja de Pagos a Ejecutar (Retiros Solicitados)</h3>
+                                <h3 style={{ fontSize: 18, fontWeight: 800, color: 'var(--color-navy)', marginBottom: 20 }}>Liquidaciones (Pagos a Comercios Aliados)</h3>
                                 <div style={{ border: '2px dashed var(--color-border)', textAlign: 'center', padding: '60px 0', background: 'var(--color-surface-2)', borderRadius: 20 }}>
                                     <CircleDollarSign size={48} color="var(--color-text-muted)" style={{ marginBottom: 16, opacity: 0.5 }} />
                                     <p style={{ fontSize: 18, fontWeight: 900, color: 'var(--color-navy)', margin: '0 0 8px 0' }}>Bandeja Limpia</p>
                                     <p style={{ fontSize: 14, color: 'var(--color-text-muted)', maxWidth: 400, margin: '0 auto' }}>
-                                        Cuando los usuarios soliciten canjear sus Puntos por COP o Transferencias Bancarias, aparecerán en esta tabla para tu aprobación.
+                                        Cuando los Comercios presenten Puntos recibidos en ventas para su liquidación en fiat (COP), aparecerán aquí para tu confirmación de pago. NO hay retiros de efectivo para usuarios comunes.
                                     </p>
                                 </div>
                             </div>

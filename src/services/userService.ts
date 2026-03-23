@@ -380,5 +380,33 @@ export const userService = {
             console.error("❌ Error en Bridge WhatsApp:", err);
             return false;
         }
+    },
+
+    async uploadAvatar(userId: string, file: File) {
+        // 1. Subir a Storage
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${userId}-${Math.random()}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+            .from('avatars')
+            .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        // 2. Obtener URL Publica
+        const { data: { publicUrl } } = supabase.storage
+            .from('avatars')
+            .getPublicUrl(filePath);
+
+        // 3. Actualizar perfil
+        const { error: updateError } = await supabase
+            .from('profiles')
+            .update({ image_url: publicUrl })
+            .eq('id', userId);
+
+        if (updateError) throw updateError;
+
+        return publicUrl;
     }
 };

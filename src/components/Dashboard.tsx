@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Users, Copy, Send, CheckCircle2, Award, Zap, Shield, Gift
+    Users, Copy, Send, CheckCircle2, Award, Zap, Shield, Gift, Camera, Loader2
 } from 'lucide-react';
 import NetworkTree from './NetworkTree';
 import TransferModal from './TransferModal';
@@ -16,6 +16,7 @@ const RANKS = [
     "ESMERALDA I", "ESMERALDA II", "ESMERALDA III",
     "ZAFIRO", "DIAMANTE", "SOY LEYENDA"
 ];
+
 export default function Dashboard({ user, balance, onUpdateBalance }: { user: any; balance: string; onUpdateBalance?: (b: string) => void; }) {
     const [showTransfer, setShowTransfer] = useState(false);
     const [showRecharge, setShowRecharge] = useState(false);
@@ -23,8 +24,8 @@ export default function Dashboard({ user, balance, onUpdateBalance }: { user: an
     const [copied, setCopied] = useState(false);
     const [stats, setStats] = useState<any>({ directReferrals: 0, currentLevel: 1, isVip: false });
     const [selectedDetailUser, setSelectedDetailUser] = useState<any | null>(null);
-
-
+    const [isUploading, setIsUploading] = useState(false);
+    const [avatarUrl, setAvatarUrl] = useState(user.image_url || null);
 
     useEffect(() => {
         if (user?.id) {
@@ -40,6 +41,27 @@ export default function Dashboard({ user, balance, onUpdateBalance }: { user: an
             console.error(e);
         }
     };
+
+    const handleAvatarClick = () => {
+        const input = document.getElementById('avatar-upload') as HTMLInputElement;
+        if (input) input.click();
+    };
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsUploading(true);
+        try {
+            const publicUrl = await userService.uploadAvatar(user.id, file);
+            setAvatarUrl(publicUrl);
+        } catch (err: any) {
+            alert("Error subiendo imagen: " + err.message);
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
     return (
         <div className="module-page animate-in" style={{ background: 'var(--color-surface-2)', minHeight: '100vh', paddingBottom: 60 }}>
             <TransferModal isOpen={showTransfer} onClose={() => setShowTransfer(false)} user={user} onSuccess={(amt: number) => {
@@ -53,6 +75,45 @@ export default function Dashboard({ user, balance, onUpdateBalance }: { user: an
 
                 <div style={{ padding: '40px 0 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 20 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+                        {/* 📸 AVATAR INTERACTIVO */}
+                        <div style={{ position: 'relative', cursor: 'pointer' }} onClick={handleAvatarClick}>
+                            <input 
+                                type="file" 
+                                id="avatar-upload" 
+                                style={{ display: 'none' }} 
+                                accept="image/*"
+                                onChange={handleFileChange} 
+                            />
+                            <div style={{
+                                width: 80, height: 80, borderRadius: '50%',
+                                background: 'linear-gradient(135deg, var(--color-wallet) 0%, #059669 100%)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                color: 'white', fontSize: 32, fontWeight: 950,
+                                border: '4px solid white', boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
+                                overflow: 'hidden', position: 'relative'
+                            }}>
+                                {avatarUrl ? (
+                                    <img src={avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                ) : (
+                                    user.fullName?.charAt(0).toUpperCase()
+                                )}
+
+                                {isUploading && (
+                                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <Loader2 className="animate-spin" size={24} />
+                                    </div>
+                                )}
+
+                                <div className="avatar-overlay" style={{
+                                    position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0,
+                                    transition: 'opacity 0.2s'
+                                }}>
+                                    <Camera size={20} />
+                                </div>
+                            </div>
+                        </div>
+
                         <div>
                             <h1 style={{ fontSize: 28, fontWeight: 950, color: 'var(--color-navy)', margin: 0, letterSpacing: -0.5 }}>Hola, {user.fullName?.split(' ')[0]} 👋</h1>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 4 }}>
@@ -81,9 +142,7 @@ export default function Dashboard({ user, balance, onUpdateBalance }: { user: an
                     </div>
                 </div>
 
-                {/* 2. Stats Grid Mejorado (Limpio y Ordenado) */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20, marginBottom: 32 }}>
-                    {/* Tarjeta 1: Mis Puntos (Destacada) */}
                     <div style={{
                         borderRadius: 24, padding: '24px', display: 'flex', alignItems: 'center', gap: 20,
                         background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
@@ -98,7 +157,6 @@ export default function Dashboard({ user, balance, onUpdateBalance }: { user: an
                         </div>
                     </div>
 
-                    {/* Tarjeta 2: Equipo Directo */}
                     <div style={{
                         background: 'white', borderRadius: 24, padding: '24px', display: 'flex', alignItems: 'center', gap: 20,
                         boxShadow: '0 4px 15px rgba(0,0,0,0.03)', border: '1px solid var(--color-border)'
@@ -112,7 +170,6 @@ export default function Dashboard({ user, balance, onUpdateBalance }: { user: an
                         </div>
                     </div>
 
-                    {/* Tarjeta 3: Nivel Actual */}
                     <div style={{
                         background: 'white', borderRadius: 24, padding: '24px', display: 'flex', alignItems: 'center', gap: 20,
                         boxShadow: '0 4px 15px rgba(0,0,0,0.03)', border: '1px solid var(--color-border)'
@@ -129,7 +186,6 @@ export default function Dashboard({ user, balance, onUpdateBalance }: { user: an
                     </div>
                 </div>
 
-                {/* 3. Main Center - Mi Red (Por defecto) */}
                 <div style={{ marginBottom: 32 }}>
                     <div className="card" style={{ padding: 40, border: '1px solid var(--color-border)', borderRadius: 24 }}>
                         <h3 style={{ fontSize: 20, fontWeight: 950, color: 'var(--color-navy)', marginBottom: 32, display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -140,9 +196,7 @@ export default function Dashboard({ user, balance, onUpdateBalance }: { user: an
                     </div>
                 </div>
 
-                {/* 4. Modals */}
                 <AnimatePresence>
-                    {/* User Detail Modal */}
                     {selectedDetailUser && (
                         <div style={{ position: 'fixed', inset: 0, zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
                             <motion.div

@@ -96,7 +96,7 @@ export default function NetworkTree({ userId, onSelectUser }: NetworkTreeProps) 
                         boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)'
                     }}
                 >
-                    <Info size={16} /> ¿Cómo Paga mi Ecosistema?
+                    <Info size={16} /> ¿Cómo Gana mi Ecosistema?
                 </motion.button>
             </div>
 

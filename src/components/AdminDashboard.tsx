@@ -12,11 +12,12 @@ import ThemeCustomizer from './ThemeCustomizer';
 import ApiSettings from './ApiSettings';
 import CerebroIA from './CerebroIA';
 import NetworkTree from './NetworkTree';
+import InventoryHQ from './InventoryHQ';
 
 import { APP_VERSION } from '../constants';
 
 export default function AdminDashboard({ onBack }: { onBack: () => void }) {
-    const [activeTab, setActiveTab] = useState<'stats' | 'users' | 'directory' | 'expansion' | 'themes' | 'banks' | 'cerebro' | 'finance' | 'tree' | 'metrics' | 'orders'>('stats');
+    const [activeTab, setActiveTab] = useState<'stats' | 'users' | 'directory' | 'expansion' | 'themes' | 'banks' | 'cerebro' | 'finance' | 'tree' | 'metrics' | 'orders' | 'inventory'>('stats');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [stats, setStats] = useState<any>(null);
     const [users, setUsers] = useState<any[]>([]);
@@ -271,6 +272,7 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                     <TabBtn id="stats" icon={LayoutDashboard} label="Dashboard Global" />
                     <TabBtn id="metrics" icon={BarChart3} label="Métricas Reales" customColor="#6366F1" />
                     <TabBtn id="orders" icon={ShoppingBag} label="Torre de Pedidos" customColor="#EC4899" />
+                    <TabBtn id="inventory" icon={Package} label="Inventario HQ" customColor="#0EA5E9" />
                     <TabBtn id="finance" icon={CircleDollarSign} label="Pagos y Utilidades" customColor="#F59E0B" />
                     
                     <p style={{ fontSize: 10, fontWeight: 900, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: 1, margin: '16px 12px 10px' }}>Ecosistema Inteligente</p>
@@ -827,6 +829,12 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                                     </p>
                                 </div>
                             </div>
+                        </motion.div>
+                    )}
+
+                    {activeTab === 'inventory' && (
+                        <motion.div key="inventory" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                            <InventoryHQ />
                         </motion.div>
                     )}
 

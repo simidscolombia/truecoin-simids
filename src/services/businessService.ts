@@ -61,5 +61,44 @@ export const businessService = {
 
         if (error) throw error;
         return data as Product[];
+    },
+
+    // ── GESTIÓN DE PRODUCTOS HQ (Admin/Aliados) ────────────
+    async saveProduct(product: Partial<Product>) {
+        const { data, error } = await supabase
+            .from('products')
+            .upsert([product])
+            .select();
+
+        if (error) throw error;
+        return data?.[0];
+    },
+
+    async deleteProduct(productId: string) {
+        const { error } = await supabase
+            .from('products')
+            .delete()
+            .eq('id', productId);
+
+        if (error) throw error;
+        return true;
+    },
+
+    async uploadProductImage(productId: string, file: File) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${productId}-${Math.random()}.${fileExt}`;
+        const filePath = `catalog/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+            .from('inventory')
+            .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+            .from('inventory')
+            .getPublicUrl(filePath);
+
+        return publicUrl;
     }
 };

@@ -37,79 +37,71 @@ function ProductCard({ product, onBuy, layout = 'grid' }: { product: Product; on
                 display: 'flex',
                 flexDirection: isList ? 'row' : 'column',
                 height: isList ? 140 : 'auto',
-                alignItems: isList ? 'center' : 'stretch'
+                alignItems: isList ? 'center' : 'stretch',
+                overflow: 'hidden'
             }}
         >
-            {/* Image */}
+            {/* Image Container - Forced 1:1 Aspect Ratio */}
             <div style={{
-                width: isList ? 160 : '100%',
-                height: isList ? '100%' : 160,
-                background: 'color-mix(in srgb, var(--color-marketplace) 8%, white)',
+                width: isList ? 140 : '100%',
+                aspectRatio: '1/1',
+                background: 'white',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 borderRight: isList ? '1px solid var(--color-border)' : 'none',
                 borderBottom: isList ? 'none' : '1px solid var(--color-border)',
                 position: 'relative',
                 overflow: 'hidden',
-                flexShrink: 0
+                flexShrink: 0,
+                padding: 12
             }}>
                 {product.image_url ? (
-                    <img src={product.image_url} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={product.image_url} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                 ) : (
-                    <ShoppingBag size={isList ? 32 : 48} style={{ color: 'var(--color-marketplace)', opacity: 0.25 }} />
+                    <ShoppingBag size={isList ? 32 : 48} style={{ color: 'var(--color-marketplace)', opacity: 0.15 }} />
                 )}
+                
+                {/* Micro-badge of Business */}
+                <div style={{ 
+                    position: 'absolute', top: 8, right: 8, width: 24, height: 24, 
+                    borderRadius: '50%', background: 'var(--color-navy)', display: 'flex', 
+                    alignItems: 'center', justifyContent: 'center', border: '2px solid white',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                }}>
+                    <Building2 size={10} color="white" />
+                </div>
             </div>
 
-            {/* Info */}
-            <div style={{ padding: isList ? '12px 24px' : '16px 18px', flex: 1, display: 'flex', flexDirection: isList ? 'row' : 'column', gap: isList ? 20 : 0 }}>
-                <div style={{ flex: 1 }}>
-                    <h3 style={{ fontSize: isList ? 16 : 15, fontWeight: 700, color: 'var(--color-navy)', marginBottom: 4, lineHeight: 1.3 }}>
+            {/* Info Area - Clean & Minimal */}
+            <div style={{ padding: '16px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div>
+                    <h3 style={{ fontSize: 13, fontWeight: 800, color: 'var(--color-navy)', marginBottom: 12, lineHeight: 1.2, height: '2.4em', overflow: 'hidden' }}>
                         {product.name}
                     </h3>
-                    <p style={{ fontSize: 12, color: 'var(--color-text-muted)', lineHeight: 1.5, marginBottom: isList ? 8 : 14, flex: 1, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                        {product.description}
-                    </p>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                        {[1, 2, 3, 4, 5].map(s => (
-                            <Star key={s} size={10} fill={s <= 4 ? 'var(--color-wallet)' : 'none'} color={s <= 4 ? 'var(--color-wallet)' : 'var(--color-border-strong)'} />
-                        ))}
-                    </div>
-                </div>
-
-                {/* Price Area */}
-                <div style={{
-                    width: isList ? 240 : '100%',
-                    borderTop: isList ? 'none' : '1px solid var(--color-border)',
-                    borderLeft: isList ? '1px solid var(--color-border)' : 'none',
-                    paddingTop: isList ? 0 : 14,
-                    paddingLeft: isList ? 20 : 0,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center'
-                }}>
-                    <div style={{ marginBottom: isList ? 12 : 12 }}>
-                        <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', marginBottom: 2 }}>
-                            Precio Estándar: {formatCurrency(fiatPublic)}
+                    {/* Matrix of Prices */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        <p style={{ fontSize: 11, color: 'var(--color-text-muted)', textDecoration: 'line-through', margin: 0 }}>
+                            {formatCurrency(fiatPublic)}
                         </p>
-                        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                            <p style={{ fontSize: isList ? 20 : 20, fontWeight: 800, color: 'var(--color-navy)', margin: 0 }}>
-                                {formatCurrency(fiatPrice)}
-                            </p>
-                            <span style={{ fontSize: 11, fontWeight: 700, color: '#16A34A', background: '#DCFCE7', padding: '1px 6px', borderRadius: 4 }}>OFERTA VIP</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                             <span style={{ fontSize: 13, fontWeight: 900, color: '#16A34A' }}>VIP {formatCurrency(fiatPrice)}</span>
                         </div>
-                        <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-marketplace)', display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
-                            <Zap size={14} fill="var(--color-marketplace)" /> {product.price_tc.toFixed(2)} TC
-                        </p>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
+                            <div style={{ width: 14, height: 14, background: 'var(--color-wallet)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Zap size={8} fill="white" color="white" />
+                            </div>
+                            <span style={{ fontSize: 13, fontWeight: 900, color: 'var(--color-wallet)' }}>{product.price_tc.toFixed(2)} TC</span>
+                        </div>
                     </div>
-
-                    <button
-                        onClick={() => onBuy(product)}
-                        className="btn btn-marketplace btn-full btn-sm"
-                        style={{ borderRadius: 8, height: 40, gap: 10, fontSize: 13 }}
-                    >
-                        <ShoppingBag size={16} /> Añadir al Carrito
-                    </button>
                 </div>
+
+                <button
+                    onClick={() => onBuy(product)}
+                    className="btn btn-marketplace btn-full"
+                    style={{ borderRadius: 8, height: 34, fontSize: 11, fontWeight: 800, marginTop: 16, padding: '0 8px' }}
+                >
+                    <ShoppingBag size={12} /> Canjear / Comprar
+                </button>
             </div>
         </motion.div>
     );
@@ -203,7 +195,6 @@ export default function Marketplace({ onAddToCart, isGuest, onLoginRequired, vie
         const matchCat = activeCategory === 'Todos' || p.category === activeCategory;
         const matchSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             p.description.toLowerCase().includes(searchTerm.toLowerCase());
-        // Eliminamos la asignación forzada de ciudades para que la búsqueda sea nacional por defecto
         const matchCity = activeCity === 'Todas' || (p as any).city === activeCity;
         return matchCat && matchSearch && matchCity;
     });
@@ -223,9 +214,6 @@ export default function Marketplace({ onAddToCart, isGuest, onLoginRequired, vie
 
     return (
         <div className="module-page animate-in">
-
-
-
             {/* Dynamic Color Filter Bar */}
             <div style={{
                 background: viewMode === 'products' ? 'var(--color-marketplace)' : 'var(--color-directorio)',
@@ -233,8 +221,6 @@ export default function Marketplace({ onAddToCart, isGuest, onLoginRequired, vie
                 padding: '20px 32px', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
                 transition: 'background-color 0.4s ease'
             }}>
-
-
                 <div className="input-with-icon" style={{ flex: '1 1 200px', maxWidth: 300 }}>
                     <Search size={14} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.6)' }} />
                     <input
@@ -321,8 +307,9 @@ export default function Marketplace({ onAddToCart, isGuest, onLoginRequired, vie
                 <div style={{
                     display: viewMode === 'products' && layoutMode === 'list' ? 'flex' : 'grid',
                     flexDirection: 'column',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
-                    gap: 16
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                    gap: 20,
+                    padding: '32px'
                 }}>
                     {viewMode === 'products'
                         ? filteredProducts.map(p => (
@@ -334,8 +321,6 @@ export default function Marketplace({ onAddToCart, isGuest, onLoginRequired, vie
                     }
                 </div>
             )}
-
-
         </div>
     );
 }

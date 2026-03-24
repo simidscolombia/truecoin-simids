@@ -283,5 +283,68 @@ export const adminService = {
             console.error("No se pudo enviar notificación WhatsApp:", err);
             return false;
         }
+    },
+
+    // ── GESTIÓN LOGÍSTICA (Torre de Control) ─────────────────
+    async getAllOrders() {
+        const { data, error } = await supabaseAdmin
+            .from('orders')
+            .select(`
+                *,
+                user:profiles!orders_user_id_fkey(full_name, phone),
+                business:businesses(name, phone)
+            `)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return data || [];
+    },
+
+    async updateOrderStatus(orderId: string, status: string) {
+        const { error } = await supabaseAdmin
+            .from('orders')
+            .update({ status, updated_at: new Date().toISOString() })
+            .eq('id', orderId);
+
+        if (error) throw error;
+        return true;
+    },
+
+    async getUserDetailedTransactions(userId: string) {
+        const { data, error } = await supabaseAdmin
+            .from('transactions')
+            .select('*')
+            .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return data || [];
+    },
+
+    async getLogisticsMetrics() {
+        const { data: orders } = await supabaseAdmin.from('orders').select('status, created_at, updated_at');
+        
+        const counts = (orders || []).reduce((acc: any, o) => {
+            acc[o.status] = (acc[o.status] || 0) + 1;
+            return acc;
+        }, {});
+
+        // Tiempo promedio de entrega (simulado o calculado si hay datos)
+        const deliveredOrders = (orders || []).filter(o => o.status === 'delivered');
+        let avgDeliveryTime = 0;
+        if (deliveredOrders.length > 0) {
+            const totalTime = deliveredOrders.reduce((sum, o) => {
+                const start = new Date(o.created_at).getTime();
+                const end = new Date(o.updated_at).getTime();
+                return sum + (end - start);
+            }, 0);
+            avgDeliveryTime = totalTime / deliveredOrders.length / (1000 * 60 * 60); // en horas
+        }
+
+        return {
+            statusCounts: counts,
+            avgDeliveryHours: avgDeliveryTime.toFixed(1),
+            totalOrders: orders?.length || 0
+        };
     }
 };

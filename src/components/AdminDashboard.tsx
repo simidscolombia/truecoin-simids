@@ -3,7 +3,7 @@
 import {
     Users, Wallet, TrendingUp, ArrowLeft, Search, Edit3, ShieldAlert,
     Database, LayoutDashboard, Save, BarChart3, SearchCode,
-    Globe, Sparkles, Palette, Trash2, Zap, Cpu, CircleDollarSign, Network
+    Globe, Sparkles, Palette, Trash2, Zap, Cpu, CircleDollarSign, Network, ShoppingBag, Clock, Truck, CheckCircle, Package
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -16,11 +16,12 @@ import NetworkTree from './NetworkTree';
 import { APP_VERSION } from '../constants';
 
 export default function AdminDashboard({ onBack }: { onBack: () => void }) {
-    const [activeTab, setActiveTab] = useState<'stats' | 'users' | 'directory' | 'expansion' | 'themes' | 'banks' | 'cerebro' | 'finance' | 'tree' | 'metrics'>('stats');
+    const [activeTab, setActiveTab] = useState<'stats' | 'users' | 'directory' | 'expansion' | 'themes' | 'banks' | 'cerebro' | 'finance' | 'tree' | 'metrics' | 'orders'>('stats');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [stats, setStats] = useState<any>(null);
     const [users, setUsers] = useState<any[]>([]);
     const [businesses, setBusinesses] = useState<any[]>([]);
+    const [orders, setOrders] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedMetric, setSelectedMetric] = useState<'users' | 'liquidez' | 'levels' | null>(null);
@@ -50,14 +51,16 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [globalStats, allUsers, allBusinesses] = await Promise.all([
+            const [globalStats, allUsers, allBusinesses, allOrders] = await Promise.all([
                 adminService.getGlobalStats(),
                 adminService.getAllUsers(),
-                adminService.getAllBusinesses()
+                adminService.getAllBusinesses(),
+                adminService.getAllOrders()
             ]);
             setStats(globalStats);
             setUsers(allUsers);
             setBusinesses(allBusinesses);
+            setOrders(allOrders);
         } catch (error) {
             console.error("Error cargando el Cerebro:", error);
         } finally {
@@ -267,6 +270,7 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                     <p style={{ fontSize: 10, fontWeight: 900, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: 1, margin: '16px 12px 10px' }}>Monitor Principal</p>
                     <TabBtn id="stats" icon={LayoutDashboard} label="Dashboard Global" />
                     <TabBtn id="metrics" icon={BarChart3} label="Métricas Reales" customColor="#6366F1" />
+                    <TabBtn id="orders" icon={ShoppingBag} label="Torre de Pedidos" customColor="#EC4899" />
                     <TabBtn id="finance" icon={CircleDollarSign} label="Pagos y Utilidades" customColor="#F59E0B" />
                     
                     <p style={{ fontSize: 10, fontWeight: 900, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: 1, margin: '16px 12px 10px' }}>Ecosistema Inteligente</p>
@@ -628,6 +632,115 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                                         <p style={{ fontSize: 12, color: 'var(--color-text-muted)', marginTop: 8 }}>Nuevos registros en los últimos 7 días</p>
                                     </div>
                                 </div>
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {activeTab === 'orders' && (
+                        <motion.div key="orders" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                            <div style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                                <div>
+                                    <h2 style={{ fontSize: 28, fontWeight: 800, color: 'var(--color-navy)', letterSpacing: -0.5 }}>Torre de Control de Pedidos</h2>
+                                    <p style={{ fontSize: 14, color: 'var(--color-text-muted)' }}>Supervisa el flujo de canjes y tiempos de entrega en tiempo real.</p>
+                                </div>
+                                <div style={{ display: 'flex', gap: 12 }}>
+                                    <div className="card" style={{ padding: '8px 16px', background: 'white', display: 'flex', alignItems: 'center', gap: 8 }}>
+                                        <Clock size={16} color="#EC4899" />
+                                        <span style={{ fontSize: 13, fontWeight: 700 }}>Avg. Entrega: 4.2h</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 32 }}>
+                                {[
+                                    { label: 'Pendientes', count: orders.filter(o => o.status === 'pending').length, color: '#F59E0B', icon: Package },
+                                    { label: 'En Preparación', count: orders.filter(o => o.status === 'preparing').length, color: '#3B82F6', icon: Edit3 },
+                                    { label: 'En Camino', count: orders.filter(o => o.status === 'shipped').length, color: '#8B5CF6', icon: Truck },
+                                    { label: 'Entregados', count: orders.filter(o => o.status === 'delivered').length, color: '#10B981', icon: CheckCircle },
+                                ].map(s => (
+                                    <div key={s.label} className="card" style={{ padding: 20, background: 'white', border: `1px solid ${s.color}20` }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <s.icon size={20} color={s.color} />
+                                            <span style={{ fontSize: 24, fontWeight: 900, color: 'var(--color-navy)' }}>{s.count}</span>
+                                        </div>
+                                        <p style={{ fontSize: 11, fontWeight: 800, color: 'var(--color-text-muted)', marginTop: 8, textTransform: 'uppercase' }}>{s.label}</p>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="card-lg" style={{ overflow: 'hidden' }}>
+                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                    <thead>
+                                        <tr style={{ background: 'var(--color-surface-2)', textAlign: 'left' }}>
+                                            <th style={{ padding: '16px 20px', fontSize: 12, fontWeight: 800, color: 'var(--color-navy)' }}>Pedido / Socio</th>
+                                            <th style={{ padding: '16px 20px', fontSize: 12, fontWeight: 800, color: 'var(--color-navy)' }}>Comercio Ally</th>
+                                            <th style={{ padding: '16px 20px', fontSize: 12, fontWeight: 800, color: 'var(--color-navy)' }}>Valor (TC)</th>
+                                            <th style={{ padding: '16px 20px', fontSize: 12, fontWeight: 800, color: 'var(--color-navy)' }}>Tiempo Transcurrido</th>
+                                            <th style={{ padding: '16px 20px', fontSize: 12, fontWeight: 800, color: 'var(--color-navy)' }}>Estado</th>
+                                            <th style={{ padding: '16px 20px', fontSize: 12, fontWeight: 800, color: 'var(--color-navy)', textAlign: 'center' }}>Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {orders.length === 0 ? (
+                                            <tr><td colSpan={6} style={{ padding: 40, textAlign: 'center', color: 'var(--color-text-muted)' }}>Esperando primer canje de la red...</td></tr>
+                                        ) : (
+                                            orders.map(order => {
+                                                const timeDiff = Math.floor((new Date().getTime() - new Date(order.created_at).getTime()) / (1000 * 60));
+                                                const hours = Math.floor(timeDiff / 60);
+                                                const mins = timeDiff % 60;
+
+                                                return (
+                                                    <tr key={order.id} style={{ borderTop: '1px solid var(--color-border)' }}>
+                                                        <td style={{ padding: '16px 20px' }}>
+                                                            <p style={{ fontSize: 13, fontWeight: 900, color: 'var(--color-navy)', margin: 0 }}>#{order.id.substring(0,6)}</p>
+                                                            <p style={{ fontSize: 11, color: 'var(--color-text-muted)', margin: 0 }}>{order.user?.full_name}</p>
+                                                        </td>
+                                                        <td style={{ padding: '16px 20px' }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                                <span style={{ fontSize: 13, fontWeight: 700 }}>{order.business?.name}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td style={{ padding: '16px 20px' }}>
+                                                            <span style={{ fontSize: 14, fontWeight: 900, color: 'var(--color-wallet)' }}>{order.total_tc} TC</span>
+                                                        </td>
+                                                        <td style={{ padding: '16px 20px' }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: hours > 24 ? '#EF4444' : 'var(--color-text-muted)' }}>
+                                                                <Clock size={12} />
+                                                                <span style={{ fontSize: 12, fontWeight: 700 }}>{hours > 0 ? `${hours}h ` : ''}{mins}m</span>
+                                                            </div>
+                                                        </td>
+                                                        <td style={{ padding: '16px 20px' }}>
+                                                            <span style={{ 
+                                                                fontSize: 10, fontWeight: 900, padding: '4px 8px', borderRadius: 8,
+                                                                background: order.status === 'pending' ? '#FEF3C7' : order.status === 'delivered' ? '#D1FAE5' : '#DBEAFE',
+                                                                color: order.status === 'pending' ? '#D97706' : order.status === 'delivered' ? '#059669' : '#2563EB',
+                                                                textTransform: 'uppercase'
+                                                            }}>
+                                                                {order.status}
+                                                            </span>
+                                                        </td>
+                                                        <td style={{ padding: '16px 20px', textAlign: 'center' }}>
+                                                            <select 
+                                                                value={order.status}
+                                                                onChange={async (e) => {
+                                                                    await adminService.updateOrderStatus(order.id, e.target.value);
+                                                                    fetchData();
+                                                                }}
+                                                                style={{ padding: '4px 8px', borderRadius: 4, fontSize: 11, fontWeight: 700, border: '1px solid var(--color-border)' }}
+                                                            >
+                                                                <option value="pending">Pendiente</option>
+                                                                <option value="preparing">En Prep.</option>
+                                                                <option value="shipped">En Camino</option>
+                                                                <option value="delivered">Entregado</option>
+                                                                <option value="cancelled">Cancelado</option>
+                                                            </select>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })
+                                        )}
+                                    </tbody>
+                                </table>
                             </div>
                         </motion.div>
                     )}

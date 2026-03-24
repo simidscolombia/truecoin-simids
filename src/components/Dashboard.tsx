@@ -6,6 +6,7 @@ import {
     Users, Copy, Send, CheckCircle2, Award, Zap, Shield, Gift, Camera, Loader2
 } from 'lucide-react';
 import NetworkTree from './NetworkTree';
+import AISettings from './AISettings';
 import TransferModal from './TransferModal';
 import RechargeModal from './RechargeModal';
 import { userService } from '../services/userService';
@@ -26,6 +27,8 @@ export default function Dashboard({ user, balance, onUpdateBalance }: { user: an
     const [selectedDetailUser, setSelectedDetailUser] = useState<any | null>(null);
     const [isUploading, setIsUploading] = useState(false);
     const [avatarUrl, setAvatarUrl] = useState(user.image_url || null);
+    const [activeTab, setActiveTab] = useState<'network' | 'ai'>('network');
+    const [aiConfig, setAiConfig] = useState(user.ai_config || { mode: 'shopy' });
 
     useEffect(() => {
         if (user?.id) {
@@ -142,6 +145,28 @@ export default function Dashboard({ user, balance, onUpdateBalance }: { user: an
                     </div>
                 </div>
 
+                {/* Dashboard Tab Selector */}
+                <div style={{ display: 'flex', gap: 24, marginBottom: 24, borderBottom: '1.5px solid var(--color-border)', paddingBottom: 0 }}>
+                    <button 
+                        onClick={() => setActiveTab('network')}
+                        style={{ 
+                            padding: '12px 16px', fontSize: 13, fontWeight: 800, cursor: 'pointer', border: 'none', background: 'transparent',
+                            color: activeTab === 'network' ? 'var(--color-navy)' : 'var(--color-text-muted)',
+                            borderBottom: activeTab === 'network' ? '3px solid var(--color-navy)' : 'none',
+                            transition: 'all 0.2s', marginBottom: -2
+                        }}
+                    >Ecosistema de Red</button>
+                    <button 
+                        onClick={() => setActiveTab('ai')}
+                        style={{ 
+                            padding: '12px 16px', fontSize: 13, fontWeight: 800, cursor: 'pointer', border: 'none', background: 'transparent',
+                            color: activeTab === 'ai' ? 'var(--color-navy)' : 'var(--color-text-muted)',
+                            borderBottom: activeTab === 'ai' ? '3px solid var(--color-navy)' : 'none',
+                            transition: 'all 0.2s', marginBottom: -2
+                        }}
+                    >Cerebro IA Personal</button>
+                </div>
+
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20, marginBottom: 32 }}>
                     <div style={{
                         borderRadius: 24, padding: '24px', display: 'flex', alignItems: 'center', gap: 20,
@@ -187,13 +212,17 @@ export default function Dashboard({ user, balance, onUpdateBalance }: { user: an
                 </div>
 
                 <div style={{ marginBottom: 32 }}>
-                    <div className="card" style={{ padding: 40, border: '1px solid var(--color-border)', borderRadius: 24 }}>
-                        <h3 style={{ fontSize: 20, fontWeight: 950, color: 'var(--color-navy)', marginBottom: 32, display: 'flex', alignItems: 'center', gap: 12 }}>
-                            <Users size={24} color="var(--color-wallet)" />
-                            Ecosistema de Red
-                        </h3>
-                        <NetworkTree userId={user.id} mentor={stats.mentor} onSelectUser={(u: any) => setSelectedDetailUser(u)} />
-                    </div>
+                    {activeTab === 'network' ? (
+                        <div className="card" style={{ padding: 40, border: '1px solid var(--color-border)', borderRadius: 24 }}>
+                            <h3 style={{ fontSize: 20, fontWeight: 950, color: 'var(--color-navy)', marginBottom: 32, display: 'flex', alignItems: 'center', gap: 12 }}>
+                                <Users size={24} color="var(--color-wallet)" />
+                                Ecosistema de Red
+                            </h3>
+                            <NetworkTree userId={user.id} mentor={stats.mentor} onSelectUser={(u: any) => setSelectedDetailUser(u)} />
+                        </div>
+                    ) : (
+                        <AISettings user={{ ...user, ai_config: aiConfig }} balance={Number(localBalance)} onUpdateAIConfig={(c) => setAiConfig(c)} />
+                    )}
                 </div>
 
                 <AnimatePresence>
